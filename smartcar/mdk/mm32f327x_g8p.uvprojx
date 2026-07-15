@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\user\inc;..\code;..\..\libraries\zf_common;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\..\libraries\sdk;..\..\libraries\sdk\CMSIS\Include;..\..\libraries\sdk\drivers;..\..\libraries\components\fatfs\source;..\code\menu</IncludePath>
+              <IncludePath>..\user\inc;..\code;..\..\libraries\zf_common;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\..\libraries\sdk;..\..\libraries\sdk\CMSIS\Include;..\..\libraries\sdk\drivers;..\..\libraries\components\fatfs\source;..\code\menu;..\code\motor</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1233,6 +1233,21 @@
               <FileName>Mymenu.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\code\menu\Mymenu.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>code/motor</GroupName>
+          <Files>
+            <File>
+              <FileName>motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\code\motor\motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>motor.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\code\motor\motor.h</FilePath>
             </File>
           </Files>
         </Group>

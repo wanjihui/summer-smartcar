@@ -1,4 +1,4 @@
-//菜单具体构建
+//菜单具体构建+摄像头
 
 #include "Mymenu.h"
 #include "zf_device_key.h"

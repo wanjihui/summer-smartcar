@@ -35,8 +35,8 @@
 
 #include "zf_common_headfile.h"
 #include "zf_device_key.h"
-  #include "zf_device_mt9v03x.h"
 #include "Mymenu.h"
+#include "motor.h"
 
 // 打开新的工程或者工程移动了位置务必执行以下操作
 // 第一步 关闭上面所有打开的文件
@@ -87,11 +87,12 @@ int main (void)
 
     key_init(10);      // 10ms 按键扫描周期
     menu_init();       // 初始化菜单结构
-    ips200_clear();
-    menu_show();
+    motor_init();      // 初始化电机驱动
+    ips200_clear();		 //主循环前清屏
+    menu_show();			 //显示一次菜单项
     while(1)
     {
-        menu();
+        menu();					//// 菜单主循环：按键扫描 → 模式切换 → 菜单/摄像头分发
 
         system_delay_ms(10);//主循环10ms延时
     }
