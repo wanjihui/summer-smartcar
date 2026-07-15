@@ -292,6 +292,7 @@ void menu(void)
         else
         {
             display_mode = DISPLAY_MODE_MENU;
+            ips200_clear();               // 从摄像头切回菜单，清除残留图像
             menu_show();
         }
     }
@@ -340,6 +341,7 @@ void menu(void)
         {
             key_clear_state(KEY_4);
             display_mode = DISPLAY_MODE_MENU;
+            ips200_clear();               // 从摄像头切回菜单，清除残留图像
             menu_show();
         }
     }
