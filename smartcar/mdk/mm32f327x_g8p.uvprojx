@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\user\inc;..\code;..\..\libraries\zf_common;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\..\libraries\sdk;..\..\libraries\sdk\CMSIS\Include;..\..\libraries\sdk\drivers;..\..\libraries\components\fatfs\source;..\code\menu;..\code\motor</IncludePath>
+              <IncludePath>..\user\inc;..\code;..\..\libraries\zf_common;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\..\libraries\sdk;..\..\libraries\sdk\CMSIS\Include;..\..\libraries\sdk\drivers;..\..\libraries\components\fatfs\source;..\code\menu;..\code\motor;..\code\encoder</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1248,6 +1248,21 @@
               <FileName>motor.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\code\motor\motor.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>code/encoder</GroupName>
+          <Files>
+            <File>
+              <FileName>encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\code\encoder\encoder.c</FilePath>
+            </File>
+            <File>
+              <FileName>encoder.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\code\encoder\encoder.h</FilePath>
             </File>
           </Files>
         </Group>

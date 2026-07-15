@@ -37,6 +37,7 @@
 #include "zf_device_key.h"
 #include "Mymenu.h"
 #include "motor.h"
+#include "encoder.h"
 
 // 打开新的工程或者工程移动了位置务必执行以下操作
 // 第一步 关闭上面所有打开的文件
@@ -88,6 +89,7 @@ int main (void)
     key_init(10);      // 10ms 按键扫描周期
     menu_init();       // 初始化菜单结构
     motor_init();      // 初始化电机驱动
+    encoder_init();    // 初始化编码器（正交解码 + PIT 中断）
     ips200_clear();		 //主循环前清屏
     menu_show();			 //显示一次菜单项
     while(1)
