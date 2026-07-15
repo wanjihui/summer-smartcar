@@ -1,13 +1,24 @@
 //菜单具体构建
 
 #include "Mymenu.h"
+#include "zf_device_key.h"
+#include "zf_device_mt9v03x.h"
 
-Menu_Item *key;//当前选中节点的指针
-Menu_Item head;//菜单的根节点
+#define BINARIZATION_THRESHOLD      ( 64 )                                      // 二值化阈值 范围 0~255 灰度值 >= 阈值 → 白，< 阈值 → 黑
 
-int32_t test = 10;
-float test1 = 3.14;
-bool test2 = true;
+typedef enum {
+    DISPLAY_MODE_MENU,                                                          // 菜单模式（默认）
+    DISPLAY_MODE_CAMERA,                                                        // 摄像头二值化图像模式
+} display_mode_enum;
+
+static display_mode_enum display_mode = DISPLAY_MODE_MENU;                       // 当前显示模式 默认菜单模式
+
+static Menu_Item *key;                                                          // 当前选中节点的指针
+static Menu_Item head;                                                          // 菜单的根节点
+
+static int32_t test = 10;
+static float test1 = 3.14;
+static bool test2 = true;
 
 void menu_init(void)
 {
@@ -36,7 +47,7 @@ void menu_init(void)
     Menu_Item *num2 = dynamicCreate_Menu_Number(folder1, "bbb", &test1, float_Box);
     Menu_Set_Limit(num2, -5.0f, 5.0f);              // float 限幅 -5.0~5.0
 
-    dynamicCreate_Menu_Number(folder1, "ccc", &test2, bool_Box); // bool 不需要限幅
+    dynamicCreate_Menu_Number(folder1, "ccc", &test2, bool_Box); // bool 不限幅
 
     key = head.first_son;
 }
@@ -105,7 +116,7 @@ void menu_show(void)
     show_key();
 }
 // K1 短按：导航模式→上移 / 编辑模式→进入子菜单或数值+1或bool翻转
-void k1_handle(void)
+static void k1_handle(void)
 {
     if(key->select == false)
     {
@@ -172,7 +183,7 @@ void k1_handle(void)
 }
 
 // K2 短按：导航模式→下移 / 编辑模式→退出父菜单或数值-1(bool无效)
-void k2_handle(void)
+static void k2_handle(void)
 {
     if(key->select == false)
     {
@@ -239,19 +250,90 @@ void k2_handle(void)
 }
 
 // K3 短按：切换选中状态
-void k3_handle(void)
+static void k3_handle(void)
 {
     key->select = !key->select;
     menu_show();
 }
 
 // K4 短按：全局返回上一级
-void k4_handle(void)
+static void k4_handle(void)
 {
     if(key->father->father != NULL)   // 不在根层级
     {
         key->select = false;          // 回到导航模式
         key = key->father;
         menu_show();
+    }
+}
+
+// 主循环：按键扫描 → 模式切换 → 菜单/摄像头分发
+void menu(void)
+{
+    key_scanner();
+
+    // 长按 K3：切换显示模式（菜单 ↔ 摄像头二值化图像）
+    if(key_get_state(KEY_3) == KEY_LONG_PRESS)
+    {
+        key_clear_state(KEY_3);
+        if(display_mode == DISPLAY_MODE_MENU)
+        {
+            display_mode = DISPLAY_MODE_CAMERA;
+            ips200_clear();
+        }
+        else
+        {
+            display_mode = DISPLAY_MODE_MENU;
+            ips200_clear();
+            menu_show();
+        }
+    }
+
+    // 按当前模式分发处理
+    if(display_mode == DISPLAY_MODE_MENU)
+    {
+        // ---- 菜单模式 ----
+        if(key_get_state(KEY_1) == KEY_SHORT_PRESS)
+        {
+            k1_handle();
+            key_clear_state(KEY_1);
+        }
+        if(key_get_state(KEY_2) == KEY_SHORT_PRESS)
+        {
+            k2_handle();
+            key_clear_state(KEY_2);
+        }
+        if(key_get_state(KEY_3) == KEY_SHORT_PRESS)
+        {
+            k3_handle();
+            key_clear_state(KEY_3);
+        }
+        if(key_get_state(KEY_4) == KEY_SHORT_PRESS)
+        {
+            k4_handle();
+            key_clear_state(KEY_4);
+        }
+    }
+    else
+    {
+        // ---- 摄像头二值化图像模式 ----
+        if(mt9v03x_finish_flag)
+        {
+            ips200_show_gray_image(0, 0,
+                (const uint8 *)mt9v03x_image,
+                MT9V03X_W, MT9V03X_H,
+                240, 180,
+                BINARIZATION_THRESHOLD);
+            mt9v03x_finish_flag = 0;
+        }
+
+        // K4 短按返回菜单
+        if(key_get_state(KEY_4) == KEY_SHORT_PRESS)
+        {
+            key_clear_state(KEY_4);
+            display_mode = DISPLAY_MODE_MENU;
+            ips200_clear();
+            menu_show();
+        }
     }
 }

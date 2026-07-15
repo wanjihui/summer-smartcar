@@ -6,9 +6,6 @@
 
 void menu_init(void);
 void menu_show(void);
-void k1_handle(void);
-void k2_handle(void);
-void k3_handle(void);
-void k4_handle(void);
+void menu(void);
 
 #endif

@@ -34,9 +34,6 @@
 ********************************************************************************************************************/
 
 #include "zf_common_headfile.h"
-#include "zf_device_key.h"
-#include "zf_device_mt9v03x.h"
-#include "Mymenu.h"
 
 // 打开新的工程或者工程移动了位置务必执行以下操作
 // 第一步 关闭上面所有打开的文件
@@ -44,6 +41,17 @@
 
 
 // *************************** 例程硬件连接说明 ***************************
+// 接入总钻风灰度数字摄像头 对应主板摄像头接口 请注意线序
+//      模块管脚            单片机管脚
+//      TXD                 查看 zf_device_mt9v03x.h 中 MT9V03X_COF_UART_TX 宏定义
+//      RXD                 查看 zf_device_mt9v03x.h 中 MT9V03X_COF_UART_RX 宏定义
+//      PCLK                查看 zf_device_mt9v03x.h 中 MT9V03X_PCLK_PIN 宏定义
+//      VSY                 查看 zf_device_mt9v03x.h 中 MT9V03X_VSYNC_PIN 宏定义
+//      D0-D7               查看 zf_device_mt9v03x.h 中 MT9V03X_DATA_PIN 宏定义 从该定义开始的连续八个引脚
+//      GND                 核心板电源地 GND
+//      3V3                 核心板 3V3 电源
+// 
+// 接入2寸IPS模块
 //      模块管脚            单片机管脚
 //      双排排针 并口两寸屏 硬件引脚
 //      RD                  查看 zf_device_ips200.h 中 IPS200_RD_PIN_PARALLEL8     宏定义 A5
@@ -68,15 +76,24 @@
 
 
 // *************************** 例程测试说明 ***************************
-// 1.核心板烧录本例程 插在主板上 2寸IPS 显示模块插在主板的屏幕接口排座上 请注意引脚对应 不要插错
+// 1.核心板烧录完成本例程 将核心板插在主板上 插到底
 // 
-// 2.电池供电 上电后 2寸IPS 屏幕亮起 显示字符数字浮点数和波形图
+// 2.摄像头接在主板的摄像头接口 注意线序2寸IPS模块插入主板屏幕接口
+// 
+// 3.主板上电 或者核心板链接完毕后上电 核心板按下复位按键
+// 
+// 4.屏幕会显示初始化信息然后显示摄像头图像
 // 
 // 如果发现现象与说明严重不符 请参照本文件最下方 例程常见问题说明 进行排查
 
 
 // **************************** 代码区域 ****************************
-#define IPS200_TYPE     (IPS200_TYPE_PARALLEL8)                                 // 双排排针 并口两寸屏 这里宏定义填写 IPS200_TYPE_PARALLEL8
+#define DISPLAY_MODE                ( 0 )                                       // 显示模式 0-灰度显示 1-二值化显示
+                                                                                // 0-灰度显示   就是正常显示的总钻风图像
+                                                                                // 1-二值化显示 根据最后一个二值化阈值显示出对应的二值化图像
+#define BINARIZATION_THRESHOLD      ( 64 )                                      // 二值化阈值 默认 64 需要设置 DISPLAY_MODE 为 1 才使用
+
+#define IPS200_TYPE                 (IPS200_TYPE_PARALLEL8)                     // 双排排针 并口两寸屏 这里宏定义填写 IPS200_TYPE_PARALLEL8
                                                                                 // 单排排针 SPI 两寸屏 这里宏定义填写 IPS200_TYPE_SPI
 
 int main (void)
@@ -85,28 +102,44 @@ int main (void)
     debug_init();                                                               // 初始化默认 Debug UART
 
     // 此处编写用户代码 例如外设初始化代码等
-
-    // 初始化屏幕
-    ips200_set_dir(IPS200_PORTAIT);
-    ips200_set_font(IPS200_6X8_FONT);
-    ips200_set_color(RGB565_WHITE, RGB565_BLACK);
     ips200_init(IPS200_TYPE);
-
-    // 初始化摄像头（带重试）
-    while(mt9v03x_init())
-    {
-        system_delay_ms(500);
-    }
-
-    key_init(10);      // 10ms 按键扫描周期
-    menu_init();       // 初始化菜单结构
-    ips200_clear();
-    menu_show();
+    ips200_show_string(0, 0, "mt9v03x init.");
     while(1)
     {
-        menu();
+        if(mt9v03x_init())
+        {
+            ips200_show_string(0, 16, "mt9v03x reinit.");
+        }
+        else
+        {
+            break;
+        }
+        system_delay_ms(500);                                                   // 短延时快速闪灯表示异常
+    }
+    ips200_show_string(0, 16, "init success.");
+    // 此处编写用户代码 例如外设初始化代码等
 
-        system_delay_ms(10);//主循环10ms延时
+    while(1)
+    {
+        // 此处编写需要循环执行的代码
+        if(mt9v03x_finish_flag)
+        {
+#if (0 == DISPLAY_MODE)
+            // 灰度图像显示 想要修改显示范围就修改本函数后两个参数 分别是显示宽度和高度
+            // 灰度图像显示 想要修改显示范围就修改本函数后两个参数 分别是显示宽度和高度
+            // 灰度图像显示 想要修改显示范围就修改本函数后两个参数 分别是显示宽度和高度
+            ips200_displayimage03x((const uint8 *)mt9v03x_image, 240, 180);
+            // 这是 ips200_displayimage03x 调用的真实函数 参数意义在其函数头有详细注释
+//            ips200_show_gray_image(0, 0, (const uint8 *)mt9v03x_image, MT9V03X_W, MT9V03X_H, 240, 180, 0);
+#else
+            // 二值化图像显示 参数意义在其函数头有详细注释
+            // 二值化图像显示 参数意义在其函数头有详细注释
+            // 二值化图像显示 参数意义在其函数头有详细注释
+            ips200_show_gray_image(0, 0, (const uint8 *)mt9v03x_image, MT9V03X_W, MT9V03X_H, 240, 180, BINARIZATION_THRESHOLD);
+#endif
+            mt9v03x_finish_flag = 0;
+        }
+        // 此处编写需要循环执行的代码
     }
 }
 // **************************** 代码区域 ****************************
@@ -119,3 +152,10 @@ int main (void)
 //      检查屏幕是不是插错位置了 检查引脚对应关系
 //      如果对应引脚都正确 检查一下是否有引脚波形不对 需要有示波器
 //      无法完成波形测试则复制一个GPIO例程将屏幕所有IO初始化为GPIO翻转电平 看看是否受控
+// 
+// 问题2：显示 reinit 字样
+//      检查接线是否正常
+//      主板供电是否使用电量充足的电池供电
+// 
+// 问题2：显示图像杂乱 错位
+//      检查摄像头信号线是否有松动
