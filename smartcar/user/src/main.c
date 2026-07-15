@@ -35,7 +35,7 @@
 
 #include "zf_common_headfile.h"
 #include "zf_device_key.h"
-#include "zf_device_mt9v03x.h"
+  #include "zf_device_mt9v03x.h"
 #include "Mymenu.h"
 
 // 打开新的工程或者工程移动了位置务必执行以下操作
@@ -43,18 +43,9 @@
 // 第二步 project->clean  等待下方进度条走完
 
 
-// *************************** 例程硬件连接说明 ***************************
+// *************************** ips200硬件连接说明 ***************************
 //      模块管脚            单片机管脚
-//      双排排针 并口两寸屏 硬件引脚
-//      RD                  查看 zf_device_ips200.h 中 IPS200_RD_PIN_PARALLEL8     宏定义 A5
-//      WR                  查看 zf_device_ips200.h 中 IPS200_WR_PIN_PARALLEL8     宏定义 A7
-//      RS                  查看 zf_device_ips200.h 中 IPS200_RS_PIN_PARALLEL8     宏定义 A6
-//      RST                 查看 zf_device_ips200.h 中 IPS200_RST_PIN_PARALLEL8    宏定义 D0
-//      CS                  查看 zf_device_ips200.h 中 IPS200_CS_PIN_PARALLEL8     宏定义 A4
-//      BL                  查看 zf_device_ips200.h 中 IPS200_BL_PIN_PARALLEL8     宏定义 D1
-//      D0-D7               查看 zf_device_ips200.h 中 IPS200_Dx_PIN_PARALLEL8     宏定义 D8/D9/D10/D11/D12/D13/D14/D15
-//      GND                 核心板电源地 GND
-//      3V3                 核心板 3V3 电源
+
 //      单排排针 SPI 两寸屏 硬件引脚
 //      SCL                 查看 zf_device_ips200.h 中 IPS200_SCL_PIN_SPI  宏定义 A5
 //      SDA                 查看 zf_device_ips200.h 中 IPS200_SDA_PIN_SPI  宏定义 A7
@@ -67,16 +58,8 @@
 
 
 
-// *************************** 例程测试说明 ***************************
-// 1.核心板烧录本例程 插在主板上 2寸IPS 显示模块插在主板的屏幕接口排座上 请注意引脚对应 不要插错
-// 
-// 2.电池供电 上电后 2寸IPS 屏幕亮起 显示字符数字浮点数和波形图
-// 
-// 如果发现现象与说明严重不符 请参照本文件最下方 例程常见问题说明 进行排查
-
-
 // **************************** 代码区域 ****************************
-#define IPS200_TYPE     (IPS200_TYPE_PARALLEL8)                                 // 双排排针 并口两寸屏 这里宏定义填写 IPS200_TYPE_PARALLEL8
+#define IPS200_TYPE     (IPS200_TYPE_SPI)                                 // 双排排针 并口两寸屏 这里宏定义填写 IPS200_TYPE_PARALLEL8
                                                                                 // 单排排针 SPI 两寸屏 这里宏定义填写 IPS200_TYPE_SPI
 
 int main (void)
@@ -88,14 +71,18 @@ int main (void)
 
     // 初始化屏幕
     ips200_set_dir(IPS200_PORTAIT);
-    ips200_set_font(IPS200_6X8_FONT);
+    ips200_set_font(IPS200_8X16_FONT);
     ips200_set_color(RGB565_WHITE, RGB565_BLACK);
     ips200_init(IPS200_TYPE);
 
-    // 初始化摄像头（带重试）
-    while(mt9v03x_init())
+    // 初始化摄像头（带重试，最多5次）
     {
-        system_delay_ms(500);
+        uint8_t cam_retry = 0;
+        while(mt9v03x_init() && cam_retry < 5)
+        {
+            cam_retry++;
+            system_delay_ms(500);
+        }
     }
 
     key_init(10);      // 10ms 按键扫描周期
@@ -111,11 +98,5 @@ int main (void)
 }
 // **************************** 代码区域 ****************************
 
-// *************************** 例程常见问题说明 ***************************
-// 遇到问题时请按照以下问题检查列表检查
-// 
-// 问题1：屏幕不显示
-//      如果使用主板测试，主板必须要用电池供电 检查屏幕供电引脚电压
-//      检查屏幕是不是插错位置了 检查引脚对应关系
-//      如果对应引脚都正确 检查一下是否有引脚波形不对 需要有示波器
-//      无法完成波形测试则复制一个GPIO例程将屏幕所有IO初始化为GPIO翻转电平 看看是否受控
+// *************************** 常见问题说明 ***************************
+

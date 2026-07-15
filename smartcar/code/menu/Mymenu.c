@@ -4,7 +4,7 @@
 #include "zf_device_key.h"
 #include "zf_device_mt9v03x.h"
 
-#define BINARIZATION_THRESHOLD      ( 64 )                                      // 二值化阈值 范围 0~255 灰度值 >= 阈值 → 白，< 阈值 → 黑
+#define BINARIZATION_THRESHOLD      ( 64  )                                      // 二值化阈值 0=灰度模式 >0=二值化 灰度值 >= 阈值 → 白，< 阈值 → 黑
 
 typedef enum {
     DISPLAY_MODE_MENU,                                                          // 菜单模式（默认）
@@ -12,6 +12,7 @@ typedef enum {
 } display_mode_enum;
 
 static display_mode_enum display_mode = DISPLAY_MODE_MENU;                       // 当前显示模式 默认菜单模式
+static bool k3_wait_release = false;                                                // K3长按防抖：需等待释放后才能再次触发
 
 static Menu_Item *key;                                                          // 当前选中节点的指针
 static Menu_Item head;                                                          // 菜单的根节点
@@ -62,13 +63,13 @@ static void show_key(void)
         if(s == key)
         {
             if(s->select)
-                ips200_show_string(0, i*8, "*>");    // 编辑模式
+                ips200_show_string(0, i*16, "*>");    // 编辑模式
             else
-                ips200_show_string(0, i*8, "->");    // 导航模式
+                ips200_show_string(0, i*16, "->");    // 导航模式
         }
         else
         {
-            ips200_show_string(0, i*8, "  ");
+            ips200_show_string(0, i*16, "  ");
         }
         s = s->next_brother;
     }
@@ -84,16 +85,16 @@ static void show_number(void)
         switch (s->kind)
         {
         case int32_Box:
-            ips200_show_int(80, i*8, *(int32_t *)s->data, 5);
+            ips200_show_int(80, i*16, *(int32_t *)s->data, 5);
             break;
         case float_Box:
-            ips200_show_float(80, i*8, *(float *)s->data, 3, 2);
+            ips200_show_float(80, i*16, *(float *)s->data, 3, 2);
             break;
         case bool_Box:
             if(*(bool *)s->data == true)
-                ips200_show_char(80, i*8, 'Y');
+                ips200_show_char(80, i*16, 'Y');
             else
-                ips200_show_char(80, i*8, 'N');
+                ips200_show_char(80, i*16, 'N');
             break;
         default:
             break;
@@ -109,7 +110,7 @@ void menu_show(void)
 
     for(int i = 0; i < h->sons; i++)
     {
-        ips200_show_string(14, i*8, s->name);//从x=14显示菜单项名称，2*6指示符+2留空
+        ips200_show_string(18, i*16, s->name);//从x=18显示菜单项名称，2*8指示符+2留空
         s = s->next_brother;
     }
     show_number();
@@ -263,6 +264,7 @@ static void k4_handle(void)
     {
         key->select = false;          // 回到导航模式
         key = key->father;
+        ips200_clear();               // 返回上一级时清屏，防止子级菜单项残留
         menu_show();
     }
 }
@@ -273,8 +275,14 @@ void menu(void)
     key_scanner();
 
     // 长按 K3：切换显示模式（菜单 ↔ 摄像头二值化图像）
-    if(key_get_state(KEY_3) == KEY_LONG_PRESS)
+    // 加入释放检测防止长按期间反复切换导致闪烁
+    if(key_get_state(KEY_3) == KEY_RELEASE)
     {
+        k3_wait_release = false;
+    }
+    if(!k3_wait_release && key_get_state(KEY_3) == KEY_LONG_PRESS)
+    {
+        k3_wait_release = true;
         key_clear_state(KEY_3);
         if(display_mode == DISPLAY_MODE_MENU)
         {
@@ -284,7 +292,6 @@ void menu(void)
         else
         {
             display_mode = DISPLAY_MODE_MENU;
-            ips200_clear();
             menu_show();
         }
     }
@@ -319,6 +326,7 @@ void menu(void)
         // ---- 摄像头二值化图像模式 ----
         if(mt9v03x_finish_flag)
         {
+            // set_region 只更新图像区域(240x180)，自动覆盖旧帧，无需全屏清除
             ips200_show_gray_image(0, 0,
                 (const uint8 *)mt9v03x_image,
                 MT9V03X_W, MT9V03X_H,
@@ -332,7 +340,6 @@ void menu(void)
         {
             key_clear_state(KEY_4);
             display_mode = DISPLAY_MODE_MENU;
-            ips200_clear();
             menu_show();
         }
     }
