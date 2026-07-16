@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\user\inc;..\code;..\..\libraries\zf_common;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\..\libraries\sdk;..\..\libraries\sdk\CMSIS\Include;..\..\libraries\sdk\drivers;..\..\libraries\components\fatfs\source;..\code\menu;..\code\motor;..\code\encoder</IncludePath>
+              <IncludePath>..\user\inc;..\code;..\..\libraries\zf_common;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\..\libraries\sdk;..\..\libraries\sdk\CMSIS\Include;..\..\libraries\sdk\drivers;..\..\libraries\components\fatfs\source;..\code\menu;..\code\motor;..\code\encoder;..\code\MPU6050</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1263,6 +1263,21 @@
               <FileName>encoder.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\code\encoder\encoder.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>code/MPU6050</GroupName>
+          <Files>
+            <File>
+              <FileName>mpu6050.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\code\MPU6050\mpu6050.c</FilePath>
+            </File>
+            <File>
+              <FileName>mpu6050.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\code\MPU6050\mpu6050.h</FilePath>
             </File>
           </Files>
         </Group>

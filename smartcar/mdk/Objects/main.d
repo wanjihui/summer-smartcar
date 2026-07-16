@@ -77,4 +77,5 @@
   ..\..\libraries\zf_device\zf_device_wireless_uart.h \
   ..\..\libraries\components\fatfs\source\ffconf.h \
   ..\..\libraries\components\fatfs\source\ff.h ..\code\menu\Mymenu.h \
-  ..\code\menu\menu.h ..\code\motor\motor.h ..\code\encoder\encoder.h
+  ..\code\menu\menu.h ..\code\motor\motor.h ..\code\encoder\encoder.h \
+  ..\code\MPU6050\mpu6050.h

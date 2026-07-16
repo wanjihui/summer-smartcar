@@ -1,4 +1,4 @@
-./objects/isr.o: ..\user\src\isr.c ..\user\inc\isr.h \
+./objects/mpu6050.o: ..\code\MPU6050\mpu6050.c ..\code\MPU6050\mpu6050.h \
   ..\..\libraries\zf_common\zf_common_headfile.h \
   ..\..\libraries\sdk\hal_device_registers.h \
   ..\..\libraries\sdk\mm32f3277g.h \
@@ -76,5 +76,4 @@
   ..\..\libraries\zf_device\zf_device_wifi_uart.h \
   ..\..\libraries\zf_device\zf_device_wireless_uart.h \
   ..\..\libraries\components\fatfs\source\ffconf.h \
-  ..\..\libraries\components\fatfs\source\ff.h ..\code\encoder\encoder.h \
-  ..\code\MPU6050\mpu6050.h
+  ..\..\libraries\components\fatfs\source\ff.h

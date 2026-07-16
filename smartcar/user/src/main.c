@@ -38,6 +38,7 @@
 #include "Mymenu.h"
 #include "motor.h"
 #include "encoder.h"
+#include "mpu6050.h"
 
 // 打开新的工程或者工程移动了位置务必执行以下操作
 // 第一步 关闭上面所有打开的文件
@@ -90,6 +91,7 @@ int main (void)
     menu_init();       // 初始化菜单结构
     motor_init();      // 初始化电机驱动
     encoder_init();    // 初始化编码器（正交解码 + PIT 中断）
+    mpu6050_module_init(); // 初始化 MPU6050 陀螺仪/加速度计
     ips200_clear();		 //主循环前清屏
     menu_show();			 //显示一次菜单项
     while(1)
