@@ -1,3 +1,19 @@
+/*********************************************************************************************************************
+																				ips200硬件连接说明 
+//      模块管脚            单片机管脚
+
+//      单排排针 SPI 两寸屏 硬件引脚
+//      SCL                 查看 zf_device_ips200.h 中 IPS200_SCL_PIN_SPI  宏定义 A5
+//      SDA                 查看 zf_device_ips200.h 中 IPS200_SDA_PIN_SPI  宏定义 A7
+//      RST                 查看 zf_device_ips200.h 中 IPS200_RST_PIN_SPI  宏定义 A6
+//      DC                  查看 zf_device_ips200.h 中 IPS200_DC_PIN_SPI   宏定义 D0
+//      CS                  查看 zf_device_ips200.h 中 IPS200_CS_PIN_SPI   宏定义 A4
+//      BL                  查看 zf_device_ips200.h 中 IPS200_BLk_PIN_SPI  宏定义 D1
+//      GND                 核心板电源地 GND
+//      3V3                 核心板 3V3 电源
+*********************************************************************************************************************/
+
+
 #ifndef __MENU_H_
 #define __MENU_H_
 

@@ -39,24 +39,12 @@
 #include "motor.h"
 #include "encoder.h"
 #include "mpu6050.h"
+#include "servo.h"
 
 // 打开新的工程或者工程移动了位置务必执行以下操作
 // 第一步 关闭上面所有打开的文件
 // 第二步 project->clean  等待下方进度条走完
 
-
-// *************************** ips200硬件连接说明 ***************************
-//      模块管脚            单片机管脚
-
-//      单排排针 SPI 两寸屏 硬件引脚
-//      SCL                 查看 zf_device_ips200.h 中 IPS200_SCL_PIN_SPI  宏定义 A5
-//      SDA                 查看 zf_device_ips200.h 中 IPS200_SDA_PIN_SPI  宏定义 A7
-//      RST                 查看 zf_device_ips200.h 中 IPS200_RST_PIN_SPI  宏定义 A6
-//      DC                  查看 zf_device_ips200.h 中 IPS200_DC_PIN_SPI   宏定义 D0
-//      CS                  查看 zf_device_ips200.h 中 IPS200_CS_PIN_SPI   宏定义 A4
-//      BL                  查看 zf_device_ips200.h 中 IPS200_BLk_PIN_SPI  宏定义 D1
-//      GND                 核心板电源地 GND
-//      3V3                 核心板 3V3 电源
 
 
 
@@ -87,16 +75,17 @@ int main (void)
         }
     }
 
-    key_init(10);      // 10ms 按键扫描周期
-    menu_init();       // 初始化菜单结构
-    motor_init();      // 初始化电机驱动
-    encoder_init();    // 初始化编码器（正交解码 + PIT 中断）
-    mpu6050_module_init(); // 初始化 MPU6050 陀螺仪/加速度计
-    ips200_clear();		 //主循环前清屏
-    menu_show();			 //显示一次菜单项
+    key_init(10);      			// 10ms 按键扫描周期
+    menu_init();       			// 初始化菜单结构
+    motor_init();      			// 初始化电机驱动
+    encoder_init();    			// 初始化编码器（正交解码 + PIT 中断）
+    mpu6050_module_init();  // 初始化 MPU6050 陀螺仪/加速度计
+    servo_init();           // 初始化舵机（TIM2_CH1 PA15 50Hz PWM）
+    ips200_clear();		 			//主循环前清屏
+    menu_show();					  //显示一次菜单项
     while(1)
     {
-        menu();					//// 菜单主循环：按键扫描 → 模式切换 → 菜单/摄像头分发
+        menu();					    // 菜单主循环：按键扫描 → 模式切换 → 菜单/摄像头分发
 
         system_delay_ms(10);//主循环10ms延时
     }
