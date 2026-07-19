@@ -33,13 +33,7 @@
 * 2022-08-10        Teternal            first version
 ********************************************************************************************************************/
 
-#include "zf_common_headfile.h"
-#include "zf_device_key.h"
-#include "Mymenu.h"
-#include "motor.h"
-#include "encoder.h"
-#include "mpu6050.h"
-#include "servo.h"
+#include "config.h"
 
 // 打开新的工程或者工程移动了位置务必执行以下操作
 // 第一步 关闭上面所有打开的文件
@@ -63,7 +57,6 @@ int main (void)
     ips200_set_dir(IPS200_PORTAIT);
     ips200_set_font(IPS200_8X16_FONT);
     ips200_set_color(RGB565_WHITE, RGB565_BLACK);
-    ips200_init(IPS200_TYPE);
 
     // 初始化摄像头（带重试，最多5次）
     {
@@ -78,11 +71,12 @@ int main (void)
     key_init(10);      			// 10ms 按键扫描周期
     menu_init();       			// 初始化菜单结构
     motor_init();      			// 初始化电机驱动
-    encoder_init();    			// 初始化编码器（正交解码 + PIT 中断）
-    mpu6050_module_init();  // 初始化 MPU6050 陀螺仪/加速度计
+    //encoder_init();    			// 初始化编码器（正交解码 + PIT 中断）
+    //mpu6050_module_init();  // 初始化 MPU6050 陀螺仪/加速度计
     servo_init();           // 初始化舵机（TIM2_CH1 PA15 50Hz PWM）
+    ips200_init(IPS200_TYPE);       //初始化屏幕
     ips200_clear();		 			//主循环前清屏
-    menu_show();					  //显示一次菜单项
+    menu_show();					//显示一次菜单项
     while(1)
     {
         menu();					    // 菜单主循环：按键扫描 → 模式切换 → 菜单/摄像头分发

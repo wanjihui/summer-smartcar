@@ -13,19 +13,19 @@ static void Create_Menu_Item(Menu_Item *father, Menu_Item *me, const char name[]
     if(father->kind != MENU_Folder)        //父节点不是文件夹类型
         return;                            //则不创建子节点
 
-    me->name = name;
-    me->sons = 0;
-    me->select = false;
-    me->data = data;
-    me->kind = kind;
+    me->name = name;                       //当前节点的名字 
+    me->sons = 0;                          //当前节点的下级节点数
+    me->select = false;                    //当前节点是否被选中
+    me->data = data;                       //当前节点对应的数据
+    me->kind = kind;                       //当前节点对应的数据类型 
 
-    me->father = father;
-    me->first_son = NULL;
-    me->next_brother = NULL;
-    me->last_brother = NULL;
+    me->father = father;                   //当前节点的父节点
+    me->first_son = NULL;                  //当前节点下的第一个子节点
+    me->next_brother = NULL;               //当前节点的下一个兄弟节点
+    me->last_brother = NULL;               //当前节点的上一个兄弟节点
 
-    me->isLimit   = false;
-    me->limit_min = 0.0f;
+    me->isLimit   = false;                  //当前节点对应的数据是否限幅
+    me->limit_min = 0.0f;                   
     me->limit_max = 0.0f;
     
     if(father->sons == 0)                   //当前节点是父节点的第一个子节点

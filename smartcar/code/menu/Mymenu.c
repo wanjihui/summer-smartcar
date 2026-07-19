@@ -1,14 +1,11 @@
 //菜单具体构建+摄像头
 
-#include "Mymenu.h"
-#include "zf_device_key.h"
-#include "zf_device_mt9v03x.h"
+#include "config.h"
 
-#define BINARIZATION_THRESHOLD      ( 64  )                                      // 二值化阈值 0=灰度模式 >0=二值化 灰度值 >= 阈值 → 白，< 阈值 → 黑
 
 typedef enum {
     DISPLAY_MODE_MENU,                                                          // 菜单模式（默认）
-    DISPLAY_MODE_CAMERA,                                                        // 摄像头二值化图像模式
+    DISPLAY_MODE_TRACK,                                                         // 搜线+显示                                                      // 摄像头二值化图像模式
 } display_mode_enum;
 
 static display_mode_enum display_mode = DISPLAY_MODE_MENU;                       // 当前显示模式 默认菜单模式
@@ -22,7 +19,8 @@ static float test1 = 3.14;
 static bool test2 = true;
 
 void menu_init(void)
-{
+{   //根节点初始化
+
     head.data = NULL;
     head.father = NULL;
     head.first_son = NULL;
@@ -37,6 +35,8 @@ void menu_init(void)
     head.limit_min = 0.0f;
     head.limit_max = 0.0f;
 
+    //构建具体菜单
+    
     Menu_Item *folder1 = dynamicCreate_Menu_Folder(&head, "folder1");
     Menu_Item *folder2 = dynamicCreate_Menu_Folder(&head, "folder2");
     dynamicCreate_Menu_Folder(folder2, "folder3");
@@ -274,7 +274,7 @@ void menu(void)
 {
     key_scanner();
 
-    // 长按 K3：切换显示模式（菜单 ↔ 摄像头二值化图像）
+    // 长按 K3：切换显示模式
     // 加入释放检测防止长按期间反复切换导致闪烁
     if(key_get_state(KEY_3) == KEY_RELEASE)
     {
@@ -286,7 +286,7 @@ void menu(void)
         key_clear_state(KEY_3);
         if(display_mode == DISPLAY_MODE_MENU)
         {
-            display_mode = DISPLAY_MODE_CAMERA;
+            display_mode = DISPLAY_MODE_TRACK;
             ips200_clear();
         }
         else
@@ -324,24 +324,18 @@ void menu(void)
     }
     else
     {
-        // ---- 摄像头二值化图像模式 ----
-        if(mt9v03x_finish_flag)
+        // ---- 搜线+显示的模式 ----
+        if (mt9v03x_finish_flag)
         {
-            // set_region 只更新图像区域(240x180)，自动覆盖旧帧，无需全屏清除
-            ips200_show_gray_image(0, 0,
-                (const uint8 *)mt9v03x_image,
-                MT9V03X_W, MT9V03X_H,
-                240, 180,
-                BINARIZATION_THRESHOLD);
+            vis_deal();                     //搜线
+            vis_draw();                     //绘图
             mt9v03x_finish_flag = 0;
         }
-
-        // K4 短按返回菜单
-        if(key_get_state(KEY_4) == KEY_SHORT_PRESS)
+        if (key_get_state(KEY_4) == KEY_SHORT_PRESS)
         {
             key_clear_state(KEY_4);
             display_mode = DISPLAY_MODE_MENU;
-            ips200_clear();               // 从摄像头切回菜单，清除残留图像
+            ips200_clear();
             menu_show();
         }
     }
