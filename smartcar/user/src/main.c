@@ -57,7 +57,9 @@ int main (void)
     ips200_set_dir(IPS200_PORTAIT);
     ips200_set_font(IPS200_8X16_FONT);
     ips200_set_color(RGB565_WHITE, RGB565_BLACK);
-
+    ips200_init(IPS200_TYPE);      
+    ips200_clear();		 			
+    
     // 初始化摄像头（带重试，最多5次）
     {
         uint8_t cam_retry = 0;
@@ -74,7 +76,6 @@ int main (void)
     //encoder_init();    			// 初始化编码器（正交解码 + PIT 中断）
     //mpu6050_module_init();  // 初始化 MPU6050 陀螺仪/加速度计
     servo_init();           // 初始化舵机（TIM2_CH1 PA15 50Hz PWM）
-    ips200_init(IPS200_TYPE);       //初始化屏幕
     ips200_clear();		 			//主循环前清屏
     menu_show();					//显示一次菜单项
     while(1)

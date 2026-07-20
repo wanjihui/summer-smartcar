@@ -10,6 +10,7 @@
 #define pho_center_x      (pho_w / 2)      // 94，图像水平中心
 #define pho_w_min    0                     // 最左列
 #define pho_w_max    (pho_w - 1)           // 187，最右列
+#define BIN_PARAM_H  48                    // 阈值参数区高度(3行)
 
 typedef uint8 border_line[pho_h];        // 重定义一个边界线数组类型，存储每行的边界点列号
 
@@ -23,7 +24,12 @@ extern border_line center_line;    // 中线 = (左+右)/2，车应该沿它走
 extern volatile float err;     // 赛道中线-图像中心=偏差,>0偏右,右转;<0偏左,左转
 extern volatile int chongchu;   //出界标志 1冲出, 0正常
 
+extern uint8 vis_low;//二值化参数
+extern uint8 vis_mid;
+extern uint8 vis_high;
 // ========== 函数声明 ==========
 int  vis_deal(void);  // 搜线，return 0正常 1丢线
 void vis_draw(void);   // 图像显示
+void vis_bin_draw(void);  // 二值化显示（调参）
+
 #endif 

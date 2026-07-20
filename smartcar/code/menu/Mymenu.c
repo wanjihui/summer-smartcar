@@ -4,23 +4,24 @@
 
 
 typedef enum {
-    DISPLAY_MODE_MENU,                                                          // 菜单模式（默认）
-    DISPLAY_MODE_TRACK,                                                         // 搜线+显示                                                      // 摄像头二值化图像模式
+    DISPLAY_MODE_MENU,     // 菜单模式（默认）
+    DISPLAY_MODE_BIN,      // 二值化调参
+    DISPLAY_MODE_TRACK,    // 搜线+显示
 } display_mode_enum;
 
-static display_mode_enum display_mode = DISPLAY_MODE_MENU;                       // 当前显示模式 默认菜单模式
-static bool k3_wait_release = false;                                                // K3长按防抖：需等待释放后才能再次触发
+static display_mode_enum display_mode = DISPLAY_MODE_MENU;  // 当前显示模式 默认菜单模式
+static bool k3_wait_release = false;                         // K3长按防抖（key_clear_state不清press_time，需等物理松开）
 
-static Menu_Item *key;                                                          // 当前选中节点的指针
-static Menu_Item head;                                                          // 菜单的根节点
+static Menu_Item *key;                   // 当前选中节点的指针
+static Menu_Item head;                   // 菜单的根节点
 
 static int32_t test = 10;
 static float test1 = 3.14;
 static bool test2 = true;
 
+//菜单初始化和构建
 void menu_init(void)
-{   //根节点初始化
-
+{
     head.data = NULL;
     head.father = NULL;
     head.first_son = NULL;
@@ -36,50 +37,60 @@ void menu_init(void)
     head.limit_max = 0.0f;
 
     //构建具体菜单
-    
     Menu_Item *folder1 = dynamicCreate_Menu_Folder(&head, "folder1");
     Menu_Item *folder2 = dynamicCreate_Menu_Folder(&head, "folder2");
     dynamicCreate_Menu_Folder(folder2, "folder3");
     dynamicCreate_Menu_Folder(folder2, "folder4");
 
-    Menu_Item *num1 = dynamicCreate_Menu_Number(folder1, "aaa", &test, int32_Box);
-    Menu_Set_Limit(num1, 0, 100);                   // int32 限幅 0~100
+    Menu_Item *num1=dynamicCreate_Menu_Number(folder1, "aaa", &test, int32_Box);
+    Menu_Set_Limit(num1, 0, 100);
 
     Menu_Item *num2 = dynamicCreate_Menu_Number(folder1, "bbb", &test1, float_Box);
-    Menu_Set_Limit(num2, -5.0f, 5.0f);              // float 限幅 -5.0~5.0
+    Menu_Set_Limit(num2, -5.0f, 5.0f);
 
-    dynamicCreate_Menu_Number(folder1, "ccc", &test2, bool_Box); // bool 不限幅
+    dynamicCreate_Menu_Number(folder1, "ccc", &test2, bool_Box);
+
+    // =====Threshold阈值文件夹=====
+    {
+        Menu_Item *vis = dynamicCreate_Menu_Folder(&head, "Threshold");
+        Menu_Item *v;
+
+        v = dynamicCreate_Menu_Number(vis, "vis_low",  &vis_low,  uint8_Box);
+        Menu_Set_Limit(v, 0, 255);
+        v = dynamicCreate_Menu_Number(vis, "vis_mid",  &vis_mid,  uint8_Box);
+        Menu_Set_Limit(v, 1, 255);
+        v = dynamicCreate_Menu_Number(vis, "vis_high", &vis_high, uint8_Box);
+        Menu_Set_Limit(v, 2, 255);
+    }
 
     key = head.first_son;
 }
 
+//显示指针
 static void show_key(void)
 {
     Menu_Item *h = key->father;
     Menu_Item *s = h->first_son;
-
     for(int i = 0; i < h->sons; i++)
     {
         if(s == key)
         {
             if(s->select)
-                ips200_show_string(0, i*16, "*>");    // 编辑模式
+                ips200_show_string(0, i*16, "*>");
             else
-                ips200_show_string(0, i*16, "->");    // 导航模式
+                ips200_show_string(0, i*16, "->");
         }
         else
-        {
             ips200_show_string(0, i*16, "  ");
-        }
         s = s->next_brother;
     }
 }
 
+//显示数据
 static void show_number(void)
 {
     Menu_Item *h = key->father;
     Menu_Item *s = h->first_son;
-
     for(int i = 0; i < h->sons; i++)
     {
         switch (s->kind)
@@ -91,10 +102,10 @@ static void show_number(void)
             ips200_show_float(80, i*16, *(float *)s->data, 3, 2);
             break;
         case bool_Box:
-            if(*(bool *)s->data == true)
-                ips200_show_char(80, i*16, 'Y');
-            else
-                ips200_show_char(80, i*16, 'N');
+            ips200_show_char(80, i*16, *(bool *)s->data ? 'Y' : 'N');
+            break;
+        case uint8_Box:
+            ips200_show_int(80, i*16, *(uint8_t *)s->data, 3);
             break;
         default:
             break;
@@ -107,40 +118,30 @@ void menu_show(void)
 {
     Menu_Item *h = key->father;
     Menu_Item *s = h->first_son;
-
     for(int i = 0; i < h->sons; i++)
     {
-        ips200_show_string(18, i*16, s->name);//从x=18显示菜单项名称，2*8指示符+2留空
+        ips200_show_string(18, i*16, s->name);
         s = s->next_brother;
     }
     show_number();
     show_key();
 }
-// K1 短按：导航模式→上移 / 编辑模式→进入子菜单或数值+1或bool翻转
+
 static void k1_handle(void)
 {
     if(key->select == false)
-    {
-        // 导航模式：指针上移（环形链表，无边界）
         key = key->last_brother;
-    }
     else
     {
-        // 编辑模式：看类型
         switch(key->kind)
         {
             case MENU_Folder:
                 if(key->first_son != NULL)
-                {
-                    key = key->first_son;
-                    key->select = false;            // 进入后切回导航模式
-                }
+                { key = key->first_son; key->select = false; }
                 break;
-
             case bool_Box:
                 *(bool*)key->data = !(*(bool*)key->data);
                 break;
-
             case int32_Box:
                 (*(int32_t*)key->data)++;
                 if(key->isLimit && *(int32_t*)key->data > (int32_t)key->limit_max)
@@ -176,38 +177,25 @@ static void k1_handle(void)
                 if(key->isLimit && *(float*)key->data > key->limit_max)
                     *(float*)key->data = key->limit_max;
                 break;
-
             default: break;
         }
     }
     menu_show();
 }
 
-// K2 短按：导航模式→下移 / 编辑模式→退出父菜单或数值-1(bool无效)
 static void k2_handle(void)
 {
     if(key->select == false)
-    {
-        // 导航模式：指针下移（环形链表，无边界）
         key = key->next_brother;
-    }
     else
     {
-        // 编辑模式：看类型
         switch(key->kind)
         {
             case MENU_Folder:
                 if(key->father->father != NULL)
-                {
-                    key = key->father;
-                    key->select = false;            // 退出后切回导航模式
-                }
+                { key = key->father; key->select = false; }
                 break;
-
-            case bool_Box:
-                // K2 不操作 bool
-                break;
-
+            case bool_Box: break;
             case int32_Box:
                 (*(int32_t*)key->data)--;
                 if(key->isLimit && *(int32_t*)key->data < (int32_t)key->limit_min)
@@ -243,100 +231,112 @@ static void k2_handle(void)
                 if(key->isLimit && *(float*)key->data < key->limit_min)
                     *(float*)key->data = key->limit_min;
                 break;
-
             default: break;
         }
     }
     menu_show();
 }
 
-// K3 短按：切换选中状态
 static void k3_handle(void)
 {
     key->select = !key->select;
     menu_show();
 }
 
-// K4 短按：全局返回上一级
 static void k4_handle(void)
 {
-    if(key->father->father != NULL)   // 不在根层级
+    if(key->father->father != NULL)
     {
-        key->select = false;          // 回到导航模式
+        key->select = false;
         key = key->father;
-        ips200_clear();               // 返回上一级时清屏，防止子级菜单项残留
+        ips200_clear();
         menu_show();
     }
 }
 
-// 主循环：按键扫描 → 模式切换 → 菜单/摄像头分发
+//K3长按：模式轮切
+static void k3_long_handle(void)
+{
+    if(display_mode == DISPLAY_MODE_MENU)
+    {
+        display_mode = DISPLAY_MODE_BIN;
+        Menu_Item *s = head.first_son;
+        for (int i = 0; i < head.sons; i++)
+        {
+            if (s->kind == MENU_Folder && s->name[0] == 'T')
+            { key = s->first_son; key->select = false; break; }
+            s = s->next_brother;
+        }
+        ips200_clear();
+    }
+    else if(display_mode == DISPLAY_MODE_BIN)
+    {
+        display_mode = DISPLAY_MODE_TRACK;
+        key->select = false;
+    }
+    else
+    {
+        display_mode = DISPLAY_MODE_MENU;
+        key = head.first_son;
+        key->select = false;
+        ips200_clear();
+        menu_show();
+    }
+}
+
+//K4在BIN/TRACK模式：返回MENU模式
+static void K4_back(void)
+{
+    display_mode = DISPLAY_MODE_MENU;
+    key = head.first_son;
+    key->select = false;
+    ips200_clear();
+    menu_show();
+}
+
+// ===== 主循环 =====
 void menu(void)
 {
     key_scanner();
 
-    // 长按 K3：切换显示模式
-    // 加入释放检测防止长按期间反复切换导致闪烁
+    // K3长按：模式轮切（加防抖：key_clear_state防止重复触发）
     if(key_get_state(KEY_3) == KEY_RELEASE)
-    {
         k3_wait_release = false;
-    }
     if(!k3_wait_release && key_get_state(KEY_3) == KEY_LONG_PRESS)
-    {
-        k3_wait_release = true;
-        key_clear_state(KEY_3);
-        if(display_mode == DISPLAY_MODE_MENU)
-        {
-            display_mode = DISPLAY_MODE_TRACK;
-            ips200_clear();
-        }
-        else
-        {
-            display_mode = DISPLAY_MODE_MENU;
-            ips200_clear();               // 从摄像头切回菜单，清除残留图像
-            menu_show();
-        }
-    }
+    { k3_wait_release = true; k3_long_handle(); key_clear_state(KEY_3); }
 
-    // 按当前模式分发处理
+    // =====MENU模式=====
     if(display_mode == DISPLAY_MODE_MENU)
     {
-        // ---- 菜单模式 ----
         if(key_get_state(KEY_1) == KEY_SHORT_PRESS)
-        {
-            k1_handle();
-            key_clear_state(KEY_1);
-        }
+        { k1_handle(); key_clear_state(KEY_1); }
         if(key_get_state(KEY_2) == KEY_SHORT_PRESS)
-        {
-            k2_handle();
-            key_clear_state(KEY_2);
-        }
+        { k2_handle(); key_clear_state(KEY_2); }
         if(key_get_state(KEY_3) == KEY_SHORT_PRESS)
-        {
-            k3_handle();
-            key_clear_state(KEY_3);
-        }
+        { k3_handle(); key_clear_state(KEY_3); }
         if(key_get_state(KEY_4) == KEY_SHORT_PRESS)
-        {
-            k4_handle();
-            key_clear_state(KEY_4);
-        }
+        { k4_handle(); key_clear_state(KEY_4); }
     }
+    // =====BIN/TRACK按键处理=====
     else
     {
-        // ---- 搜线+显示的模式 ----
+        if(key_get_state(KEY_1) == KEY_SHORT_PRESS)
+        { k1_handle(); key_clear_state(KEY_1); }
+        if(key_get_state(KEY_2) == KEY_SHORT_PRESS)
+        { k2_handle(); key_clear_state(KEY_2); }
+        if(key_get_state(KEY_3) == KEY_SHORT_PRESS)
+        { k3_handle(); key_clear_state(KEY_3); }
+        if(key_get_state(KEY_4) == KEY_SHORT_PRESS)
+        { key_clear_state(KEY_4); K4_back(); }
+
         if (mt9v03x_finish_flag)
         {
-            vis_deal();                     //搜线
-            vis_draw();                     //绘图
-            mt9v03x_finish_flag = 0;
-        }
-        if (key_get_state(KEY_4) == KEY_SHORT_PRESS)
-        {
-            key_clear_state(KEY_4);
-            display_mode = DISPLAY_MODE_MENU;
-            ips200_clear();
+            if (display_mode == DISPLAY_MODE_BIN)
+                vis_bin_draw();
+            else
+            { vis_deal(); vis_draw(); }
             menu_show();
+            mt9v03x_finish_flag = 0;
         }
     }
 }

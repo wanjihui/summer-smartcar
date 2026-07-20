@@ -9,12 +9,17 @@ uint8  g_bin_image[pho_h][pho_w];
  volatile float err;
  volatile int chongchu;
 
-// 双阈值+差比和二值化
+ // 双阈值参数 实时调节
+uint8 vis_low  = 80;
+uint8 vis_mid  = 106;
+uint8 vis_high = 130;
+
+// 双阈值+差比和二值化判定
 static int is_white(uint8 p)
 {
-    if (p < 80)  return 0;
-    if (p > 130) return 1;
-    return (p >= 106) ? 1 : 0;
+    if (p < vis_low)  return 0;
+    if (p > vis_high) return 1;
+    return (p >= vis_mid) ? 1 : 0;
 }
 
 // 图像底部找左右种子，return 1找到，0失败
@@ -290,13 +295,13 @@ int vis_deal(void)
 
 /*
  * 显示搜线结果
- * 调用 vis_deal() 了边界数组后
+ * 调用 vis_deal() 读取了边界数组后
  * 灰度原图上叠加 红色左右边界 绿色中线
  * 跳过底部5行不画
  */
 void vis_draw(void)
 {
-    ips200_show_gray_image(0, 0, (const uint8 *)mt9v03x_image,
+    ips200_show_gray_image(0, BIN_PARAM_H, (const uint8 *)mt9v03x_image,
                        pho_w, pho_h, pho_w, pho_h, 0);
 
     for (int y = 0; y < pho_h - 5; y++)
@@ -304,15 +309,32 @@ void vis_draw(void)
         uint8 l = l_border[y];
         uint8 r = r_border[y];
         uint8 c = center_line[y];
+        int dy = y + BIN_PARAM_H;          
+        // 图像放到参数区域下方
 
         //防越界
-        ips200_draw_point(l, y, RGB565_RED);
-        if (l < pho_w_max)  ips200_draw_point(l + 1, y, RGB565_RED);
+        ips200_draw_point(l, dy, RGB565_RED);
+        if (l < pho_w_max)  ips200_draw_point(l + 1, dy, RGB565_RED);
 
-        ips200_draw_point(r, y, RGB565_RED);
-        if (r > pho_w_min)  ips200_draw_point(r - 1, y, RGB565_RED);
+        ips200_draw_point(r, dy, RGB565_RED);
+        if (r > pho_w_min)  ips200_draw_point(r - 1, dy, RGB565_RED);
 
-        ips200_draw_point(c, y, RGB565_GREEN);
-        if (c < pho_w_max)  ips200_draw_point(c + 1, y, RGB565_GREEN);
+        ips200_draw_point(c, dy, RGB565_GREEN);
+        if (c < pho_w_max)  ips200_draw_point(c + 1, dy, RGB565_GREEN);
     }
+}
+
+
+/*
+ * 显示双阈值二值化结果 + 底部数值显示
+ * 纯黑白 用来确认阈值是否把赛道和背景分开
+ */
+void vis_bin_draw(void)
+{
+    for (int y = 0; y < pho_h; y++)
+        for (int x = 0; x < pho_w; x++)
+            g_bin_image[y][x] = is_white(mt9v03x_image[y][x]) ? 255 : 0;
+
+    ips200_show_gray_image(0, BIN_PARAM_H, (const uint8 *)g_bin_image,
+                       pho_w, pho_h, pho_w, pho_h, 8);
 }
