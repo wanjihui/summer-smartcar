@@ -25,7 +25,6 @@ extern volatile float err;     // 赛道中线-图像中心=偏差,>0偏右,右�
 extern volatile int chongchu;   //出界标志 1冲出, 0正常
 
 extern uint8 vis_low;//二值化参数
-extern uint8 vis_mid;
 extern uint8 vis_high;
 // ========== 函数声明 ==========
 int  vis_deal(void);  // 搜线，return 0正常 1丢线

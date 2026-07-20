@@ -57,10 +57,8 @@ void menu_init(void)
 
         v = dynamicCreate_Menu_Number(vis, "vis_low",  &vis_low,  uint8_Box);
         Menu_Set_Limit(v, 0, 255);
-        v = dynamicCreate_Menu_Number(vis, "vis_mid",  &vis_mid,  uint8_Box);
-        Menu_Set_Limit(v, 1, 255);
         v = dynamicCreate_Menu_Number(vis, "vis_high", &vis_high, uint8_Box);
-        Menu_Set_Limit(v, 2, 255);
+        Menu_Set_Limit(v, 0, 255);
     }
 
     key = head.first_son;
@@ -96,16 +94,16 @@ static void show_number(void)
         switch (s->kind)
         {
         case int32_Box:
-            ips200_show_int(80, i*16, *(int32_t *)s->data, 5);
+            ips200_show_int(90, i*16, *(int32_t *)s->data, 5);
             break;
         case float_Box:
-            ips200_show_float(80, i*16, *(float *)s->data, 3, 2);
+            ips200_show_float(90, i*16, *(float *)s->data, 3, 2);
             break;
         case bool_Box:
-            ips200_show_char(80, i*16, *(bool *)s->data ? 'Y' : 'N');
+            ips200_show_char(90, i*16, *(bool *)s->data ? 'Y' : 'N');
             break;
         case uint8_Box:
-            ips200_show_int(80, i*16, *(uint8_t *)s->data, 3);
+            ips200_show_int(90, i*16, *(uint8_t *)s->data, 3);
             break;
         default:
             break;
@@ -137,7 +135,10 @@ static void k1_handle(void)
         {
             case MENU_Folder:
                 if(key->first_son != NULL)
-                { key = key->first_son; key->select = false; }
+                {
+                    ips200_clear();
+                    key = key->first_son; key->select = false; 
+                }
                 break;
             case bool_Box:
                 *(bool*)key->data = !(*(bool*)key->data);
@@ -193,7 +194,10 @@ static void k2_handle(void)
         {
             case MENU_Folder:
                 if(key->father->father != NULL)
-                { key = key->father; key->select = false; }
+                {
+                    ips200_clear();
+                    key = key->father; key->select = false; 
+                }
                 break;
             case bool_Box: break;
             case int32_Box:
@@ -297,8 +301,6 @@ static void K4_back(void)
 // ===== 主循环 =====
 void menu(void)
 {
-    key_scanner();
-
     // K3长按：模式轮切（加防抖：key_clear_state防止重复触发）
     if(key_get_state(KEY_3) == KEY_RELEASE)
         k3_wait_release = false;
@@ -333,7 +335,7 @@ void menu(void)
         {
             if (display_mode == DISPLAY_MODE_BIN)
                 vis_bin_draw();
-            else
+            else if (display_mode == DISPLAY_MODE_TRACK)
             { vis_deal(); vis_draw(); }
             menu_show();
             mt9v03x_finish_flag = 0;

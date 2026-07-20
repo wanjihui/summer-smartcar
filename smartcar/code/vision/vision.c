@@ -10,16 +10,15 @@ uint8  g_bin_image[pho_h][pho_w];
  volatile int chongchu;
 
  // 双阈值参数 实时调节
-uint8 vis_low  = 80;
-uint8 vis_mid  = 106;
-uint8 vis_high = 130;
+uint8 vis_low  = 200;
+uint8 vis_high = 240;
 
-// 双阈值+差比和二值化判定
+// 双阈值二值化判定
 static int is_white(uint8 p)
 {
     if (p < vis_low)  return 0;
     if (p > vis_high) return 1;
-    return (p >= vis_mid) ? 1 : 0;
+    return (p >= (vis_low + vis_high) / 2) ? 1 : 0;
 }
 
 // 图像底部找左右种子，return 1找到，0失败
@@ -249,7 +248,7 @@ static void pho_border(uint16 points[][2], uint16 total,
 /*
  * 计算中线数组和赛道偏差
  * err即屏幕中线离赛道中线距离
- * err计算: 45~65行，每5行取一个点
+ * err计算: 40~100行，每5行取一个点，线性加权
  * err>0右转,err<0左转
  */
 static void pho_center(void)
@@ -259,14 +258,14 @@ static void pho_center(void)
         center_line[y] = (uint8)((l_border[y] + r_border[y]) / 2);
     }
 
-    float sum = 0;
-    int cnt = 0;
-    for (int row = 45; row <= 65; row += 5)
+    float sum = 0, w_sum = 0;
+    for (int row = 40; row <= 100; row += 5)
     {
-        sum += (float)center_line[row] - pho_center_x;
-        cnt++;
+        float w = (float)(row - 35) / 65.0f;  // 线性加权，近处权重大
+        sum += ((float)center_line[row] - pho_center_x) * w;
+        w_sum += w;
     }
-    err = sum / (float)cnt;
+    err = sum / w_sum;
 }
 
 

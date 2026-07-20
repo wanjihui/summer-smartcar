@@ -79,9 +79,14 @@ void TIM3_IRQHandler (void)
 //-------------------------------------------------------------------------------------------------------------------
 void TIM4_IRQHandler (void)
 {
-    // 此处编写用户代码
-
-    // 此处编写用户代码
+    // 有短按待消费时暂停扫描，防止被下一轮 RELEASE 覆盖
+    if (key_get_state(KEY_1) != KEY_SHORT_PRESS &&
+        key_get_state(KEY_2) != KEY_SHORT_PRESS &&
+        key_get_state(KEY_3) != KEY_SHORT_PRESS &&
+        key_get_state(KEY_4) != KEY_SHORT_PRESS)
+    {
+        key_scanner();
+    }
     TIM4->SR &= ~TIM4->SR;                                                      // 清空中断状态
 }
 
