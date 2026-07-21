@@ -27,6 +27,7 @@ static void Create_Menu_Item(Menu_Item *father, Menu_Item *me, const char name[]
     me->isLimit   = false;                  //当前节点对应的数据是否限幅
     me->limit_min = 0.0f;                   
     me->limit_max = 0.0f;
+    me->step = 0;
     
     if(father->sons == 0)                   //当前节点是父节点的第一个子节点
     {
@@ -80,10 +81,11 @@ Menu_Item* dynamicCreate_Menu_Number(Menu_Item *father, const char name[], void 
     return me;
 }
 
-//设置数据限幅
-void Menu_Set_Limit(Menu_Item *me, float min, float max)
+//设置数据限幅和步进
+void Menu_Set_Limit(Menu_Item *me, float min, float max, float step)
 {
     me->isLimit   = true;
     me->limit_min = min;
     me->limit_max = max;
+    me->step = step;
 }

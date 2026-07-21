@@ -79,4 +79,5 @@
   ..\..\libraries\components\fatfs\source\ff.h ..\code\motor\motor.h \
   ..\code\encoder\encoder.h ..\code\MPU6050\mpu6050.h \
   ..\code\servo\servo.h ..\code\menu\menu.h ..\code\menu\Mymenu.h \
-  ..\code\vision\vision.h
+  ..\code\vision\vision.h ..\code\control\pid.h \
+  ..\code\control\control.h

@@ -51,12 +51,13 @@ typedef struct Menu_Item
     bool isLimit;       //当前节点对应的数据是否限幅
     float limit_min;
     float limit_max;
+    float step;         //步进值
 } Menu_Item;
 
 void Create_Menu_Folder(Menu_Item *father, Menu_Item *me, const char name[]);
 void Create_Menu_Number(Menu_Item *father, Menu_Item *me, const char name[], void *data, MENU_KIND kind);
 Menu_Item* dynamicCreate_Menu_Folder(Menu_Item *father, const char name[]);
 Menu_Item* dynamicCreate_Menu_Number(Menu_Item *father, const char name[], void *data, MENU_KIND kind);
-void Menu_Set_Limit(Menu_Item *me, float min, float max);
+void Menu_Set_Limit(Menu_Item *me, float min, float max, float step);
 
 #endif

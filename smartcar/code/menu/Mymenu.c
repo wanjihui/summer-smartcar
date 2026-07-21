@@ -37,18 +37,49 @@ void menu_init(void)
     head.limit_max = 0.0f;
 
     //构建具体菜单
-    Menu_Item *folder1 = dynamicCreate_Menu_Folder(&head, "folder1");
-    Menu_Item *folder2 = dynamicCreate_Menu_Folder(&head, "folder2");
-    dynamicCreate_Menu_Folder(folder2, "folder3");
-    dynamicCreate_Menu_Folder(folder2, "folder4");
 
+    // =====folder1测试文件夹=====
+    {
+    Menu_Item *folder1 = dynamicCreate_Menu_Folder(&head, "folder1");
     Menu_Item *num1=dynamicCreate_Menu_Number(folder1, "aaa", &test, int32_Box);
-    Menu_Set_Limit(num1, 0, 100);
+    Menu_Set_Limit(num1, 0, 100,1.0f);
 
     Menu_Item *num2 = dynamicCreate_Menu_Number(folder1, "bbb", &test1, float_Box);
-    Menu_Set_Limit(num2, -5.0f, 5.0f);
+    Menu_Set_Limit(num2, -5.0f, 5.0f,1.0f);
 
     dynamicCreate_Menu_Number(folder1, "ccc", &test2, bool_Box);
+    }
+
+    // =====PID文件夹=====
+    {
+        Menu_Item *pid = dynamicCreate_Menu_Folder(&head, "PID");
+        Menu_Item *v;
+
+        // 舵机
+        v = dynamicCreate_Menu_Number(pid, "servo_kp",  &servo_kp,  float_Box);
+        Menu_Set_Limit(v, 0, 5,0.1f);
+        v = dynamicCreate_Menu_Number(pid, "servo_kd",  &servo_kd,  float_Box);
+        Menu_Set_Limit(v, 0, 2,0.01f);
+        v = dynamicCreate_Menu_Number(pid, "center",    &servo_center, float_Box);
+        Menu_Set_Limit(v, 75, 105,0.5);
+        v = dynamicCreate_Menu_Number(pid, "max_angle", &servo_max_cha, float_Box);
+        Menu_Set_Limit(v, 1, 45,0.5);
+        v = dynamicCreate_Menu_Number(pid, "deadband",  &servo_dead, float_Box);
+        Menu_Set_Limit(v, 0, 10,0.5);
+        v = dynamicCreate_Menu_Number(pid, "slew_rate", &servo_max_add, float_Box);
+        Menu_Set_Limit(v, 0.5f, 5,0.5);
+
+        // 电机
+        v = dynamicCreate_Menu_Number(pid, "base_duty", &motor_base_duty, int32_Box);
+        Menu_Set_Limit(v, 0, 50,1);
+        v = dynamicCreate_Menu_Number(pid, "max_duty",  &motor_max_duty, int32_Box);
+        Menu_Set_Limit(v, 0, 50,1);
+        v = dynamicCreate_Menu_Number(pid, "motor_kp",  &motor_kp, float_Box);
+        Menu_Set_Limit(v, 0, 10,0.1);
+        v = dynamicCreate_Menu_Number(pid, "motor_kd",  &motor_kd, float_Box);
+        Menu_Set_Limit(v, 0, 2,0.01);
+    }
+
 
     // =====Threshold阈值文件夹=====
     {
@@ -56,9 +87,9 @@ void menu_init(void)
         Menu_Item *v;
 
         v = dynamicCreate_Menu_Number(vis, "vis_low",  &vis_low,  uint8_Box);
-        Menu_Set_Limit(v, 0, 255);
+        Menu_Set_Limit(v, 0, 255,1.0);
         v = dynamicCreate_Menu_Number(vis, "vis_high", &vis_high, uint8_Box);
-        Menu_Set_Limit(v, 0, 255);
+        Menu_Set_Limit(v, 0, 255,1.0);
     }
 
     key = head.first_son;
@@ -127,58 +158,56 @@ void menu_show(void)
 
 static void k1_handle(void)
 {
-    if(key->select == false)
+    if (key->select == false)
         key = key->last_brother;
     else
     {
-        switch(key->kind)
+        switch (key->kind)
         {
             case MENU_Folder:
-                if(key->first_son != NULL)
-                {
-                    ips200_clear();
-                    key = key->first_son; key->select = false; 
-                }
+                if (key->first_son != NULL)
+                { ips200_clear(); key = key->first_son; key->select = false; }
                 break;
+
             case bool_Box:
                 *(bool*)key->data = !(*(bool*)key->data);
                 break;
+
             case int32_Box:
-                (*(int32_t*)key->data)++;
-                if(key->isLimit && *(int32_t*)key->data > (int32_t)key->limit_max)
+                (*(int32_t*)key->data) += (int32_t)key->step;
+                if (key->isLimit && *(int32_t*)key->data > (int32_t)key->limit_max)
                     *(int32_t*)key->data = (int32_t)key->limit_max;
                 break;
             case uint32_Box:
-                (*(uint32_t*)key->data)++;
-                if(key->isLimit && *(uint32_t*)key->data > (uint32_t)key->limit_max)
+                (*(uint32_t*)key->data) += (uint32_t)key->step;
+                if (key->isLimit && *(uint32_t*)key->data > (uint32_t)key->limit_max)
                     *(uint32_t*)key->data = (uint32_t)key->limit_max;
                 break;
             case int16_Box:
-                (*(int16_t*)key->data)++;
-                if(key->isLimit && *(int16_t*)key->data > (int16_t)key->limit_max)
+                (*(int16_t*)key->data) += (int16_t)key->step;
+                if (key->isLimit && *(int16_t*)key->data > (int16_t)key->limit_max)
                     *(int16_t*)key->data = (int16_t)key->limit_max;
                 break;
             case uint16_Box:
-                (*(uint16_t*)key->data)++;
-                if(key->isLimit && *(uint16_t*)key->data > (uint16_t)key->limit_max)
+                (*(uint16_t*)key->data) += (uint16_t)key->step;
+                if (key->isLimit && *(uint16_t*)key->data > (uint16_t)key->limit_max)
                     *(uint16_t*)key->data = (uint16_t)key->limit_max;
                 break;
             case int8_Box:
-                (*(int8_t*)key->data)++;
-                if(key->isLimit && *(int8_t*)key->data > (int8_t)key->limit_max)
+                (*(int8_t*)key->data) += (int8_t)key->step;
+                if (key->isLimit && *(int8_t*)key->data > (int8_t)key->limit_max)
                     *(int8_t*)key->data = (int8_t)key->limit_max;
                 break;
             case uint8_Box:
-                (*(uint8_t*)key->data)++;
-                if(key->isLimit && *(uint8_t*)key->data > (uint8_t)key->limit_max)
+                (*(uint8_t*)key->data) += (uint8_t)key->step;
+                if (key->isLimit && *(uint8_t*)key->data > (uint8_t)key->limit_max)
                     *(uint8_t*)key->data = (uint8_t)key->limit_max;
                 break;
             case float_Box:
-                (*(float*)key->data) += 0.1f;
-                if(key->isLimit && *(float*)key->data > key->limit_max)
+                (*(float*)key->data) += key->step;
+                if (key->isLimit && *(float*)key->data > key->limit_max)
                     *(float*)key->data = key->limit_max;
                 break;
-            default: break;
         }
     }
     menu_show();
@@ -186,56 +215,55 @@ static void k1_handle(void)
 
 static void k2_handle(void)
 {
-    if(key->select == false)
+    if (key->select == false)
         key = key->next_brother;
     else
     {
-        switch(key->kind)
+        switch (key->kind)
         {
             case MENU_Folder:
-                if(key->father->father != NULL)
-                {
-                    ips200_clear();
-                    key = key->father; key->select = false; 
-                }
+                if (key->father->father != NULL)
+                { ips200_clear(); key = key->father; key->select = false; }
                 break;
-            case bool_Box: break;
+
+            case bool_Box:
+                break;
+
             case int32_Box:
-                (*(int32_t*)key->data)--;
-                if(key->isLimit && *(int32_t*)key->data < (int32_t)key->limit_min)
+                (*(int32_t*)key->data) -= (int32_t)key->step;
+                if (key->isLimit && *(int32_t*)key->data < (int32_t)key->limit_min)
                     *(int32_t*)key->data = (int32_t)key->limit_min;
                 break;
             case uint32_Box:
-                (*(uint32_t*)key->data)--;
-                if(key->isLimit && *(uint32_t*)key->data < (uint32_t)key->limit_min)
+                (*(uint32_t*)key->data) -= (uint32_t)key->step;
+                if (key->isLimit && *(uint32_t*)key->data < (uint32_t)key->limit_min)
                     *(uint32_t*)key->data = (uint32_t)key->limit_min;
                 break;
             case int16_Box:
-                (*(int16_t*)key->data)--;
-                if(key->isLimit && *(int16_t*)key->data < (int16_t)key->limit_min)
+                (*(int16_t*)key->data) -= (int16_t)key->step;
+                if (key->isLimit && *(int16_t*)key->data < (int16_t)key->limit_min)
                     *(int16_t*)key->data = (int16_t)key->limit_min;
                 break;
             case uint16_Box:
-                (*(uint16_t*)key->data)--;
-                if(key->isLimit && *(uint16_t*)key->data < (uint16_t)key->limit_min)
+                (*(uint16_t*)key->data) -= (uint16_t)key->step;
+                if (key->isLimit && *(uint16_t*)key->data < (uint16_t)key->limit_min)
                     *(uint16_t*)key->data = (uint16_t)key->limit_min;
                 break;
             case int8_Box:
-                (*(int8_t*)key->data)--;
-                if(key->isLimit && *(int8_t*)key->data < (int8_t)key->limit_min)
+                (*(int8_t*)key->data) -= (int8_t)key->step;
+                if (key->isLimit && *(int8_t*)key->data < (int8_t)key->limit_min)
                     *(int8_t*)key->data = (int8_t)key->limit_min;
                 break;
             case uint8_Box:
-                (*(uint8_t*)key->data)--;
-                if(key->isLimit && *(uint8_t*)key->data < (uint8_t)key->limit_min)
+                (*(uint8_t*)key->data) -= (uint8_t)key->step;
+                if (key->isLimit && *(uint8_t*)key->data < (uint8_t)key->limit_min)
                     *(uint8_t*)key->data = (uint8_t)key->limit_min;
                 break;
             case float_Box:
-                (*(float*)key->data) -= 0.1f;
-                if(key->isLimit && *(float*)key->data < key->limit_min)
+                (*(float*)key->data) -= key->step;
+                if (key->isLimit && *(float*)key->data < key->limit_min)
                     *(float*)key->data = key->limit_min;
                 break;
-            default: break;
         }
     }
     menu_show();
@@ -256,6 +284,9 @@ static void k4_handle(void)
         ips200_clear();
         menu_show();
     }
+    else
+        motor_stop();//根目录下k4停车
+
 }
 
 //K3长按：模式轮切
@@ -336,7 +367,7 @@ void menu(void)
             if (display_mode == DISPLAY_MODE_BIN)
                 vis_bin_draw();
             else if (display_mode == DISPLAY_MODE_TRACK)
-            { vis_deal(); vis_draw(); }
+                vis_draw(); 
             menu_show();
             mt9v03x_finish_flag = 0;
         }

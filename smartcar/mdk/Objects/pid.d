@@ -1,4 +1,4 @@
-./objects/mymenu.o: ..\code\menu\Mymenu.c ..\user\inc\config.h \
+./objects/pid.o: ..\code\control\pid.c ..\user\inc\config.h \
   ..\..\libraries\zf_common\zf_common_headfile.h \
   ..\..\libraries\sdk\hal_device_registers.h \
   ..\..\libraries\sdk\mm32f3277g.h \

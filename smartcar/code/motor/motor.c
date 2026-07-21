@@ -26,7 +26,7 @@ void motor_init(void)
 // 参数说明     duty  占空比 -MOTOR_MAX_DUTY ~ +MOTOR_MAX_DUTY
 //                     正值为正转 负值为反转 0 为停止
 //-------------------------------------------------------------------------------------------------------------------
-void motor_set_left(int8_t duty)
+void motor_set_right(int8_t duty)
 {
     // 限幅
     if(duty > MOTOR_MAX_DUTY)   duty = MOTOR_MAX_DUTY;
@@ -49,7 +49,7 @@ void motor_set_left(int8_t duty)
 // 参数说明     duty  占空比 -MOTOR_MAX_DUTY ~ +MOTOR_MAX_DUTY
 //                     正值为正转 负值为反转 0 为停止
 //-------------------------------------------------------------------------------------------------------------------
-void motor_set_right(int8_t duty)
+void motor_set_left(int8_t duty)
 {
     // 限幅
     if(duty > MOTOR_MAX_DUTY)   duty = MOTOR_MAX_DUTY;

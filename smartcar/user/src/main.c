@@ -70,20 +70,26 @@ int main (void)
         }
     }
 
-    key_init(10);      			// 10ms 按键扫描周期
-    pit_ms_init(TIM4_PIT, 10);   // PIT 定时中断，保证按键扫描不受主循环拖慢
-    menu_init();       			// 初始化菜单结构
-    motor_init();      			// 初始化电机驱动
-    //encoder_init();    			// 初始化编码器（正交解码 + PIT 中断）
-    mpu6050_module_init();  // 初始化 MPU6050 陀螺仪/加速度计
-    servo_init();           // 初始化舵机（TIM2_CH1 PA15 50Hz PWM）
-    ips200_clear();		 			//主循环前清屏
-    menu_show();					//显示一次菜单项
+    key_init(10);      					// 10ms 按键扫描周期
+    pit_ms_init(TIM4_PIT, 10);  // PIT 定时中断，保证按键扫描不受主循环拖慢
+    menu_init();       					// 初始化菜单结构
+    motor_init();      					// 初始化电机驱动
+    //encoder_init();    					// 初始化编码器（正交解码 + PIT 中断）
+    mpu6050_module_init();      // 初始化 MPU6050 陀螺仪/加速度计
+    servo_init();               // 初始化舵机（TIM2_CH1 PA15 50Hz PWM）
+    control_init();             //pid初始化
+    ips200_clear();		 					//主循环前清屏
+    menu_show();					  		//显示一次菜单项
     while(1)
     {
-        menu();					    // 菜单主循环：按键模式切换 → 菜单/摄像头分发
-
-        system_delay_ms(10);//主循环10ms延时
+			if (mt9v03x_finish_flag)  //等待图像采集完成
+				{      
+					vis_deal();           //搜线 误差算法
+					control_update();     //舵机 电机控制
+				}
+					menu();					      // 菜单主循环：按键模式切换 → 菜单/摄像头分发
+					mt9v03x_finish_flag = 0;//处理完标志位清零
+					system_delay_ms(10);//主循环10ms延时
     }
 }
 // **************************** 代码区域 ****************************

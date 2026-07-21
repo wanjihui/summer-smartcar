@@ -10,8 +10,8 @@ uint8  g_bin_image[pho_h][pho_w];
  volatile int chongchu;
 
  // 双阈值参数 实时调节
-uint8 vis_low  = 200;
-uint8 vis_high = 240;
+uint8 vis_low  = DEFAULT_VIS_LOW;
+uint8 vis_high = DEFAULT_VIS_HIGH;
 
 // 双阈值二值化判定
 static int is_white(uint8 p)
