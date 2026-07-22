@@ -362,14 +362,14 @@ void menu(void)
         if(key_get_state(KEY_4) == KEY_SHORT_PRESS)
         { key_clear_state(KEY_4); K4_back(); }
 
-        if (mt9v03x_finish_flag)
+        if (vis_frame_ready)
         {
             if (display_mode == DISPLAY_MODE_BIN)
                 vis_bin_draw();
             else if (display_mode == DISPLAY_MODE_TRACK)
-                vis_draw(); 
+                vis_draw();
             menu_show();
-            mt9v03x_finish_flag = 0;
+            vis_frame_ready = 0;
         }
     }
 }

@@ -13,16 +13,15 @@ int   motor_max_duty = DEFAULT_MOTOR_MAX;
 float motor_kp       = DEFAULT_MOTOR_KP;
 float motor_kd       = DEFAULT_MOTOR_KD;
 
-static pid_t pid_servo;                          //存舵机参数
-static float servo_last_angle = 90.0f;           //上一帧角度记录,初始在center
-static float motor_last_err = 0;                 // 上一帧电机err
+static float servo_last_err  = 0;       // 上一帧偏差，舵机D项用
+static float servo_last_angle = 0;      // 上一帧舵机角度，步进限制用
+static float motor_last_err   = 0;      // 上一帧偏差，电机D项用
 
 
 void control_init(void)
 {
-    pid_init(&pid_servo, servo_kp, 0, servo_kd, 0,
-             -servo_max_cha, servo_max_cha);//舵机pid输出限幅+_15度
-    servo_last_angle = servo_center;//初始化上一帧的角度
+    servo_last_angle = servo_center;     // 初始化舵机角度记录
+    servo_set_angle(servo_center);       // 立即输出PWM，舵机进入工作状态
 }
 
 //舵机控制
@@ -36,9 +35,10 @@ static void servo_update(void)
     if (servo_dir)              e = -e;
 
     // ----位置式PD计算----
-    //kp×当前偏差,改变角度回正速度  kd×偏差变化,阻尼角度变化速度
-    float pd = pid_servo.kp * e + pid_servo.kd * (e - pid_servo.last_err);
-    pid_servo.last_err = e;   //存储当前err
+    // 全局变量
+    // kp×当前偏差=回正速度  kd×偏差变化=阻尼
+    float pd = servo_kp * e + servo_kd * (e - servo_last_err);
+    servo_last_err = e;   //存储当前err
 
     // ----像素err转换为角度----
     //角度差最大15° / 像素误差最大94px ≈ 0.16°/px

@@ -1329,16 +1329,6 @@
               <FileType>5</FileType>
               <FilePath>..\code\control\control.h</FilePath>
             </File>
-            <File>
-              <FileName>pid.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\code\control\pid.c</FilePath>
-            </File>
-            <File>
-              <FileName>pid.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\code\control\pid.h</FilePath>
-            </File>
           </Files>
         </Group>
       </Groups>

@@ -1,7 +1,6 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 #include "zf_common_headfile.h"
-#include "pid.h"
 #include "servo.h"
 #include "motor.h"
 #include "vision.h"

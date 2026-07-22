@@ -83,12 +83,13 @@ int main (void)
     while(1)
     {
 			if (mt9v03x_finish_flag)  //等待图像采集完成
-				{      
+				{
+					mt9v03x_finish_flag = 0;//立即清零，防止新帧标志在后续处理中被覆盖
 					vis_deal();           //搜线 误差算法
 					control_update();     //舵机 电机控制
+					vis_frame_ready = 1;  //通知显示层：新帧已处理，可以刷新
 				}
 					menu();					      // 菜单主循环：按键模式切换 → 菜单/摄像头分发
-					mt9v03x_finish_flag = 0;//处理完标志位清零
 					system_delay_ms(10);//主循环10ms延时
     }
 }

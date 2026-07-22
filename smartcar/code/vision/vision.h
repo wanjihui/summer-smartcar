@@ -22,6 +22,7 @@ extern border_line r_border;       // 右边界
 extern border_line center_line;    // 中线 = (左+右)/2，车应该沿它走
 
 extern volatile float err;     // 赛道中线-图像中心=偏差,>0偏右,右转;<0偏左,左转
+extern volatile uint8_t vis_frame_ready; // 新帧已搜线完成，显示层可刷新
 
 extern uint8 vis_low;//二值化参数
 extern uint8 vis_high;
