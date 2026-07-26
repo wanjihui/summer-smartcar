@@ -7,7 +7,7 @@ uint8  g_bin_image[pho_h][pho_w];
  border_line center_line;
 
  volatile float err;
- volatile uint8_t vis_frame_ready;  // 新帧已处理标志，main设置，menu消费后清零
+ volatile uint8_t vis_frame_ready;
 
  // 双阈值参数 实时调节
 uint8 vis_low  = DEFAULT_VIS_LOW;
@@ -27,50 +27,91 @@ static int is_white(uint8 p)
 }
 
 /* ================================================================
- * 图像底部逐行向上找左右种子
- * 从 y=118 向上扫到 y=112（共7行）
- * 找到左右种子都存在的第一行就返回
- * return: 1 找到, 0 全失败 → 进入兜底搜线
+ * 90→40行独立找左右种子，左右各自返回，不同行也没关系
+ * 返回: 左右种子独立标记，至少一个找到就可以生长
  * ================================================================ */
-static int find_seeds(int *seed_l_x, int *seed_r_x, int *seed_y)
+static void find_seeds(int *llx, int *lly, int *rrx, int *rry)
 {
-    for (int y = 118; y >= 112; y--)  //扫描118→112共7行
+    *llx = -1; *rrx = -1;
+
+    for (int y = 90; y >= 40; y--)
     {
-        // 左种子：从左往右扫，黑→白跳变 + 3连白确认
-        *seed_l_x = -1;
-        for (int x = 1; x < pho_w - 3; x++)
+        // 左种子：从中间向左扫，找赛道左边缘（白→黑转跳）+ 3连白确认赛道内
+        if (*llx < 0 && is_white(mt9v03x_image[y][pho_center_x]))
         {
-            if (!is_white(mt9v03x_image[y][x - 1])
-                && is_white(mt9v03x_image[y][x])
-                && is_white(mt9v03x_image[y][x + 1])
-                && is_white(mt9v03x_image[y][x + 2]))
+            for (int x = pho_center_x; x >= 2; x--)
             {
-                *seed_l_x = x;
-                break;
+                if (!is_white(mt9v03x_image[y][x - 1])
+                    && is_white(mt9v03x_image[y][x])
+                    && is_white(mt9v03x_image[y][x + 1])
+                    && is_white(mt9v03x_image[y][x + 2]))
+                {
+                    *llx = x; *lly = y; break;
+                }
             }
+            if (*llx < 0) { *llx = 0; *lly = y; }  // 扫到底全白 → 出界
         }
 
-        // 右种子：从右往左扫，白→黑跳变 + 3连白确认
-        *seed_r_x = -1;
-        for (int x = pho_w - 2; x >= 2; x--)
+        // 右种子：从中间向右扫，找赛道右边缘（白→黑转跳）+ 3连白确认赛道内
+        if (*rrx < 0 && is_white(mt9v03x_image[y][pho_center_x]))
+        {
+            for (int x = pho_center_x; x < pho_w - 3; x++)
+            {
+                if (is_white(mt9v03x_image[y][x])
+                    && !is_white(mt9v03x_image[y][x + 1])
+                    && is_white(mt9v03x_image[y][x - 1])
+                    && is_white(mt9v03x_image[y][x - 2]))
+                {
+                    *rrx = x; *rry = y; break;
+                }
+            }
+            if (*rrx < 0) { *rrx = pho_w_max; *rry = y; }  // 扫到底全白 → 出界
+        }
+
+        if (*llx >= 0 && *rrx >= 0) break;
+    }
+}
+
+/* ================================================================
+ * 底部扫描：逐行扫 118→79（40行），直接填 l_border/r_border
+ * 赛道近处宽且可靠，不需要种子生长，逐行扫更快更准
+ * ================================================================ */
+static void bottom_scan(void)
+{
+    for (int y = 118; y >= 79; y--)
+    {
+        int lx = -1, rx = -1;
+        int m = pho_center_x;
+
+        if (!is_white(mt9v03x_image[y][m])) { l_border[y] = 0; r_border[y] = 0; continue; }
+
+        // 左边界：从中间向左扫，找赛道左边缘（白→黑）+2连白
+        for (int x = m; x >= 1; x--)
+        {
+            if (!is_white(mt9v03x_image[y][x - 1])  // 白→黑转跳
+                && is_white(mt9v03x_image[y][x])
+                && is_white(mt9v03x_image[y][x + 1]))
+            {
+                lx = x + 1; break;
+            }
+        }
+        if (lx < 0) lx = pho_w_min;  // 扫到底全白 → 出界
+
+        // 右边界：从中间向右扫，找赛道右边缘（白→黑）+2连白
+        for (int x = m; x < pho_w - 2; x++)
         {
             if (is_white(mt9v03x_image[y][x])
                 && !is_white(mt9v03x_image[y][x + 1])
-                && is_white(mt9v03x_image[y][x - 1])
-                && is_white(mt9v03x_image[y][x - 2]))
+                && is_white(mt9v03x_image[y][x - 1]))
             {
-                *seed_r_x = x;
-                break;
+                rx = x - 1; break;
             }
         }
+        if (rx < 0) rx = pho_w_max;  // 扫到底全白 → 出界
 
-        if (*seed_l_x >= 0 && *seed_r_x >= 0)
-        {
-            *seed_y = y;
-            return 1;  // 当前行两个种子都找到
-        }
+        l_border[y] = (uint8)lx;
+        r_border[y] = (uint8)rx;
     }
-    return 0;  // 7行全失败 → 进入兜底搜线
 }
 
 /* ================================================================
@@ -87,15 +128,13 @@ static int find_seeds(int *seed_l_x, int *seed_r_x, int *seed_y)
  *   选 ny 最小（图像最上方）的候选 → 种子整体向上爬行
  *
  * 断点续搜：
- *   8方向全失败 → 连续往上扫3行
- *   左：整行左→右扫描，找黑→白跳变 + 3连白确认
- *   右：整行右→左扫描，找白→黑跳变 + 3连白确认
+ *   8方向全失败 → 连续往上扫5行
  *   找到 → 续上继续正常生长
- *   3行全失败 → 终止该侧搜索
+ *   5行全失败 → 终止该侧搜索
  *
  * 终止条件：
- *   爬到顶 (cy == 0)
- *   3行重试全失败
+ *   爬到顶 (cy <= 20)
+ *   5行重试全失败
  *   存储点数达到 SEED_MAX_POINTS
  * ================================================================ */
 
@@ -152,13 +191,13 @@ static void seed_grow_left(int lx, int ly)
         }
         else if (cy > 0)
         {
-            // ---- 断点续搜：往上扫3行 ----
+            // ---- 断点续搜：往上扫5行 ----
             int found = 0;
-            for (int retry = 0; retry < 3 && cy > 0; retry++)
+            for (int retry = 0; retry < 5 && cy > 0; retry++)
             {
                 cy--;  // 上移一行
-                // 整行左→右扫描，找黑→白跳变 + 3连白确认
-                for (int x = 1; x < pho_w - 3; x++)
+                // 从中间向左扫，找赛道左边缘（白→黑）+ 3连白
+                for (int x = pho_center_x; x >= 2; x--)
                 {
                     if (!is_white(mt9v03x_image[cy][x - 1])
                         && is_white(mt9v03x_image[cy][x])
@@ -175,7 +214,7 @@ static void seed_grow_left(int lx, int ly)
             if (!found) break;  //3行全失败 终止
         }
 
-        if (cy == 0) break;  // 爬到图像顶部
+        if (cy <= 40) break;  // 爬到采样区顶部，不再往上
     }
 
     data_l = idx;
@@ -228,13 +267,13 @@ static void seed_grow_right(int rx, int ry)
         }
         else if (cy > 0)
         {
-            //----断点续搜 往上扫3行----
+            //----断点续搜 往上扫5行----
             int found = 0;
-            for (int retry = 0; retry < 3 && cy > 0; retry++)
+            for (int retry = 0; retry < 5 && cy > 0; retry++)
             {
                 cy--;
-                // 整行右→左扫描，找白→黑跳变 + 3连白确认
-                for (int x = pho_w - 2; x >= 2; x--)
+                // 从中间向右扫，找赛道右边缘（白→黑）+ 3连白
+                for (int x = pho_center_x; x < pho_w - 3; x++)
                 {
                     if (is_white(mt9v03x_image[cy][x])
                         && !is_white(mt9v03x_image[cy][x + 1])
@@ -251,7 +290,7 @@ static void seed_grow_right(int rx, int ry)
             if (!found) break;  //3行全失败 终止
         }
 
-        if (cy == 0) break;  //爬到图像顶部
+        if (cy <= 40) break;  // 爬到采样区顶部，不再往上
     }
 
     data_r = idx;
@@ -299,9 +338,8 @@ static void pho_border(uint16 points[][2], uint16 total,
  *
  * center_line[y] = (l_border[y] + r_border[y]) / 2
  *
- * err 加权平均（110→70 行，每5行采样，从近到远）：
- *   线性加权 w = (row - 65) / 45 → row70 权重≈0.11, row110 权重=1.0
- *   近处权重大，远处权重小
+ * err 加权平均（100→40 行，每5行采样，远处权重大）：
+ *   w = (100-row)/60 + 0.2 → row40=1.2, row100=0.2
  *
  * err>0 赛道偏右 车需右转
  * err<0 赛道偏左 车需左转
@@ -317,12 +355,12 @@ static void pho_center(void)
     }
 
     float sum = 0, w_sum = 0;
-    for (int row = 110; row >= 70; row -= 5)  //近处110行→远处70行
+    for (int row = 100; row >= 40; row -= 5)  //近处100行→远处40行
     {
         if (l_border[row] == 0 || r_border[row] == 0)
             continue;  // 无数据行不计入
 
-        float w = (float)(row - 65) / 45.0f;  // row70≈0.11, row110=1.0
+        float w = (float)(100 - row) / 60.0f + 0.2f;  // row40=1.2, row100=0.2 远处权重大
         sum += ((float)center_line[row] - pho_center_x) * w;
         w_sum += w;
     }
@@ -334,11 +372,10 @@ static void pho_center(void)
 
 
 /* ================================================================
- * 兜底搜线：种子失败时白像素质心法直接算中线
+ * 兜底搜线：两边种子都找不到时，逐行扫边界（与bottom_scan同款逻辑）
  *
- * 扫描 110→70 行，每行统计白像素 x 坐标平均值 → center_line
- * 设 l_border = r_border = center_line（使 pho_center 的 (l+r)/2
- * 原样输出质心值，err 计算和 vis_draw 绿线自然纳入）
+ * 扫描 100→40 行，找每行左右边界，填 l_border/r_border
+ * 都不做质心——质心容易被噪声拉偏，且 l=r 不画红线
  *
  * return: 1 有有效数据, 0 全部无效 → 真正丢线
  * ================================================================ */
@@ -352,27 +389,40 @@ static int fallback_scan(void)
 
     int valid = 0;
 
-    for (int y = 110; y >= 70; y--)
+    for (int y = 100; y >= 40; y--)
     {
-        int sum = 0, cnt = 0;
+        int lx = -1, rx = -1;
+        int m = pho_center_x;
 
-        for (int x = 0; x < pho_w; x++)
+        if (!is_white(mt9v03x_image[y][m])) continue;
+
+        // 左边界：从中间向左扫，找赛道左边缘
+        for (int x = m; x >= 1; x--)
         {
-            if (is_white(mt9v03x_image[y][x]))
+            if (!is_white(mt9v03x_image[y][x - 1])  // 白→黑转跳
+                && is_white(mt9v03x_image[y][x])
+                && is_white(mt9v03x_image[y][x + 1]))
             {
-                sum += x;
-                cnt++;
+                lx = x + 1; break;
             }
         }
+        if (lx < 0) lx = pho_w_min;
 
-        if (cnt >= 3)
+        // 右边界：从中间向右扫
+        for (int x = m; x < pho_w - 2; x++)
         {
-            uint8_t c = (uint8_t)(sum / cnt);       // 白像素质心
-            center_line[y] = c;                      // 直接存中线
-            l_border[y]   = c;                       // pho_center: (c+c)/2=c
-            r_border[y]   = c;                       // 同时标记该行有效（≠0）
-            valid = 1;
+            if (is_white(mt9v03x_image[y][x])
+                && !is_white(mt9v03x_image[y][x + 1])
+                && is_white(mt9v03x_image[y][x - 1]))
+            {
+                rx = x - 1; break;
+            }
         }
+        if (rx < 0) rx = pho_w_max;
+
+        l_border[y] = (uint8)lx;
+        r_border[y] = (uint8)rx;
+        valid = 1;
     }
 
     return valid;
@@ -380,34 +430,101 @@ static int fallback_scan(void)
 
 
 /* ================================================================
- * 断点补偿：种子生长中断在 110~70 行范围内时，白像素质心法补全
- *
- * 已有数据的行（l≠0 且 r≠0）保持不变
- * 缺失行用质心法填 center_line，l_border = r_border = 质心
+ * 赛道半宽：直道标定，线性插值查表
+ * ================================================================ */
+static const int hw_y[9] = {100, 90, 80, 70, 60, 50, 40, 30, 20};
+static const int hw_v[9] = { 92, 89, 84, 74, 63, 52, 42, 31, 20};
+
+static int get_half_width(int y)
+{
+    if (y >= hw_y[0]) return hw_v[0];          // >=100
+    if (y <= hw_y[8]) return hw_v[8];          // <=20
+    for (int i = 0; i < 8; i++)
+    {
+        if (y <= hw_y[i] && y >= hw_y[i+1])
+        {
+            int dy = hw_y[i] - hw_y[i+1];
+            int dv = hw_v[i] - hw_v[i+1];
+            return hw_v[i] - dv * (hw_y[i] - y) / dy;
+        }
+    }
+    return 50;  // 不会到这里
+}
+
+/* ================================================================
+ * 断点补偿：种子生长中断在 79~20 行范围内时
+ *   l有r缺 → 右→左扫白→黑找右边界
+ *   r有l缺 → 左→右扫黑→白找左边界
+ *   都缺 → 质心兜底
  * ================================================================ */
 static void fill_gaps(void)
 {
-    for (int y = 110; y >= 70; y--)
+    for (int y = 79; y >= 40; y--)
     {
-        if (l_border[y] != 0 && r_border[y] != 0) continue;  // 已有数据
+        if (l_border[y] != 0 && r_border[y] != 0) continue;
 
-        int sum = 0, cnt = 0;
-
-        for (int x = 0; x < pho_w; x++)
+        // 只有左边界 → 找右边界
+        if (l_border[y] != 0 && r_border[y] == 0)
         {
-            if (is_white(mt9v03x_image[y][x]))
+            for (int x = pho_center_x; x < pho_w - 2; x++)  // 从中向右扫
             {
-                sum += x;
-                cnt++;
+                if (is_white(mt9v03x_image[y][x])
+                    && !is_white(mt9v03x_image[y][x + 1])
+                    && is_white(mt9v03x_image[y][x - 1]))
+                {
+                    r_border[y] = (uint8)(x - 1); break;
+                }
             }
+            // 扫不到且边缘全白 → 边界在画外，半宽推算
+            if (r_border[y] == 0 && is_white(mt9v03x_image[y][pho_w_max]))
+            {
+                int rv = (int)l_border[y] + 2 * get_half_width(y);
+                r_border[y] = (uint8)(rv > pho_w_max ? pho_w_max : rv);
+            }
+            else if (r_border[y] == 0)
+                r_border[y] = pho_w_max;  // 找不到也不是全白 → 兜底
         }
 
-        if (cnt >= 3)
+        // 只有右边界 → 找左边界
+        if (r_border[y] != 0 && l_border[y] == 0)
         {
-            uint8_t c = (uint8_t)(sum / cnt);
-            center_line[y] = c;
-            l_border[y]   = c;
-            r_border[y]   = c;
+            for (int x = pho_center_x; x >= 1; x--)  // 从中向左扫
+            {
+                if (!is_white(mt9v03x_image[y][x - 1])
+                    && is_white(mt9v03x_image[y][x])
+                    && is_white(mt9v03x_image[y][x + 1]))
+                {
+                    l_border[y] = (uint8)(x + 1); break;
+                }
+            }
+            // 扫不到且边缘全白 → 边界在画外，半宽推算
+            if (l_border[y] == 0 && is_white(mt9v03x_image[y][0]))
+            {
+                int lv = (int)r_border[y] - 2 * get_half_width(y);
+                l_border[y] = (uint8)(lv < pho_w_min ? pho_w_min : lv);
+            }
+            else if (l_border[y] == 0)
+                l_border[y] = pho_w_min;  // 找不到也不是全白 → 兜底
+        }
+
+        // 两边都缺 → 质心兜底
+        if (l_border[y] == 0 && r_border[y] == 0)
+        {
+            int sum = 0, cnt = 0;
+            for (int x = 0; x < pho_w; x++)
+            {
+                if (is_white(mt9v03x_image[y][x]))
+                {
+                    sum += x;
+                    cnt++;
+                }
+            }
+            if (cnt >= 3)
+            {
+                uint8_t c = (uint8_t)(sum / cnt);
+                l_border[y] = c;
+                r_border[y] = c;
+            }
         }
     }
 }
@@ -416,33 +533,76 @@ static void fill_gaps(void)
 /* ================================================================
  * 搜线主函数
  *
- * 正常路径：find_seeds → seed_grow ×2 → pho_border ×2 → fill_gaps_110_70 → pho_center
- * 兜底路径：find_seeds 失败 → fallback_scan → pho_center
+ * 正常：find_seeds(90→40) → seed_grow → pho_border → fill_gaps(79→40) → bottom_scan(118→79) → pho_center(100→40)
+ * 兜底：两边都没种子 → fallback_scan(100→40) → bottom_scan(118→79) → pho_center
  *
  * return: 0 有数据, 1 完全丢线
  * ================================================================ */
+/* ================================================================
+ * 手遮摄像头检测：底部5行+顶部5行全黑 → 认为摄像头被遮住
+ * ================================================================ */
+static int camera_is_covered(void)
+{
+    // 底部 118→110（9行）
+    for (int y = 118; y >= 110; y--)
+        for (int x = 0; x < pho_w; x++)
+            if (is_white(mt9v03x_image[y][x])) return 0;
+    // 顶部 10→0（11行）
+    for (int y = 10; y >= 0; y--)
+        for (int x = 0; x < pho_w; x++)
+            if (is_white(mt9v03x_image[y][x])) return 0;
+    return 1;  // 全是黑的 → 遮住了
+}
+
 int vis_deal(void)
 {
-    int lx, rx, seed_y;
+    int llx, lly, rrx, rry;
+    data_l = 0; data_r = 0;
 
-    if (find_seeds(&lx, &rx, &seed_y))
+    /* 手遮摄像头 → 立即停车 */
+    if (camera_is_covered())
     {
-        /* 正常路径：八邻域种子生长 */
-        data_l = 0; data_r = 0;
-        seed_grow_left(lx, seed_y);
-        seed_grow_right(rx, seed_y);
+        motor_stop();
+        car_run = false;
+        return 1;
+    }
+
+    /* 清零边界数组（pho_border只清自己那边，这边统一清） */
+    for (int y = 0; y < pho_h; y++)
+    {
+        l_border[y] = 0;
+        r_border[y] = 0;
+    }
+
+    /* 第一步：90→40独立找左右种子 */
+    find_seeds(&llx, &lly, &rrx, &rry);
+
+    /* 第二步：各自独立生长（一边找到就长一边） */
+    if (llx >= 0)
+    {
+        seed_grow_left(llx, lly);
         pho_border(points_l, data_l, l_border, +1);
+    }
+    if (rrx >= 0)
+    {
+        seed_grow_right(rrx, rry);
         pho_border(points_r, data_r, r_border, -1);
-        fill_gaps();  // 补全种子生长断掉的行
+    }
+
+    /* 第三步：补全边界（缺哪边找哪边）或兜底 */
+    if (llx >= 0 || rrx >= 0)
+    {
+        fill_gaps();  // 有一边就找另一边，都缺才质心
     }
     else if (!fallback_scan())
     {
-        /* 兜底也失败 → 真正丢线 */
-        return 1;
+        return 1;  // 完全丢线
     }
-    /* else: 兜底成功 → l_border/r_border 已填充，继续算 err */
 
-    /* 两条路径汇聚：计算中线和偏差 */
+    /* 第四步：底部40行逐行扫描（最后执行，覆写118→79，不被fallback清掉） */
+    bottom_scan();
+
+    /* 汇聚：计算中线和偏差 */
     pho_center();
     return 0;
 }
@@ -469,9 +629,10 @@ void vis_draw(void)
         uint8 c = center_line[y];
         int dy = y + BIN_PARAM_H;          // 图像放到参数区域下方
 
-        if (l == 0 || r == 0) continue;    // 无数据行不绘制
+        if (c == 0) continue;              // center_line=0 → 完全无数据，跳过
 
-        if (l != r)  // 八邻域数据：画左右边界红线
+        // 红线：左右边界都有且不同才画
+        if (l != 0 && r != 0 && l != r)
         {
             ips200_draw_point(l, dy, RGB565_RED);
             if (l < pho_w_max)  ips200_draw_point(l + 1, dy, RGB565_RED);
@@ -480,7 +641,7 @@ void vis_draw(void)
             if (r > pho_w_min)  ips200_draw_point(r - 1, dy, RGB565_RED);
         }
 
-        // 中线绿线（八邻域和质心法都画）
+        // 绿线：有center_line数据就画
         ips200_draw_point(c, dy, RGB565_GREEN);
         if (c < pho_w_max)  ips200_draw_point(c + 1, dy, RGB565_GREEN);
     }

@@ -38,46 +38,42 @@ void menu_init(void)
 
     //构建具体菜单
 
-    // =====folder1测试文件夹=====
-    {
-    Menu_Item *folder1 = dynamicCreate_Menu_Folder(&head, "folder1");
-    Menu_Item *num1=dynamicCreate_Menu_Number(folder1, "aaa", &test, int32_Box);
-    Menu_Set_Limit(num1, 0, 100,1.0f);
-
-    Menu_Item *num2 = dynamicCreate_Menu_Number(folder1, "bbb", &test1, float_Box);
-    Menu_Set_Limit(num2, -5.0f, 5.0f,1.0f);
-
-    dynamicCreate_Menu_Number(folder1, "ccc", &test2, bool_Box);
-    }
-
     // =====PID文件夹=====
     {
         Menu_Item *pid = dynamicCreate_Menu_Folder(&head, "PID");
         Menu_Item *v;
 
         // 舵机
-        v = dynamicCreate_Menu_Number(pid, "servo_kp",  &servo_kp,  float_Box);
-        Menu_Set_Limit(v, 0, 5,0.1f);
+        v = dynamicCreate_Menu_Number(pid, "servokp1",  &servo_kp1, float_Box);
+        Menu_Set_Limit(v, 0, 5,0.05f);
+        v = dynamicCreate_Menu_Number(pid, "servokp2",  &servo_kp2, float_Box);
+        Menu_Set_Limit(v, 0, 0.1f,0.001f);
         v = dynamicCreate_Menu_Number(pid, "servo_kd",  &servo_kd,  float_Box);
         Menu_Set_Limit(v, 0, 2,0.01f);
-        v = dynamicCreate_Menu_Number(pid, "center",    &servo_center, float_Box);
-        Menu_Set_Limit(v, 75, 105,0.5);
+        v = dynamicCreate_Menu_Number(pid, "gyro_kd",   &gyro_kd, float_Box);
+        Menu_Set_Limit(v, -5.0f, 5.0f, 0.1f);
+        v = dynamicCreate_Menu_Number(pid, "max_add", &servo_max_add, float_Box);
+        Menu_Set_Limit(v, 0.5f, 20,0.5f);
         v = dynamicCreate_Menu_Number(pid, "max_angle", &servo_max_cha, float_Box);
-        Menu_Set_Limit(v, 1, 45,0.5);
+        Menu_Set_Limit(v, 1, 45,1.0f);
+        v = dynamicCreate_Menu_Number(pid, "center",    &servo_center, float_Box);
+        Menu_Set_Limit(v, 75, 105,0.1f);
         v = dynamicCreate_Menu_Number(pid, "deadband",  &servo_dead, float_Box);
-        Menu_Set_Limit(v, 0, 10,0.5);
-        v = dynamicCreate_Menu_Number(pid, "slew_rate", &servo_max_add, float_Box);
-        Menu_Set_Limit(v, 0.5f, 5,0.5);
+        Menu_Set_Limit(v, 0, 10,0.5f);
+
 
         // 电机
-        v = dynamicCreate_Menu_Number(pid, "base_duty", &motor_base_duty, int32_Box);
-        Menu_Set_Limit(v, 0, 50,1);
         v = dynamicCreate_Menu_Number(pid, "max_duty",  &motor_max_duty, int32_Box);
-        Menu_Set_Limit(v, 0, 50,1);
+        Menu_Set_Limit(v, 0, 50,1.0f);
+        v = dynamicCreate_Menu_Number(pid, "base_duty", &motor_base_duty, int32_Box);
+        Menu_Set_Limit(v, 0, 50,1.0f);
+        v = dynamicCreate_Menu_Number(pid, "bend_cut",  &motor_bend_cut, float_Box);
+        Menu_Set_Limit(v, 0, 1.0f,0.001f);
         v = dynamicCreate_Menu_Number(pid, "motor_kp",  &motor_kp, float_Box);
-        Menu_Set_Limit(v, 0, 10,0.1);
+        Menu_Set_Limit(v, 0, 10,0.05f);
         v = dynamicCreate_Menu_Number(pid, "motor_kd",  &motor_kd, float_Box);
-        Menu_Set_Limit(v, 0, 2,0.01);
+        Menu_Set_Limit(v, 0, 2,0.01f);
+        dynamicCreate_Menu_Number(pid, "car_run",   &car_run,  bool_Box);
     }
 
 
@@ -90,6 +86,18 @@ void menu_init(void)
         Menu_Set_Limit(v, 0, 255,1.0);
         v = dynamicCreate_Menu_Number(vis, "vis_high", &vis_high, uint8_Box);
         Menu_Set_Limit(v, 0, 255,1.0);
+    }
+
+    // =====folder测试文件夹=====
+    {
+    Menu_Item *folder = dynamicCreate_Menu_Folder(&head, "folder");
+    Menu_Item *num1=dynamicCreate_Menu_Number(folder, "aaa", &test, int32_Box);
+    Menu_Set_Limit(num1, 0, 100,1.0f);
+
+    Menu_Item *num2 = dynamicCreate_Menu_Number(folder, "bbb", &test1, float_Box);
+    Menu_Set_Limit(num2, -5.0f, 5.0f,1.0f);
+
+    dynamicCreate_Menu_Number(folder, "ccc", &test2, bool_Box);
     }
 
     key = head.first_son;
@@ -128,7 +136,7 @@ static void show_number(void)
             ips200_show_int(90, i*16, *(int32_t *)s->data, 5);
             break;
         case float_Box:
-            ips200_show_float(90, i*16, *(float *)s->data, 3, 2);
+            ips200_show_float(90, i*16, *(float *)s->data, 3, 3);
             break;
         case bool_Box:
             ips200_show_char(90, i*16, *(bool *)s->data ? 'Y' : 'N');

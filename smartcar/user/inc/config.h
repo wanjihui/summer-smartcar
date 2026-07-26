@@ -26,17 +26,20 @@
 #define DEFAULT_VIS_HIGH       190
 
 // --- 舵机 ---
-#define DEFAULT_SERVO_KP       1.10f  // P 系数
-#define DEFAULT_SERVO_KD       0.10f  // D 系数
+#define DEFAULT_SERVO_KP1      0.40f  // 线性P（小偏差）
+#define DEFAULT_SERVO_KP2      0.0f // 平方P（大偏差）
+#define DEFAULT_SERVO_KD       0.0f  // D 系数
+#define DEFAULT_GYRO_KD        0.0f   // 陀螺仪直道阻尼（0=关闭）
 #define DEFAULT_SERVO_CENTER   95.2f // 中位角度
 #define DEFAULT_SERVO_MAX_CHA  30.0f // 最大偏角
 #define DEFAULT_SERVO_DEAD     2.0f  // 死区（像素）
-#define DEFAULT_SERVO_MAX_ADD  2.0f  // 步进限制（度/帧）
+#define DEFAULT_SERVO_MAX_ADD  4.0f  // 步进限制（度/帧）
 #define DEFAULT_SERVO_DIR      1     // 0=正常 1=翻转
 
 // --- 电机 ---
-#define DEFAULT_MOTOR_BASE     13    // 基础占空比 %
+#define DEFAULT_MOTOR_BASE     25    // 基础占空比 %
 #define DEFAULT_MOTOR_MAX      30    // 最大占空比 %
+#define DEFAULT_MOTOR_BEND_CUT 0.0f // 弯道减速系数
 #define DEFAULT_MOTOR_KP       0.0f  // 差速 P 系数
 #define DEFAULT_MOTOR_KD       0.0f  // 差速 D 系数
 #endif

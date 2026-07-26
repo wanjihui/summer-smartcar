@@ -1,7 +1,8 @@
 #include "config.h"
 
 //PID参数定义
-float servo_kp       = DEFAULT_SERVO_KP;
+float servo_kp1      = DEFAULT_SERVO_KP1;  // 线性P：err小偏差
+float servo_kp2      = DEFAULT_SERVO_KP2;  // 平方P：err大偏差
 float servo_kd       = DEFAULT_SERVO_KD;
 float servo_center   = DEFAULT_SERVO_CENTER;
 float servo_max_cha  = DEFAULT_SERVO_MAX_CHA;
@@ -10,8 +11,11 @@ float servo_max_add  = DEFAULT_SERVO_MAX_ADD;
 int   servo_dir      = DEFAULT_SERVO_DIR;
 int   motor_base_duty= DEFAULT_MOTOR_BASE;
 int   motor_max_duty = DEFAULT_MOTOR_MAX;
+float gyro_kd        = DEFAULT_GYRO_KD;
+float motor_bend_cut  = DEFAULT_MOTOR_BEND_CUT;
 float motor_kp       = DEFAULT_MOTOR_KP;
 float motor_kd       = DEFAULT_MOTOR_KD;
+bool  car_run        = false;    // 小车运行开关，菜单可切换
 
 static float servo_last_err  = 0;       // 上一帧偏差，舵机D项用
 static float servo_last_angle = 0;      // 上一帧舵机角度，步进限制用
@@ -34,16 +38,25 @@ static void servo_update(void)
     //servo_dir=1 翻转舵机方向
     if (servo_dir)              e = -e;
 
-    // ----位置式PD计算----
-    // 全局变量
-    // kp×当前偏差=回正速度  kd×偏差变化=阻尼
-    float pd = servo_kp * e + servo_kd * (e - servo_last_err);
+    // ----位置式PD计算（双KP：线性+平方）----
+    // kp1×err 直道小偏差柔和  kp2×err×|err| 弯道大偏差爆发
+    // kd×偏差变化=阻尼
+    float e_abs = (e > 0) ? e : -e;
+    float pd = servo_kp1 * e + servo_kp2 * e * e_abs
+             + servo_kd * (e - servo_last_err);
+
+    // 直道陀螺仪阻尼：|err|<10时启用，陀螺仪直接感知车身旋转，比摄像头D项快20ms
+    float e_abs_raw = (err > 0) ? err : -err;
+    if (e_abs_raw < 10.0f)
+        pd += gyro_kd * (float)mpu6050_get_gyro_z();
+
     servo_last_err = e;   //存储当前err
 
     // ----像素err转换为角度----
-    //角度差最大15° / 像素误差最大94px ≈ 0.16°/px
-    // err 每偏离 1 像素，舵机偏离 0.16°
-    float angle_rate = servo_max_cha / (float)pho_center_x;
+    // err物理上限≈50px（图像宽188，中心94，赛道最多偏离±50px）
+    // max_cha/50: err=50px → 舵机打满，充分利用舵机量程
+    // 旧公式 /94 导致err需94px才打满→舵机只用50%量程→弯道永远转不够
+    float angle_rate = servo_max_cha / 50.0f;
     float angle_cha = pd * angle_rate;
 
     if (angle_cha >  servo_max_cha) angle_cha =  servo_max_cha;
@@ -66,21 +79,38 @@ static void motor_update(void)
 {
     // ----PD算出差速----
     float e=err;                                     // 偏差
+    if (e > -servo_dead && e < servo_dead) e = 0;    // 死区（与舵机一致）
+    if (servo_dir) e = -e;                           // 方向翻转（与舵机一致）
     float cha = e - motor_last_err;                  // 偏差变化
 
     float Cha = motor_kp * e + motor_kd * cha;
     motor_last_err = e;
 
-    // ----差速分配----
-    // err>0偏右 右转 左快右慢
-    int left  = motor_base_duty + (int)Cha;
-    int right = motor_base_duty - (int)Cha;
+    // ----弯道减速 + 差速分配----
+    // err>0偏右→右转: left=base+diff(快) right=base-diff(慢)
+    // err<0偏左→左转: left=base-|diff|(慢) right=base+|diff|(快)
+    float e_abs = (e > 0) ? e : -e;
+    int bend_cut = (int)(e_abs * motor_bend_cut); // 弯越急降速越多
+    int base = motor_base_duty - bend_cut;         // 弯道基础速度降低
+    if (base < 5) base = 5;                         // 死区12已是最低可用duty，base保底降到5
 
-    // ----限幅----
-    if (left  > motor_max_duty) left  = motor_max_duty;
-    if (left  < 0)               left  = 0;
-    if (right > motor_max_duty) right = motor_max_duty;
-    if (right < 0)               right = 0;
+    // 差速量：motor_kp低时(0.1~0.2)正常差速，高时急弯内轮可反转(pivot)
+    int diff = (int)Cha;
+
+    int left  = base + diff;
+    int right = base - diff;
+
+    // ----死区+限幅----
+    // 电机±1~11%扭矩不足，直接跳到±12；0保持0（停车）
+    if (left  > 0 && left  < 12)  left  = 12;
+    if (left  < 0 && left  > -12) left  = -12;
+    if (right > 0 && right < 12)  right = 12;
+    if (right < 0 && right > -12) right = -12;
+
+    if (left  > motor_max_duty)  left  = motor_max_duty;
+    if (left  < -motor_max_duty)  left  = -motor_max_duty;
+    if (right > motor_max_duty)  right = motor_max_duty;
+    if (right < -motor_max_duty)  right = -motor_max_duty;
 
     motor_set_both((int8_t)left, (int8_t)right); 
 }
