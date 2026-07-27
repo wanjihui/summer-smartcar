@@ -12,6 +12,7 @@ int   servo_dir      = DEFAULT_SERVO_DIR;
 int   motor_base_duty= DEFAULT_MOTOR_BASE;
 int   motor_max_duty = DEFAULT_MOTOR_MAX;
 float gyro_kd        = DEFAULT_GYRO_KD;
+float gyro_threshold  = DEFAULT_GYRO_THRESHOLD;
 float motor_bend_cut  = DEFAULT_MOTOR_BEND_CUT;
 float motor_kp       = DEFAULT_MOTOR_KP;
 float motor_kd       = DEFAULT_MOTOR_KD;
@@ -45,9 +46,9 @@ static void servo_update(void)
     float pd = servo_kp1 * e + servo_kp2 * e * e_abs
              + servo_kd * (e - servo_last_err);
 
-    // 直道陀螺仪阻尼：|err|<10时启用，陀螺仪直接感知车身旋转，比摄像头D项快20ms
+    // 直道陀螺仪阻尼：|err|<阈值时启用，陀螺仪直接感知车身旋转，比摄像头D项快20ms
     float e_abs_raw = (err > 0) ? err : -err;
-    if (e_abs_raw < 10.0f)
+    if (e_abs_raw < gyro_threshold)
         pd += gyro_kd * (float)mpu6050_get_gyro_z();
 
     servo_last_err = e;   //存储当前err

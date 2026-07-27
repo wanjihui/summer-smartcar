@@ -51,7 +51,13 @@ void menu_init(void)
         v = dynamicCreate_Menu_Number(pid, "servo_kd",  &servo_kd,  float_Box);
         Menu_Set_Limit(v, 0, 2,0.01f);
         v = dynamicCreate_Menu_Number(pid, "gyro_kd",   &gyro_kd, float_Box);
-        Menu_Set_Limit(v, -5.0f, 5.0f, 0.1f);
+        Menu_Set_Limit(v, -0.05f, 0.05f, 0.0005f);  // gyro_kd（ADC原始值大）
+        v = dynamicCreate_Menu_Number(pid, "gyro_thr",  &gyro_threshold, float_Box);
+        Menu_Set_Limit(v, 2.0f, 30.0f, 1.0f);  // 陀螺仪触发阈值
+        v = dynamicCreate_Menu_Number(pid, "lookhead", &lookahead, uint8_Box);
+        Menu_Set_Limit(v, 5, 60, 5.0f);
+        v = dynamicCreate_Menu_Number(pid, "half_w", &half_width, uint8_Box);
+        Menu_Set_Limit(v, 30, 150, 1.0f);
         v = dynamicCreate_Menu_Number(pid, "max_add", &servo_max_add, float_Box);
         Menu_Set_Limit(v, 0.5f, 20,0.5f);
         v = dynamicCreate_Menu_Number(pid, "max_angle", &servo_max_cha, float_Box);
@@ -75,8 +81,7 @@ void menu_init(void)
         Menu_Set_Limit(v, 0, 2,0.01f);
         dynamicCreate_Menu_Number(pid, "car_run",   &car_run,  bool_Box);
     }
-
-
+    
     // =====Threshold阈值文件夹=====
     {
         Menu_Item *vis = dynamicCreate_Menu_Folder(&head, "Threshold");
@@ -136,7 +141,7 @@ static void show_number(void)
             ips200_show_int(90, i*16, *(int32_t *)s->data, 5);
             break;
         case float_Box:
-            ips200_show_float(90, i*16, *(float *)s->data, 3, 3);
+            ips200_show_float(90, i*16, *(float *)s->data, 6, 4);
             break;
         case bool_Box:
             ips200_show_char(90, i*16, *(bool *)s->data ? 'Y' : 'N');

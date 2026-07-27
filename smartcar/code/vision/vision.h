@@ -10,7 +10,11 @@
 #define pho_center_x      (pho_w / 2)      // 94，图像水平中心
 #define pho_w_min    0                     // 最左列
 #define pho_w_max    (pho_w - 1)           // 187，最右列
+#define BORDER_INVALID 255                 // 边界无效标记（不与0~187合法列号冲突）
 #define BIN_PARAM_H  48                    // 阈值参数区高度(3行)
+
+extern uint8 lookahead;                    // 预瞄距离（行），菜单可调，默认30
+extern uint8 half_width;                   // 赛道半宽（px），菜单可调，默认90
 
 typedef uint8 border_line[pho_h];        // 重定义一个边界线数组类型，存储每行的边界点列号
 
