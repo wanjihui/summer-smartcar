@@ -384,211 +384,127 @@ static void border_smooth(border_line border)
 }
 
 /* ================================================================
- * 二次曲线拟合（最小二乘）
+ * 计算中线偏差 err — 预瞄窗口采样取均值
  *
- *   模型：x = a·y² + b·y + c
- *   输入：border（边界数组），y_start..y_end 采样范围，step 采样间隔
- *   输出：fit 结构体，valid=1 表示拟合成功
- *
- *   采样策略：
- *     - 至少需要 FIT_MIN_PTS 个有效点才拟合
- *     - 自动跳过 border[y]==BORDER_INVALID（无数据）的行
- *     - 等权最小二乘，所有采样点同等对待
- * ================================================================ */
-#define FIT_MIN_PTS  10
-
-typedef struct {
-    float a, b, c;      // 二次曲线系数
-    int   valid;        // 1=拟合成功
-    int   n_points;     // 有效采样点数
-} quad_fit_t;
-
-static void fit_quadratic(border_line border, int y_start, int y_end,
-                          int step, quad_fit_t *fit)
-{
-    fit->valid = 0;
-    fit->n_points = 0;
-
-    float sy = 0, sy2 = 0, sy3 = 0, sy4 = 0;
-    float sx = 0, sxy = 0, sxy2 = 0;
-    int n = 0;
-
-    for (int y = y_start; y >= y_end; y -= step)
-    {
-        // 无数据行跳过
-        if (border[y] == BORDER_INVALID) continue;
-
-        float yy = (float)y;
-        float xx = (float)border[y];
-        float y2 = yy * yy;
-
-        sy   += yy;
-        sy2  += y2;
-        sy3  += y2 * yy;
-        sy4  += y2 * y2;
-        sx   += xx;
-        sxy  += xx * yy;
-        sxy2 += xx * y2;
-        n++;
-    }
-
-    fit->n_points = n;
-    if (n < FIT_MIN_PTS) return;
-
-    // 克莱姆法则解 3×3 正规方程
-    float det = n*(sy2*sy4 - sy3*sy3)
-              - sy*(sy*sy4 - sy3*sy2)
-              + sy2*(sy*sy3 - sy2*sy2);
-
-    if (det > -1e-9f && det < 1e-9f) return;  // 奇异，拟合失败
-
-    float inv_det = 1.0f / det;
-
-    fit->c = (sx *(sy2*sy4 - sy3*sy3)
-            - sy *(sxy*sy4 - sxy2*sy3)
-            + sy2*(sxy*sy3 - sxy2*sy2)) * inv_det;
-
-    fit->b = (n  *(sxy*sy4 - sxy2*sy3)
-            - sx *(sy*sy4 - sy3*sy2)
-            + sy2*(sy*sxy2 - sxy*sy2)) * inv_det;
-
-    fit->a = (n  *(sy2*sxy2 - sy3*sxy)
-            - sy *(sy*sxy2 - sy2*sxy)
-            + sx *(sy*sy3 - sy2*sy2)) * inv_det;
-
-    fit->valid = 1;
-}
-
-/* ================================================================
- * 从二次曲线计算指定 y 处的 x 值
- * ================================================================ */
-static float quad_eval(const quad_fit_t *fit, float y)
-{
-    return fit->a * y * y + fit->b * y + fit->c;
-}
-
-/* ================================================================
- * 计算中线曲线和赛道偏差 err
- *
- *   1. 拟合左边界 l_border → fit_L
- *   2. 拟合右边界 r_border → fit_R
- *   3. 双边都有效：center(y) = (fit_L(y) + fit_R(y)) / 2
- *   4. 只有单边：center(y) = fit_L(y) + hw  或  fit_R(y) - hw
- *   5. 预瞄点读偏差 → err
- *   6. 曲率从 fit_L/fit_R 导出
- *
- *   center_line[] 供 vis_draw 显示（拟合曲线值，连续光滑）
+ *   直接在 lookahead 前后 10 行逐行取 (l+r)/2 或 border±hw，
+ *   不拟合曲线。多行均值 = 天然低通滤波。
  * ================================================================ */
 static void pho_center(void)
 {
-    quad_fit_t fit_L, fit_R;
-    int y_start = 100, y_end = 40, step = 3;
-
-    // ---- 平滑 + 分别拟合左右边界 ----
+    // ---- 平滑边界 ----
     border_smooth(l_border);
     border_smooth(r_border);
-    fit_quadratic(l_border, y_start, y_end, step, &fit_L);
-    fit_quadratic(r_border, y_start, y_end, step, &fit_R);
 
-    // ---- 生成 center_line[] + 计算 err（同逻辑） ----
     int hw = get_half_width(0);
+    int y_look = 100 - (int)lookahead;
 
-    // 统计左右有效点数（直接数 border 数组，不依赖 fit 和 seed）
-    int nL = 0, nR = 0;
-    for (int y = y_start; y >= y_end; y -= step)
+    // ---- 生成 center_line[]（显示用，逐行判断） ----
+    for (int y = pho_h - 1; y >= 0; y--)
     {
-        if (l_border[y] != BORDER_INVALID) nL++;
-        if (r_border[y] != BORDER_INVALID) nR++;
-    }
-    int both = (nL >= FIT_MIN_PTS && nR >= FIT_MIN_PTS
-             && nL > nR / 3 && nR > nL / 3);
+        int l = (int)l_border[y];
+        int r = (int)r_border[y];
+        int c;
 
-    int y_look = y_start - (int)lookahead;
-    float x_pred;
-
-    if (both)
-    {
-        // 双边扫到：拟合曲线取中点
-        for (int y = pho_h - 1; y >= 0; y--)
+        if (l != BORDER_INVALID && r != BORDER_INVALID)
+            c = (l + r) / 2;
+        else if (l != BORDER_INVALID)
+            c = l + hw;
+        else if (r != BORDER_INVALID)
+            c = r - hw;
+        else
         {
-            if (l_border[y] == BORDER_INVALID && r_border[y] == BORDER_INVALID)
-            {
-                center_line[y] = BORDER_INVALID;
-                continue;
-            }
-            float cl = quad_eval(&fit_L, (float)y);
-            float cr = quad_eval(&fit_R, (float)y);
-            int c = (int)((cl + cr) / 2.0f + 0.5f);
-            if (c < pho_w_min) c = pho_w_min;
-            if (c > pho_w_max) c = pho_w_max;
-            center_line[y] = (uint8)c;
-        }
-        x_pred = (quad_eval(&fit_L, (float)y_look) + quad_eval(&fit_R, (float)y_look)) / 2.0f;
-    }
-    else if (nL >= FIT_MIN_PTS)
-    {
-        // 只有左边界：原始边界偏移
-        for (int y = pho_h - 1; y >= 0; y--)
-        {
-            if (l_border[y] == BORDER_INVALID)
-            {
-                center_line[y] = BORDER_INVALID;
-                continue;
-            }
-            int c = (int)l_border[y] + hw;
-            if (c < pho_w_min) c = pho_w_min;
-            if (c > pho_w_max) c = pho_w_max;
-            center_line[y] = (uint8)c;
-        }
-        int sum = 0, cnt = 0;
-        for (int y = y_look + 10; y >= y_look - 10; y--)
-        {
-            if (y < 0 || y >= pho_h) continue;
-            if (l_border[y] == BORDER_INVALID) continue;
-            sum += (int)l_border[y] + hw;
-            cnt++;
-        }
-        x_pred = (cnt > 0) ? (float)sum / (float)cnt : 0.0f;
-    }
-    else if (nR >= FIT_MIN_PTS)
-    {
-        // 只有右边界：原始边界偏移
-        for (int y = pho_h - 1; y >= 0; y--)
-        {
-            if (r_border[y] == BORDER_INVALID)
-            {
-                center_line[y] = BORDER_INVALID;
-                continue;
-            }
-            int c = (int)r_border[y] - hw;
-            if (c < pho_w_min) c = pho_w_min;
-            if (c > pho_w_max) c = pho_w_max;
-            center_line[y] = (uint8)c;
-        }
-        int sum = 0, cnt = 0;
-        for (int y = y_look + 10; y >= y_look - 10; y--)
-        {
-            if (y < 0 || y >= pho_h) continue;
-            if (r_border[y] == BORDER_INVALID) continue;
-            sum += (int)r_border[y] - hw;
-            cnt++;
-        }
-        x_pred = (cnt > 0) ? (float)sum / (float)cnt : 0.0f;
-    }
-    else
-    {
-        for (int y = 0; y < pho_h; y++)
             center_line[y] = BORDER_INVALID;
-        return;
+            continue;
+        }
+
+        if (c < pho_w_min) c = pho_w_min;
+        if (c > pho_w_max) c = pho_w_max;
+        center_line[y] = (uint8)c;
     }
 
-    err = x_pred - (float)pho_center_x;
+    // ---- 计算 err：预瞄窗口均值 ----
+    int sum = 0, cnt = 0;
+    for (int y = y_look + 10; y >= y_look - 10; y -= 5)
+    {
+        if (y < 0 || y >= pho_h) continue;
+
+        int l = (int)l_border[y];
+        int r = (int)r_border[y];
+        int c;
+
+        if (l != BORDER_INVALID && r != BORDER_INVALID)
+            c = (l + r) / 2;
+        else if (l != BORDER_INVALID)
+            c = l + hw;
+        else if (r != BORDER_INVALID)
+            c = r - hw;
+        else
+            continue;
+
+        sum += (c - pho_center_x);
+        cnt++;
+    }
+
+    if (cnt > 0)
+        err = (float)sum / (float)cnt;
+    // else: err 保留上帧不变
 }
 
 /* ================================================================
- * (fallback_scan 已删除 — 丢线由 pho_center 拟合失败自动兜底)
+ * 回退扫描：种子追踪完全失败时的最后手段
+ *
+ * 不依赖种子 / 邻域生长，每行独立扫描原始灰度图：
+ *   左边界：从中心向左扫，找 白→黑 跳变
+ *   右边界：从中心向右扫，找 白→黑 跳变
+ *
+ * 有效行条件（同时满足）：
+ *   1. 左右边界都找到
+ *   2. 赛道宽度 > 4px
+ *
+ * 但直接扫原始灰度图，避免额外维护二值图缓存
  * ================================================================ */
+static void fallback_scan(void)
+{
+    int useful_rows = 0;
 
+    for (int y = 1; y < pho_h - 1; y++)
+    {
+        int lb = BORDER_INVALID, rb = BORDER_INVALID;
+
+        /* 左边界：从中向左扫，找 白->黑 跳变 */
+        for (int x = pho_center_x; x >= 1; x--)
+        {
+            if (is_white(mt9v03x_image[y][x]) && !is_white(mt9v03x_image[y][x - 1]))
+            {
+                lb = x;
+                break;
+            }
+        }
+
+        /* 右边界：从中向右扫，找 白->黑 跳变 */
+        for (int x = pho_center_x; x < pho_w - 1; x++)
+        {
+            if (is_white(mt9v03x_image[y][x]) && !is_white(mt9v03x_image[y][x + 1]))
+            {
+                rb = x;
+                break;
+            }
+        }
+
+        if (lb != BORDER_INVALID && rb != BORDER_INVALID && rb - lb > 4)
+        {
+            l_border[y] = (uint8)lb;
+            r_border[y] = (uint8)rb;
+            useful_rows++;
+        }
+    }
+
+    if (useful_rows > 0)
+    {
+        border_smooth(l_border);
+        border_smooth(r_border);
+    }
+}
 
 /* ================================================================
  * 赛道半宽（常量，菜单可调）
@@ -754,11 +670,13 @@ int vis_deal(void)
         if (llx >= 0 || rrx >= 0)
         {
             fill_gaps(gap_start);  // 有一边就找另一边，都缺才质心
+            bottom_scan(gap_start);
         }
-        // 两边都没种子 → 拟合自然失败，err 保留上帧值
-
-        /* 第四步：种子行以下空白区逐行扫描 */
-        bottom_scan(gap_start);
+        else
+        {
+            /* 两边都没种子 → 回退逐行扫描挽救本帧 */
+            fallback_scan();
+        }
     }
 
     /* 汇聚：计算中线和偏差 */
@@ -781,31 +699,27 @@ void vis_draw(void)
     ips200_show_gray_image(0, BIN_PARAM_H, (const uint8 *)mt9v03x_image,
                        pho_w, pho_h, pho_w, pho_h, 0);
 
-    // ---- 左边界：种子点逐行画（红色/黄色，2px宽） ----
-    for (int i = 0; i < data_l; i++)
+    // ---- 左右边界：从 border 数组逐行画（红色/黄色，2px宽） ----
+    for (int y = 115; y >= 40; y--)
     {
-        int x = (int)points_l[i][0] + 1;  // dir=+1 黑→白
-        int y = (int)points_l[i][1];
-        if (x < 0) x = 0; if (x > pho_w_max) x = pho_w_max;
         int dy = y + BIN_PARAM_H;
-        int col = (data_r > 0) ? RGB565_RED : RGB565_YELLOW;
-        ips200_draw_point((uint16)x, (uint16)dy, col);
-        if (x < pho_w_max) ips200_draw_point((uint16)(x + 1), (uint16)dy, col);
+        uint8 lb = l_border[y];
+        uint8 rb = r_border[y];
+        if (lb != BORDER_INVALID)
+        {
+            int col = (data_r > 0) ? RGB565_RED : RGB565_YELLOW;
+            ips200_draw_point(lb, (uint16)dy, col);
+            if (lb < pho_w_max) ips200_draw_point((uint16)(lb + 1), (uint16)dy, col);
+        }
+        if (rb != BORDER_INVALID)
+        {
+            int col = (data_l > 0) ? RGB565_RED : RGB565_YELLOW;
+            ips200_draw_point(rb, (uint16)dy, col);
+            if (rb < pho_w_max) ips200_draw_point((uint16)(rb + 1), (uint16)dy, col);
+        }
     }
 
-    // ---- 右边界：种子点逐行画（红色/黄色，2px宽） ----
-    for (int i = 0; i < data_r; i++)
-    {
-        int x = (int)points_r[i][0] - 1;  // dir=-1 黑→白
-        int y = (int)points_r[i][1];
-        if (x < 0) x = 0; if (x > pho_w_max) x = pho_w_max;
-        int dy = y + BIN_PARAM_H;
-        int col = (data_l > 0) ? RGB565_RED : RGB565_YELLOW;
-        ips200_draw_point((uint16)x, (uint16)dy, col);
-        if (x < pho_w_max) ips200_draw_point((uint16)(x + 1), (uint16)dy, col);
-    }
-
-    // ---- 中线：拟合曲线逐点（绿色） ----
+    // ---- 中线：逐行中心点（绿色） ----
     for (int y = 115; y >= 40; y--)
     {
         uint8 c = center_line[y];
