@@ -28,9 +28,9 @@
 #define DEFAULT_HALF_WIDTH     90    // 赛道半宽（px）
 
 // --- 舵机 ---
-#define DEFAULT_SERVO_KP1      1.05f  // 线性P（小偏差）
-#define DEFAULT_SERVO_KP2      0.0f // 平方P（大偏差）
-#define DEFAULT_SERVO_KD       0.8f  // D 系数
+#define DEFAULT_SERVO_KP1      1.05f  // 基础P
+#define DEFAULT_KP_GYRO        0.0005f // 陀螺仪增强P系数
+#define DEFAULT_SERVO_KD       0.08f   // D 系数
 #define DEFAULT_GYRO_KD        -0.004f   // 陀螺仪直道阻尼（0=关闭）
 #define DEFAULT_GYRO_THRESHOLD 10.0f  // 陀螺仪触发阈值（|err|小于此值启用）
 #define DEFAULT_SERVO_CENTER   95.2f // 中位角度97.5

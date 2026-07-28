@@ -1,7 +1,7 @@
 Dependencies for Project 'mm32f327x_g8p', Target 'mm32f327x_g8p_project': (DO NOT MODIFY !)
 CompilerVersion: 6240000::V6.24::ARMCLANG
-F (..\USER\src\main.c)(0x6A676638)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/main.o -MMD)
-I (..\user\inc\config.h)(0x6A675B4A)
+F (..\USER\src\main.c)(0x6A686449)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/main.o -MMD)
+I (..\user\inc\config.h)(0x6A686B3E)
 I (..\..\libraries\zf_common\zf_common_headfile.h)(0x63E32266)
 I (..\..\libraries\sdk\hal_device_registers.h)(0x6242D6A4)
 I (..\..\libraries\sdk\mm32f3277g.h)(0x6242D6A4)
@@ -87,7 +87,7 @@ I (..\code\servo\servo.h)(0x6A5878FC)
 I (..\code\menu\menu.h)(0x6A5F2DAC)
 I (..\code\menu\Mymenu.h)(0x6A56FD47)
 I (..\code\vision\vision.h)(0x6A675254)
-I (..\code\control\control.h)(0x6A66FDEC)
+I (..\code\control\control.h)(0x6A686B2A)
 F (..\user\src\isr.c)(0x6A5DC87A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/isr.o -MMD)
 I (..\user\inc\isr.h)(0x62FB49A6)
 I (..\..\libraries\zf_common\zf_common_headfile.h)(0x63E32266)
@@ -171,7 +171,7 @@ I (..\..\libraries\components\fatfs\source\ff.h)(0x6204BC72)
 I (..\code\encoder\encoder.h)(0x6A57684F)
 I (..\code\MPU6050\mpu6050.h)(0x6A57768B)
 F (..\user\inc\isr.h)(0x62FB49A6)()
-F (..\user\inc\config.h)(0x6A675B4A)()
+F (..\user\inc\config.h)(0x6A686B3E)()
 F (..\..\libraries\zf_common\zf_common_clock.c)(0x63E32211)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/zf_common_clock.o -MMD)
 I (..\..\libraries\zf_common\zf_common_function.h)(0x6430D49F)
 I (..\..\libraries\zf_common\zf_common_typedef.h)(0x636A06B2)
@@ -993,8 +993,8 @@ I (..\..\libraries\components\fatfs\source\ffconf.h)(0x62465F99)
 F (..\code\menu\menu.c)(0x6A5F307B)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/menu.o -MMD)
 I (..\code\menu\menu.h)(0x6A5F2DAC)
 F (..\code\menu\menu.h)(0x6A5F2DAC)()
-F (..\code\menu\Mymenu.c)(0x6A67497C)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/mymenu.o -MMD)
-I (..\user\inc\config.h)(0x6A675B4A)
+F (..\code\menu\Mymenu.c)(0x6A686B48)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/mymenu.o -MMD)
+I (..\user\inc\config.h)(0x6A686B3E)
 I (..\..\libraries\zf_common\zf_common_headfile.h)(0x63E32266)
 I (..\..\libraries\sdk\hal_device_registers.h)(0x6242D6A4)
 I (..\..\libraries\sdk\mm32f3277g.h)(0x6242D6A4)
@@ -1080,7 +1080,7 @@ I (..\code\servo\servo.h)(0x6A5878FC)
 I (..\code\menu\menu.h)(0x6A5F2DAC)
 I (..\code\menu\Mymenu.h)(0x6A56FD47)
 I (..\code\vision\vision.h)(0x6A675254)
-I (..\code\control\control.h)(0x6A66FDEC)
+I (..\code\control\control.h)(0x6A686B2A)
 F (..\code\menu\Mymenu.h)(0x6A56FD47)()
 F (..\code\motor\motor.c)(0x6A5F5D78)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/motor.o -MMD)
 I (..\code\motor\motor.h)(0x6A573983)
@@ -1406,8 +1406,8 @@ I (..\..\libraries\zf_device\zf_device_wireless_uart.h)(0x64521843)
 I (..\..\libraries\components\fatfs\source\ffconf.h)(0x62465F99)
 I (..\..\libraries\components\fatfs\source\ff.h)(0x6204BC72)
 F (..\code\servo\servo.h)(0x6A5878FC)()
-F (..\code\vision\vision.c)(0x6A684741)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/vision.o -MMD)
-I (..\user\inc\config.h)(0x6A675B4A)
+F (..\code\vision\vision.c)(0x6A685976)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/vision.o -MMD)
+I (..\user\inc\config.h)(0x6A686B3E)
 I (..\..\libraries\zf_common\zf_common_headfile.h)(0x63E32266)
 I (..\..\libraries\sdk\hal_device_registers.h)(0x6242D6A4)
 I (..\..\libraries\sdk\mm32f3277g.h)(0x6242D6A4)
@@ -1493,10 +1493,10 @@ I (..\code\servo\servo.h)(0x6A5878FC)
 I (..\code\menu\menu.h)(0x6A5F2DAC)
 I (..\code\menu\Mymenu.h)(0x6A56FD47)
 I (..\code\vision\vision.h)(0x6A675254)
-I (..\code\control\control.h)(0x6A66FDEC)
+I (..\code\control\control.h)(0x6A686B2A)
 F (..\code\vision\vision.h)(0x6A675254)()
-F (..\code\control\control.c)(0x6A67044C)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/control.o -MMD)
-I (..\user\inc\config.h)(0x6A675B4A)
+F (..\code\control\control.c)(0x6A686B1F)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/control.o -MMD)
+I (..\user\inc\config.h)(0x6A686B3E)
 I (..\..\libraries\zf_common\zf_common_headfile.h)(0x63E32266)
 I (..\..\libraries\sdk\hal_device_registers.h)(0x6242D6A4)
 I (..\..\libraries\sdk\mm32f3277g.h)(0x6242D6A4)
@@ -1582,5 +1582,5 @@ I (..\code\servo\servo.h)(0x6A5878FC)
 I (..\code\menu\menu.h)(0x6A5F2DAC)
 I (..\code\menu\Mymenu.h)(0x6A56FD47)
 I (..\code\vision\vision.h)(0x6A675254)
-I (..\code\control\control.h)(0x6A66FDEC)
-F (..\code\control\control.h)(0x6A66FDEC)()
+I (..\code\control\control.h)(0x6A686B2A)
+F (..\code\control\control.h)(0x6A686B2A)()
