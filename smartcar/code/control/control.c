@@ -2,7 +2,7 @@
 
 //PID参数定义
 float servo_kp1      = DEFAULT_SERVO_KP1;  // 基础P
-float kp_gyro        = DEFAULT_KP_GYRO;    // 陀螺仪增强P: |gyro_z|×err
+float servo_kp2      = DEFAULT_SERVO_KP2;  // 二次P: err×|err|
 float servo_kd       = DEFAULT_SERVO_KD;
 float servo_center   = DEFAULT_SERVO_CENTER;
 float servo_max_cha  = DEFAULT_SERVO_MAX_CHA;
@@ -39,12 +39,11 @@ static void servo_update(void)
     //servo_dir=1 翻转舵机方向
     if (servo_dir)              e = -e;
 
-    // ----位置式PD（陀螺仪增强P）----
-    // P = kp1 + kp_gyro×|gyro_z|  直道小P 弯道自动增大
+    // ----位置式PD ----
+    // P = kp1 + kp2×|err|  弯道err大时自动增强
     // kd×偏差变化=阻尼
-    float gyro_z = (float)mpu6050_get_gyro_z();
-    float gyro_abs = (gyro_z > 0) ? gyro_z : -gyro_z;
-    float pd = e * (servo_kp1 + kp_gyro * gyro_abs)
+    float e_abs = (e > 0) ? e : -e;
+    float pd = servo_kp1 * e + servo_kp2 * e * e_abs
              + servo_kd * (e - servo_last_err);
 
     // 直道陀螺仪阻尼：|err|<阈值时启用，陀螺仪直接感知车身旋转，比摄像头D项快20ms

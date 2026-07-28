@@ -9,7 +9,7 @@
 
 //=====舵机=====
 extern float servo_kp1;       // 基础P
-extern float kp_gyro;         // 陀螺仪增强P: |gyro_z|×err
+extern float servo_kp2;       // 二次P: err×|err|
 extern float servo_kd;
 extern float gyro_kd;         // 陀螺仪直道阻尼
 extern float gyro_threshold;   // 陀螺仪触发阈值（|err|<此值启用）

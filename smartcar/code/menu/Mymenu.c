@@ -46,7 +46,7 @@ void menu_init(void)
         // 舵机
         v = dynamicCreate_Menu_Number(pid, "servokp1",  &servo_kp1, float_Box);
         Menu_Set_Limit(v, 0, 5,0.05f);
-        v = dynamicCreate_Menu_Number(pid, "kp_gyro",  &kp_gyro, float_Box);
+        v = dynamicCreate_Menu_Number(pid, "servokp2",  &servo_kp2, float_Box);
         Menu_Set_Limit(v, 0, 0.005f,0.0001f);
         v = dynamicCreate_Menu_Number(pid, "servo_kd",  &servo_kd,  float_Box);
         Menu_Set_Limit(v, 0, 2,0.01f);
