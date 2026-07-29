@@ -12,7 +12,6 @@ int   servo_dir      = DEFAULT_SERVO_DIR;
 int   motor_base_duty= DEFAULT_MOTOR_BASE;
 int   motor_max_duty = DEFAULT_MOTOR_MAX;
 float gyro_kd        = DEFAULT_GYRO_KD;
-float gyro_threshold  = DEFAULT_GYRO_THRESHOLD;
 float motor_bend_cut  = DEFAULT_MOTOR_BEND_CUT;
 float motor_kp       = DEFAULT_MOTOR_KP;
 float motor_kd       = DEFAULT_MOTOR_KD;
@@ -34,39 +33,46 @@ static void servo_update(void)
 {
     // ----死区处理----
     float e = err;                //err由vision算法计算
-    //即|e|<2 不调
     if (e > -servo_dead && e < servo_dead) e = 0;
-    //servo_dir=1 翻转舵机方向
-    if (servo_dir)              e = -e;
+    if (servo_dir)             e = -e;
 
-    // ----位置式PD ----
-    // P = kp1 + kp2×|err|  弯道err大时自动增强
-    // kd×偏差变化=阻尼
-    float e_abs = (e > 0) ? e : -e;
-    float pd = servo_kp1 * e + servo_kp2 * e * e_abs
-             + servo_kd * (e - servo_last_err);
+    // ----根据赛道形状切换参数----
+    int straight = is_straight();   // 一次判断，多处复用
+    float kp, kd;
+    if (straight)
+    {
+        /* 直道：小 P 稳速 + 大 D 抑抖 */
+        kp = servo_kp1;
+        kd = servo_kd * 1.5f;
+    }
+    else
+    {
+        /* 弯道：大 P 快响应 + 小 D 不拖转向 */
+        float e_abs = (e > 0) ? e : -e;
+        kp = servo_kp1 + servo_kp2 * e_abs;   // kp2×|e| 随偏差增大
+        kd = servo_kd;
+    }
 
-    // 直道陀螺仪阻尼：|err|<阈值时启用，陀螺仪直接感知车身旋转，比摄像头D项快20ms
-    float e_abs_raw = (err > 0) ? err : -err;
-    if (e_abs_raw < gyro_threshold)
+    // ----位置式 PD ----
+    float pd = kp * e + kd * (e - servo_last_err);
+
+    // 直道陀螺仪阻尼
+    if (straight)
         pd += gyro_kd * (float)mpu6050_get_gyro_z();
 
-    servo_last_err = e;   //存储当前err
+    servo_last_err = e;
 
     // ----像素err转换为角度----
-    // err物理上限≈50px（图像宽188，中心94，赛道最多偏离±50px）
-    // max_cha/50: err=50px → 舵机打满，充分利用舵机量程
-    // 旧公式 /94 导致err需94px才打满→舵机只用50%量程→弯道永远转不够
     float angle_rate = servo_max_cha / 50.0f;
     float angle_cha = pd * angle_rate;
 
     if (angle_cha >  servo_max_cha) angle_cha =  servo_max_cha;
     if (angle_cha < -servo_max_cha) angle_cha = -servo_max_cha;
 
-    float target = servo_center + angle_cha;     //目标=中间+偏差
+    float target = servo_center + angle_cha;
 
     //----步进限制----
-    float add = target - servo_last_angle;        // 每帧预期改变度数
+    float add = target - servo_last_angle;
     if (add >  servo_max_add) target = servo_last_angle + servo_max_add;
     if (add < -servo_max_add) target = servo_last_angle - servo_max_add;
 

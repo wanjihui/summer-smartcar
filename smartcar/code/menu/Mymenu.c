@@ -52,8 +52,6 @@ void menu_init(void)
         Menu_Set_Limit(v, 0, 2,0.01f);
         v = dynamicCreate_Menu_Number(pid, "gyro_kd",   &gyro_kd, float_Box);
         Menu_Set_Limit(v, -0.05f, 0.05f, 0.0005f);  // gyro_kd（ADC原始值大）
-        v = dynamicCreate_Menu_Number(pid, "gyro_thr",  &gyro_threshold, float_Box);
-        Menu_Set_Limit(v, 2.0f, 30.0f, 1.0f);  // 陀螺仪触发阈值
         v = dynamicCreate_Menu_Number(pid, "lookhead", &lookahead, uint8_Box);
         Menu_Set_Limit(v, 5, 60, 5.0f);
         v = dynamicCreate_Menu_Number(pid, "half_w", &half_width, uint8_Box);
@@ -87,10 +85,10 @@ void menu_init(void)
         Menu_Item *vis = dynamicCreate_Menu_Folder(&head, "Threshold");
         Menu_Item *v;
 
-        v = dynamicCreate_Menu_Number(vis, "vis_low",  &vis_low,  uint8_Box);
-        Menu_Set_Limit(v, 0, 255,1.0);
-        v = dynamicCreate_Menu_Number(vis, "vis_high", &vis_high, uint8_Box);
-        Menu_Set_Limit(v, 0, 255,1.0);
+        v = dynamicCreate_Menu_Number(vis, "block_sz", &Block_Size, int32_Box);
+        Menu_Set_Limit(v, 3, 15, 2.0);              // 窗口3~15，仅奇数有效
+        v = dynamicCreate_Menu_Number(vis, "clip_val", &Clip_Value, int32_Box);
+        Menu_Set_Limit(v, 0, 20, 1.0);              // 偏置0~20
     }
 
     // =====folder测试文件夹=====
