@@ -15,7 +15,6 @@
 #define SEED_MAX_POINTS  (pho_h * 3)       // 种子点最大存储数（预留横向空间）
 
 extern uint8 lookahead;                    // 预瞄距离（行），菜单可调，默认30
-extern uint8 half_width;                   // 赛道半宽（px），菜单可调，默认90
 
 typedef uint8 border_line[pho_h];        // 重定义一个边界线数组类型，存储每行的边界点列号
 

@@ -54,12 +54,8 @@ void menu_init(void)
         Menu_Set_Limit(v, -0.05f, 0.05f, 0.0005f);  // gyro_kd（ADC原始值大）
         v = dynamicCreate_Menu_Number(pid, "lookhead", &lookahead, uint8_Box);
         Menu_Set_Limit(v, 5, 60, 5.0f);
-        v = dynamicCreate_Menu_Number(pid, "half_w", &half_width, uint8_Box);
-        Menu_Set_Limit(v, 30, 150, 1.0f);
         v = dynamicCreate_Menu_Number(pid, "max_add", &servo_max_add, float_Box);
         Menu_Set_Limit(v, 0.5f, 20,0.5f);
-        v = dynamicCreate_Menu_Number(pid, "max_angle", &servo_max_cha, float_Box);
-        Menu_Set_Limit(v, 1, 45,1.0f);
         v = dynamicCreate_Menu_Number(pid, "center",    &servo_center, float_Box);
         Menu_Set_Limit(v, 75, 105,0.1f);
         v = dynamicCreate_Menu_Number(pid, "deadband",  &servo_dead, float_Box);

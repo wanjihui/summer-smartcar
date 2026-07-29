@@ -23,7 +23,6 @@
 
 // --- 双阈值 ---
 #define DEFAULT_LOOKAHEAD      45    // 预瞄距离（行）
-#define DEFAULT_HALF_WIDTH     90    // 赛道半宽（px）
 
 // --- 舵机 ---
 #define DEFAULT_SERVO_KP1      1.05f  // 基础P
@@ -31,7 +30,7 @@
 #define DEFAULT_SERVO_KD       0.0f  // D 系数
 #define DEFAULT_GYRO_KD        0.0f   // 陀螺仪直道阻尼（0=关闭）
 #define DEFAULT_SERVO_CENTER   95.2f // 中位角度
-#define DEFAULT_SERVO_MAX_CHA  15.0f // 最大偏角
+#define DEFAULT_SERVO_MAX_CHA  13.0f // 最大偏角
 #define DEFAULT_SERVO_DEAD     2.0f  // 死区（像素）
 #define DEFAULT_SERVO_MAX_ADD  4.0f  // 步进限制（度/帧）
 #define DEFAULT_SERVO_DIR      1     // 0=正常 1=翻转

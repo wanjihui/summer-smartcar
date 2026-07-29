@@ -164,39 +164,45 @@ static void find_seeds(int *llx, int *lly, int *rrx, int *rry)
  * ================================================================ */
 static void bottom_scan(int seed_y)
 {
-    int end = seed_y + 1;  // 种子行已覆盖，从上一行开始扫
-    if (end < 71) end = 71;  // 种子至少到70，向下扫到71覆盖衔接
+    int end = seed_y + 1;
+    if (end < 41) end = 41;
     for (int y = 118; y >= end; y--)
     {
-        int lx = -1, rx = -1;
-        int m = pho_center_x;
-
-        // 左边界：从中间向左扫，找赛道左边缘（黑→白）+2连白
-        for (int x = m; x >= 1; x--)
+        // 找该行最长连续白段
+        int best_s = -1, best_e = -1, best_len = 0;
+        int run_s = -1;
+        for (int x = 0; x < pho_w; x++)
         {
-            if (Image_Used[y][x - 1] == 0      // 黑→白跳变
-                && Image_Used[y][x] == 255
-                && Image_Used[y][x + 1] == 255)
+            if (Image_Used[y][x] == 255)
             {
-                lx = x + 1; break;
+                if (run_s < 0) run_s = x;
+            }
+            else
+            {
+                if (run_s >= 0)
+                {
+                    int len = x - run_s;
+                    if (len > best_len) { best_len = len; best_s = run_s; best_e = x - 1; }
+                    run_s = -1;
+                }
             }
         }
-        if (lx < 0) lx = BORDER_INVALID;
-
-        // 右边界：从中间向右扫，找赛道右边缘（白→黑）+2连白
-        for (int x = m; x < pho_w - 1; x++)
+        if (run_s >= 0)
         {
-            if (Image_Used[y][x] == 255
-                && Image_Used[y][x + 1] == 0       // 白→黑跳变
-                && Image_Used[y][x - 1] == 255)
-            {
-                rx = x - 1; break;
-            }
+            int len = pho_w - run_s;
+            if (len > best_len) { best_len = len; best_s = run_s; best_e = pho_w - 1; }
         }
-        if (rx < 0) rx = BORDER_INVALID;
 
-        l_border[y] = (uint8)lx;
-        r_border[y] = (uint8)rx;
+        if (best_len >= 3)
+        {
+            l_border[y] = (uint8)best_s;
+            r_border[y] = (uint8)best_e;
+        }
+        else
+        {
+            l_border[y] = BORDER_INVALID;
+            r_border[y] = BORDER_INVALID;
+        }
     }
 }
 
@@ -486,7 +492,6 @@ static void pho_border(uint16 points[][2], uint16 total,
     }
 }
 
-static int get_half_width(int y);  // 前向声明
 
 /* ================================================================
  * 边界3点滑动平均：消除单行噪声，保持趋势
@@ -517,11 +522,11 @@ static void border_smooth(border_line border)
  * pho_center — 中线生成 + 偏差计算
  *
  * 1. border_smooth(l_border/r_border) — 平滑左右边界
- * 2. 逐行生成 center_line[]: 双边→中点, 单边→±half_width, 都没有→255
- * 3. border_smooth(center_line) — 平滑中线（消除半宽偏移接缝）
+ * 2. center_line[]: 双边→中点, 单边→中点到屏幕边, 都缺→白像素重心
+ * 3. border_smooth(center_line) — 平滑中线
  * 4. 在 y_look±10 窗口内收集 center_line≠255 的行 → 自适应步长采样 → 均值 = err
  *
- * 调参: lookahead(预瞄行,默认30), half_width(赛道半宽,默认90)
+ * 调参: lookahead(预瞄行,默认30); 单边→白像素重心
  * ================================================================ */
 static int candidates[pho_h];  // 候选行缓存（可重用）
 
@@ -613,7 +618,6 @@ static void pho_center(void)
     border_smooth(l_border);
     border_smooth(r_border);
 
-    int hw = get_half_width(0);
     int y_look = 100 - (int)lookahead;
     if (y_look < 0) y_look = 0;
     if (y_look >= pho_h) y_look = pho_h - 1;
@@ -626,12 +630,30 @@ static void pho_center(void)
         int c;
 
         if (l != BORDER_INVALID && r != BORDER_INVALID)
+        {
             c = (l + r) / 2;
+        }
         else if (l != BORDER_INVALID)
-            c = l + hw;
+        {
+            c = (l + pho_w_max) / 2;        // 只有左 → 中点到右屏幕边
+        }
         else if (r != BORDER_INVALID)
-            c = r - hw;
+        {
+            c = r / 2;                       // 只有右 → 中点到左屏幕边
+        }
         else
+        {
+            // 两边都缺 → 白像素重心兜底
+            int sum = 0, cnt = 0;
+            for (int x = 0; x < pho_w; x++)
+            {
+                if (Image_Used[y][x] == 255)
+                { sum += x; cnt++; }
+            }
+            c = (cnt >= 3) ? (sum + cnt / 2) / cnt : BORDER_INVALID;
+        }
+
+        if (c == BORDER_INVALID)
         {
             center_line[y] = BORDER_INVALID;
             continue;
@@ -651,16 +673,13 @@ static void pho_center(void)
     if (window_top < 0)  window_top = 0;
     if (window_bot >= pho_h) window_bot = pho_h - 1;
 
-    // 收集窗口内中线有效的行（排除边界贴边、不可靠）
+    // 收集窗口内中线有效的行
     int cand_cnt = 0;
     for (int y = window_bot; y >= window_top; y--)
     {
-        if (center_line[y] == BORDER_INVALID) continue;
-        // 左右任一边界贴边 → 半宽推算不可靠，跳过
-        int l = (int)l_border[y];
-        int r = (int)r_border[y];
-        if (l == BORDER_INVALID || r == BORDER_INVALID) continue;
-        if (l >= pho_w_max - 3 || r <= pho_w_min + 3) continue;
+        uint8 c = center_line[y];
+        if (c == BORDER_INVALID) continue;
+        if (c < 5 || c > pho_w_max - 5) continue;   // 中线贴边，不可靠
 
         candidates[cand_cnt++] = y;
     }
@@ -700,11 +719,8 @@ static void pho_center(void)
 /* ================================================================
  * fallback_scan — 种子完全找不到时的最后手段
  *
- * 每行独立从中间向两侧扫描二值图，找白→黑跳变
- * 不依赖种子/邻域/上一行结果
- *
- * 有效行: 左右都找到 且 宽度>4px → 写入 l_border/r_border
- * 有有效行 → border_smooth 平滑
+ * 每行独立扫全行，找最长连续白段 → l=段首, r=段尾
+ * len≥3 才写入，不依赖种子/邻域/上一行
  * ================================================================ */
 static void fallback_scan(void)
 {
@@ -712,32 +728,35 @@ static void fallback_scan(void)
 
     for (int y = 1; y < pho_h - 1; y++)
     {
-        int lb = BORDER_INVALID, rb = BORDER_INVALID;
-
-        /* 左边界：从中向左扫，找 白->黑 跳变 */
-        for (int x = pho_center_x; x >= 1; x--)
+        // 找该行最长连续白段
+        int best_s = -1, best_e = -1, best_len = 0;
+        int run_s = -1;
+        for (int x = 0; x < pho_w; x++)
         {
-            if (Image_Used[y][x] == 255 && Image_Used[y][x - 1] == 0)
+            if (Image_Used[y][x] == 255)
             {
-                lb = x;
-                break;
+                if (run_s < 0) run_s = x;
+            }
+            else
+            {
+                if (run_s >= 0)
+                {
+                    int len = x - run_s;
+                    if (len > best_len) { best_len = len; best_s = run_s; best_e = x - 1; }
+                    run_s = -1;
+                }
             }
         }
-
-        /* 右边界：从中向右扫，找 白->黑 跳变 */
-        for (int x = pho_center_x; x < pho_w - 1; x++)
+        if (run_s >= 0)
         {
-            if (Image_Used[y][x] == 255 && Image_Used[y][x + 1] == 0)
-            {
-                rb = x;
-                break;
-            }
+            int len = pho_w - run_s;
+            if (len > best_len) { best_len = len; best_s = run_s; best_e = pho_w - 1; }
         }
 
-        if (lb != BORDER_INVALID && rb != BORDER_INVALID && rb - lb > 4)
+        if (best_len >= 3)
         {
-            l_border[y] = (uint8)lb;
-            r_border[y] = (uint8)rb;
+            l_border[y] = (uint8)best_s;
+            r_border[y] = (uint8)best_e;
             useful_rows++;
         }
     }
@@ -748,18 +767,6 @@ static void fallback_scan(void)
         border_smooth(r_border);
     }
 }
-
-/* ================================================================
- * 赛道半宽（常量，菜单可调）
- * ================================================================ */
-uint8 half_width = DEFAULT_HALF_WIDTH;
-
-static int get_half_width(int y)
-{
-    (void)y;
-    return (int)half_width;
-}
-
 
 
 /* ================================================================
@@ -867,7 +874,7 @@ int vis_deal(void)
  *
  * 灰度原图上叠加：
  *   红色   该行双边都有效
- *   黄色   该行仅单边有效（半宽推算）
+ *   黄色   该行仅单边有效（白像素重心推算）
  *   绿色   中线（平滑后的 center_line[]）
  * ================================================================ */
 void vis_draw(void)
