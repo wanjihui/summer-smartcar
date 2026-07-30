@@ -1,4 +1,4 @@
-﻿
+
 #include "config.h"
 
  border_line l_border;                      // 左边界，每行一个列号
@@ -17,6 +17,7 @@
  * ================================================================ */
 int32_t Block_Size = 9;
 int32_t Clip_Value = 4;
+float   err_alpha = DEFAULT_ERR_ALPHA;
 
 /* ================================================================
  * Otsu 二值化图像缓存
@@ -112,51 +113,100 @@ static int compute_otsu(void)
 }
 
 /* ================================================================
- * find_seeds — 从图像底部向上全屏扫描找左右种子
+ * find_seeds_at — 在指定3行上扫描找左右种子
  *
  * 基于二值图 Image_Used（0=黑/背景，255=白/赛道）
- * 左右各自从边缘向对侧全屏扫描，找 2连黑→3连白 = 赛道边界
- * 与保底扫描、bottom_scan 逻辑统一
+ * 左右各自从边缘向中心扫描，找首次 黑→白 跳变作为赛道边界
+ *
+ * 左种子：B→W→W→W（≥3连白，过滤噪点）
+ * 右种子：W→W→W→B（≥3连白，过滤噪点）
  *
  * 调参: 无独立参数，依赖 Otsu 阈值质量
  * 返回: 左右种子坐标，(llx,lly) 和 (rrx,rry)，-1 表示未找到
  * ================================================================ */
-static void find_seeds(int *llx, int *lly, int *rrx, int *rry)
+static void find_seeds_at(int *llx, int *lly, int *rrx, int *rry,
+                          const int sample_rows[3])
 {
     *llx = -1; *rrx = -1;
 
-    for (int y = 115; y >= 70; y--)
+    int lx_cand[3], ly_cand[3], rx_cand[3], ry_cand[3];
+    int lc = 0, rc = 0;
+
+    for (int i = 0; i < 3; i++)
     {
-        /* 左种子：从左边缘全屏扫，找 2黑→3白 */
-        if (*llx < 0)
+        int y = sample_rows[i];
+
+        /* 左种子：从左边缘全行扫，找 B→W→W→W（≥3连白，过滤噪点） */
+        for (int x = 1; x < pho_w - 3; x++)
         {
-            for (int x = 2; x < pho_w - 2; x++)
+            if (Image_Used[y][x - 1] == 0
+                && Image_Used[y][x] == 255
+                && Image_Used[y][x + 1] == 255
+                && Image_Used[y][x + 2] == 255)
             {
-                if (Image_Used[y][x - 2] == 0
-                    && Image_Used[y][x - 1] == 0
-                    && Image_Used[y][x] == 255
-                    && Image_Used[y][x + 1] == 255
-                    && Image_Used[y][x + 2] == 255)
-                { *llx = x; *lly = y; break; }
+                lx_cand[lc] = x;
+                ly_cand[lc] = y;
+                lc++;
+                break;
             }
         }
 
-        /* 右种子：从右边缘全屏扫，找 2黑→3白 */
-        if (*rrx < 0)
+        /* 右种子：从右边缘全行扫，找 W→W→W→B（≥3连白，过滤噪点）*/
+        for (int x = pho_w_max - 1; x >= 3; x--)
         {
-            for (int x = pho_w_max - 2; x >= 2; x--)
+            if (Image_Used[y][x + 1] == 0
+                && Image_Used[y][x] == 255
+                && Image_Used[y][x - 1] == 255
+                && Image_Used[y][x - 2] == 255)
             {
-                if (Image_Used[y][x + 2] == 0
-                    && Image_Used[y][x + 1] == 0
-                    && Image_Used[y][x] == 255
-                    && Image_Used[y][x - 1] == 255
-                    && Image_Used[y][x - 2] == 255)
-                { *rrx = x; *rry = y; break; }
+                rx_cand[rc] = x;
+                ry_cand[rc] = y;
+                rc++;
+                break;
             }
         }
-
-        if (*llx >= 0 && *rrx >= 0) break;
     }
+
+    /* 取中位数种子（抗单行野值）*/
+    if (lc >= 2)
+    {
+        /* 冒泡排序3个以内元素，取中位 */
+        for (int a = 0; a < lc - 1; a++)
+            for (int b = a + 1; b < lc; b++)
+                if (lx_cand[a] > lx_cand[b])
+                {
+                    int t = lx_cand[a]; lx_cand[a] = lx_cand[b]; lx_cand[b] = t;
+                    t = ly_cand[a]; ly_cand[a] = ly_cand[b]; ly_cand[b] = t;
+                }
+        int mi = lc / 2;  /* 下中位数：lc=2→idx0, lc=3→idx1 */
+        *llx = lx_cand[mi];
+        *lly = ly_cand[mi];
+    }
+    else if (lc == 1) { *llx = lx_cand[0]; *lly = ly_cand[0]; }
+
+    if (rc >= 2)
+    {
+        for (int a = 0; a < rc - 1; a++)
+            for (int b = a + 1; b < rc; b++)
+                if (rx_cand[a] > rx_cand[b])
+                {
+                    int t = rx_cand[a]; rx_cand[a] = rx_cand[b]; rx_cand[b] = t;
+                    t = ry_cand[a]; ry_cand[a] = ry_cand[b]; ry_cand[b] = t;
+                }
+        int mi = rc / 2;
+        *rrx = rx_cand[mi];
+        *rry = ry_cand[mi];
+    }
+    else if (rc == 1) { *rrx = rx_cand[0]; *rry = ry_cand[0]; }
+}
+
+/* ================================================================
+ * find_seeds — 默认行(115,100,85)的种子搜索包装
+ * ================================================================ */
+static void find_seeds(int *llx, int *lly, int *rrx, int *rry)
+{
+    const int rows[3] = {115, 100, 85};
+    find_seeds_at(llx, lly, rrx, rry, rows);
 }
 /* ================================================================
  * 底部扫描：逐行扫 118→(种子行+1)，直接填 l_border/r_border
@@ -248,11 +298,11 @@ static void seed_grow_left(int lx, int ly)
         points_l[idx][1] = cy;
         idx++;
 
-        /* 同行连续5点 → 振荡，停止 */
+        /* 同行连续8点 → 振荡，停止 */
         if (cy == last_y)
         {
             same_row_cnt++;
-            if (same_row_cnt >= 5) break;
+            if (same_row_cnt >= 8) break;
         }
         else { same_row_cnt = 1; last_y = cy; }
 
@@ -270,13 +320,10 @@ static void seed_grow_left(int lx, int ly)
                 int found = 0;
                 for (int ry = cy - 1; ry > 20 && !found; ry--)
                 {
-                    for (int x = 2; x < pho_center_x; x++)
+                    for (int x = 1; x < pho_w - 1; x++)
                     {
-                        if (Image_Used[ry][x - 2] == 0
-                            && Image_Used[ry][x - 1] == 0
-                            && Image_Used[ry][x] == 255
-                            && Image_Used[ry][x + 1] == 255
-                            && Image_Used[ry][x + 2] == 255)
+                        if (Image_Used[ry][x - 1] == 0
+                            && Image_Used[ry][x] == 255)
                         {
                             cx = x; cy = ry; dir = 0; turn = 0;
                             local_sum = 0;
@@ -349,11 +396,11 @@ static void seed_grow_right(int rx, int ry)
         points_r[idx][1] = cy;
         idx++;
 
-        /* 同行连续5点 → 振荡，停止 */
+        /* 同行连续8点 → 振荡，停止 */
         if (cy == last_y)
         {
             same_row_cnt++;
-            if (same_row_cnt >= 5) break;
+            if (same_row_cnt >= 8) break;
         }
         else { same_row_cnt = 1; last_y = cy; }
 
@@ -371,13 +418,10 @@ static void seed_grow_right(int rx, int ry)
                 int found = 0;
                 for (int ry_idx = cy - 1; ry_idx > 40 && !found; ry_idx--)
                 {
-                    for (int x = pho_w_max - 2; x > pho_center_x; x--)
+                    for (int x = pho_w_max - 1; x >= 1; x--)
                     {
-                        if (Image_Used[ry_idx][x + 2] == 0
-                            && Image_Used[ry_idx][x + 1] == 0
-                            && Image_Used[ry_idx][x] == 255
-                            && Image_Used[ry_idx][x - 1] == 255
-                            && Image_Used[ry_idx][x - 2] == 255)
+                        if (Image_Used[ry_idx][x + 1] == 0
+                            && Image_Used[ry_idx][x] == 255)
                         {
                             cx = x; cy = ry_idx; dir = 0; turn = 0;
                             local_sum = 0;
@@ -554,73 +598,51 @@ int lost_line_right(void)
 }
 
 /* ================================================================
- * 直道判定：取左右边界中段，检查是否接近直线
+ * 直道判定：检查中线是否接近竖直直线
  *
- * 两步判断：
- *   1. 首尾连线斜率是否接近 0（边界竖直 = 直道）
- *      kk ∈ (-0.5, 0.5) — 50行内横向偏移 <25px 视为直道
- *   2. 中间每点偏离首尾连线的距离 < 8px
- *      任一采样点超标 → 弯道
+ * 用 center_line[] 替代左右边界分别判断：
+ *   - 中线已含双边/单边/兜底逻辑，不依赖两侧边界同时有效
+ *   - 中线已经 border_smooth 平滑，抗噪更好
+ *   - 只需一条线的斜率+偏离检查，比旧版左右各6点更简洁
  *
- * y_start=100, y_end=50：中段区域，避开近处车轮和远处压缩
+ * y_start=100, y_end=55：中段区域
  * 返回: 1=直道  0=弯道
  * ================================================================ */
 int is_straight(void)
 {
-    int y_start = 100, y_end = 50, step = 5;
+    int y_start = 100, y_end = 55, step = 5;
 
     /* 两端必须有效 */
-    if (l_border[y_start] == BORDER_INVALID || l_border[y_end] == BORDER_INVALID)
+    if (center_line[y_start] == BORDER_INVALID
+        || center_line[y_end] == BORDER_INVALID)
         return 0;
-    if (r_border[y_start] == BORDER_INVALID || r_border[y_end] == BORDER_INVALID)
-        return 0;
 
-    /* 左边界斜率 */
-    float kl = (float)(l_border[y_end] - l_border[y_start])
+    /* 中线斜率：|k| < 0.45 → 50行内偏移 <22px */
+    float kc = (float)(center_line[y_end] - center_line[y_start])
              / (float)(y_end - y_start);
-    if (kl > 0.5f || kl < -0.5f) return 0;
+    if (kc > 0.45f || kc < -0.45f) return 0;
 
-    /* 右边界斜率 */
-    float kr = (float)(r_border[y_end] - r_border[y_start])
-             / (float)(y_end - y_start);
-    if (kr > 0.5f || kr < -0.5f) return 0;
-
-    /* 中间点偏离检查（左右各至少6个有效点） */
-    int okL = 0, okR = 0;
+    /* 中间点偏离检查：≥6个有效点，每点偏离 < 10px */
+    int ok = 0;
     for (int y = y_start; y >= y_end; y -= step)
     {
-        if (l_border[y] != BORDER_INVALID)
-        {
-            float expectedL = (float)l_border[y_start]
-                            + kl * (float)(y - y_start);
-            float diff = (float)l_border[y] - expectedL;
-            if (diff < 0) diff = -diff;
-            if (diff > 8.0f) return 0;
-            okL++;
-        }
-        if (r_border[y] != BORDER_INVALID)
-        {
-            float expectedR = (float)r_border[y_start]
-                            + kr * (float)(y - y_start);
-            float diff = (float)r_border[y] - expectedR;
-            if (diff < 0) diff = -diff;
-            if (diff > 8.0f) return 0;
-            okR++;
-        }
+        if (center_line[y] == BORDER_INVALID) continue;
+
+        float expected = (float)center_line[y_start] + kc * (float)(y - y_start);
+        float diff = (float)center_line[y] - expected;
+        if (diff < 0) diff = -diff;
+        if (diff > 10.0f) return 0;
+        ok++;
     }
 
-    return (okL >= 6 && okR >= 6) ? 1 : 0;
+    return (ok >= 6) ? 1 : 0;
 }
 
-static void pho_center(void)
+static void pho_center(int both_lost)
 {
     // ---- 平滑边界 ----
     border_smooth(l_border);
     border_smooth(r_border);
-
-    int y_look = 100 - (int)lookahead;
-    if (y_look < 0) y_look = 0;
-    if (y_look >= pho_h) y_look = pho_h - 1;
 
     // ---- 生成 center_line[]（显示 + err 共用） ----
     for (int y = pho_h - 1; y >= 0; y--)
@@ -667,6 +689,26 @@ static void pho_center(void)
     // ---- 平滑中线（消除半宽偏移可能引入的不连续）----
     border_smooth(center_line);
 
+    // ---- 动态预瞄：弯道看近(err大)、直道看远(err小) ----
+    // 用近处3行中线偏移量快速估弯，不依赖上一帧err
+    int curve_est = 0, ce_cnt = 0;
+    for (int y = 100; y >= 85; y -= 5)
+    {
+        if (center_line[y] != BORDER_INVALID)
+        {
+            int d = (int)center_line[y] - pho_center_x;
+            if (d < 0) d = -d;
+            curve_est += d;
+            ce_cnt++;
+        }
+    }
+    if (ce_cnt > 0) curve_est /= ce_cnt;
+    // curve_est=0~10(直道) → 看远;  curve_est>40(急弯) → 看近
+    int delta_look = (curve_est > 40) ? 25 : (curve_est > 20) ? 15 : (curve_est > 10) ? 5 : 0;
+    int y_look = 100 - (int)lookahead + delta_look;  // 弯道时y_look增大=看更近
+    if (y_look < 20) y_look = 20;
+    if (y_look >= pho_h) y_look = pho_h - 1;
+
     // ---- 从中线数组直接采样计算 err ----
     int window_top  = y_look - 10;
     int window_bot  = y_look + 10;
@@ -712,7 +754,45 @@ static void pho_center(void)
     }
 
     if (cnt > 0)
-        err = (float)sum / (float)cnt;
+    {
+        float new_err = (float)sum / (float)cnt;
+
+        /* EMA 时间域平滑：
+         *   中线公式在双边/单边/丢线切换时可能跳变 ±15px，
+         *   用指数移动平均 err = α×raw + (1-α)×prev 消除突变。
+         *   α 越大响应越快但抑抖越弱，菜单可调 err_alpha。 */
+        static float err_prev = 0;
+        static int   err_init = 0;
+        if (!err_init) { err_prev = new_err; err_init = 1; }
+
+        /* 双侧丢线安全钳：弯道中(fallback_scan)err会错误归零→车直冲
+         *   |上一帧err|>15 说明在弯道 → 本帧err锁住不动, 最多维持5帧 */
+        static int hold_cnt = 0;
+        if (both_lost)
+        {
+            float prev_abs = (err_prev > 0) ? err_prev : -err_prev;
+            if (prev_abs > 15.0f && hold_cnt < 5)
+            {
+                hold_cnt++;
+                new_err = err_prev;  // 锁住err, 舵机/差速保持过弯状态
+            }
+            else if (hold_cnt >= 5)
+            {
+                hold_cnt = 0;        // 5帧后仍未恢复 → 真丢了, 放弃锁存
+            }
+        }
+        else
+        {
+            hold_cnt = 0;            // 恢复正常, 清零计数器
+        }
+
+        float a = err_alpha;
+        if (a < 0.1f) a = 0.1f;   /* 安全钳 */
+        if (a > 1.0f) a = 1.0f;
+
+        err = a * new_err + (1.0f - a) * err_prev;
+        err_prev = err;
+    }
     // else: err 保留上帧不变
 }
 
@@ -802,16 +882,23 @@ int vis_deal(void)
     int llx, lly, rrx, rry;
     data_l = 0; data_r = 0;
 
-    /* ---- Otsu 自适应阈值（每5帧重算一次）---- */
+    /* ---- Otsu 自适应阈值（每5帧重算，EMA滤波抑制跳变）---- */
     static int cached_th = -1;
-    static int frame_since_otsu = 999;
+    static int frame_since_otsu = 0;
+    frame_since_otsu++;
     if (frame_since_otsu >= 5)
     {
         int th = compute_otsu();
-        if (th > 0) cached_th = th;
+        if (th > 0)
+        {
+            /* EMA 滤波：th_ema = α×th_new + (1-α)×th_old, α=0.3 */
+            if (cached_th < 0)
+                cached_th = th;
+            else
+                cached_th = (int)(0.3f * (float)th + 0.7f * (float)cached_th);
+        }
         frame_since_otsu = 0;
     }
-    else { frame_since_otsu++; }
 
     /* ---- 一次性二值化整张图 ---- */
     int th = (cached_th >= 0) ? cached_th : 128;
@@ -835,7 +922,113 @@ int vis_deal(void)
     }
 
     /* ---- 找种子 → 生长 → 边界提取 ---- */
+    /* 帧间一致性：记录上一帧成功种子，本帧失败时在旧种子邻域重搜 */
+    static int prev_llx = -1, prev_lly = -1, prev_rrx = -1, prev_rry = -1;
+    static int prev_both_ok = 0;  /* 上一帧双边都找到 */
+
     find_seeds(&llx, &lly, &rrx, &rry);
+
+    /* 本帧一侧失败但上一帧双边OK → 在旧种子±8邻域内重搜 */
+    if (prev_both_ok)
+    {
+        if (llx < 0 && prev_llx >= 0)
+        {
+            int y = prev_lly;
+            int x0 = (prev_llx - 8 > 1) ? prev_llx - 8 : 1;
+            int x1 = (prev_llx + 8 < pho_w - 2) ? prev_llx + 8 : pho_w - 2;
+            for (int x = x0; x <= x1 && llx < 0; x++)
+            {
+                if (Image_Used[y][x - 1] == 0 && Image_Used[y][x] == 255)
+                { llx = x; lly = y; }
+            }
+            /* 邻域搜不到则沿y方向扩展搜索 */
+            if (llx < 0)
+            {
+                for (int dy = 1; dy <= 10 && llx < 0; dy++)
+                {
+                    int y_up = y - dy, y_dn = y + dy;
+                    if (y_up >= 70)
+                    {
+                        for (int x = x0; x <= x1 && llx < 0; x++)
+                            if (Image_Used[y_up][x - 1] == 0 && Image_Used[y_up][x] == 255)
+                            { llx = x; lly = y_up; }
+                    }
+                    if (llx < 0 && y_dn <= 118)
+                    {
+                        for (int x = x0; x <= x1 && llx < 0; x++)
+                            if (Image_Used[y_dn][x - 1] == 0 && Image_Used[y_dn][x] == 255)
+                            { llx = x; lly = y_dn; }
+                    }
+                }
+            }
+        }
+        if (rrx < 0 && prev_rrx >= 0)
+        {
+            int y = prev_rry;
+            int x0 = (prev_rrx - 8 > 1) ? prev_rrx - 8 : 1;
+            int x1 = (prev_rrx + 8 < pho_w_max - 1) ? prev_rrx + 8 : pho_w_max - 1;
+            for (int x = x1; x >= x0 && rrx < 0; x--)
+            {
+                if (Image_Used[y][x + 1] == 0 && Image_Used[y][x] == 255)
+                { rrx = x; rry = y; }
+            }
+            if (rrx < 0)
+            {
+                for (int dy = 1; dy <= 10 && rrx < 0; dy++)
+                {
+                    int y_up = y - dy, y_dn = y + dy;
+                    if (y_up >= 70)
+                    {
+                        for (int x = x1; x >= x0 && rrx < 0; x--)
+                            if (Image_Used[y_up][x + 1] == 0 && Image_Used[y_up][x] == 255)
+                            { rrx = x; rry = y_up; }
+                    }
+                    if (rrx < 0 && y_dn <= 118)
+                    {
+                        for (int x = x1; x >= x0 && rrx < 0; x--)
+                            if (Image_Used[y_dn][x + 1] == 0 && Image_Used[y_dn][x] == 255)
+                            { rrx = x; rry = y_dn; }
+                    }
+                }
+            }
+        }
+    }
+
+    /* ---- 位置合法性校验：左种子必须在右种子左边 ---- */
+    if (llx >= 0 && rrx >= 0 && llx >= rrx)
+    {
+        /* 种子交叉（异常）→ 换5组行重试，任一组通过即用 */
+        const int alt_rows[5][3] = {
+            {112, 97, 82},
+            {110, 95, 80},
+            {108, 93, 78},
+            {105, 90, 75},
+            {118, 103, 88},
+        };
+        int found = 0;
+        for (int i = 0; i < 5 && !found; i++)
+        {
+            int tlx, tly, trx, try_;
+            find_seeds_at(&tlx, &tly, &trx, &try_, alt_rows[i]);
+            if (tlx >= 0 && trx >= 0 && tlx < trx)
+            {
+                llx = tlx; lly = tly;
+                rrx = trx; rry = try_;
+                found = 1;
+            }
+        }
+        if (!found)
+        {
+            /* 5组全部失败 → 两侧种子丢弃，走兜底扫描 */
+            llx = -1; rrx = -1;
+        }
+    }
+
+    /* 更新帧间记忆 */
+    prev_both_ok = (llx >= 0 && rrx >= 0) ? 1 : 0;
+    if (llx >= 0) { prev_llx = llx; prev_lly = lly; }
+    if (rrx >= 0) { prev_rrx = rrx; prev_rry = rry; }
+
     if (llx >= 0)
     {
         seed_grow_left(llx, lly);
@@ -849,9 +1042,11 @@ int vis_deal(void)
 
     /* ---- 补全 / 回退 ---- */
     {
+        /* 取较低种子行（min）确保 bottom_scan 填满两侧种子以下全部行 */
         int gap_start = 79;
-        if (llx >= 0 && lly > gap_start) gap_start = lly;
-        if (rrx >= 0 && rry > gap_start) gap_start = rry;
+        if (llx >= 0 && lly < gap_start) gap_start = lly;
+        if (rrx >= 0 && rry < gap_start) gap_start = rry;
+        if (gap_start < 41) gap_start = 41;
 
         if (llx >= 0 || rrx >= 0)
         {
@@ -859,12 +1054,17 @@ int vis_deal(void)
         }
         else
         {
+            /* 双侧种子都丢失 → 兜底扫描 + 标记本帧不可靠 */
             fallback_scan();
         }
     }
 
+    /* 记录本帧是否双侧丢线，供 pho_center 做安全钳 */
+    static int both_lost = 0;
+    both_lost = (llx < 0 && rrx < 0) ? 1 : 0;
+
     /* ---- 中线 + 偏差 ---- */
-    pho_center();
+    pho_center(both_lost);
     vis_frame_ready = 1;   // 通知显示层新帧就绪
     return 0;
 }

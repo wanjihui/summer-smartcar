@@ -47,11 +47,13 @@ void menu_init(void)
         v = dynamicCreate_Menu_Number(pid, "servokp1",  &servo_kp1, float_Box);
         Menu_Set_Limit(v, 0, 5,0.05f);
         v = dynamicCreate_Menu_Number(pid, "servokp2",  &servo_kp2, float_Box);
-        Menu_Set_Limit(v, 0, 0.005f,0.0001f);
+        Menu_Set_Limit(v, 0, 0.01f,0.0001f);
         v = dynamicCreate_Menu_Number(pid, "servo_kd",  &servo_kd,  float_Box);
         Menu_Set_Limit(v, 0, 2,0.01f);
         v = dynamicCreate_Menu_Number(pid, "gyro_kd",   &gyro_kd, float_Box);
-        Menu_Set_Limit(v, -0.05f, 0.05f, 0.0005f);  // gyro_kd（ADC原始值大）
+        Menu_Set_Limit(v, -0.05f, 0.05f, 0.0005f);
+        v = dynamicCreate_Menu_Number(pid, "gyro_kdc",  &gyro_kd_curve, float_Box);
+        Menu_Set_Limit(v, -0.01f, 0.01f, 0.0001f);
         v = dynamicCreate_Menu_Number(pid, "lookhead", &lookahead, uint8_Box);
         Menu_Set_Limit(v, 5, 60, 5.0f);
         v = dynamicCreate_Menu_Number(pid, "max_add", &servo_max_add, float_Box);
@@ -63,19 +65,19 @@ void menu_init(void)
 
 
         // 电机
-        v = dynamicCreate_Menu_Number(pid, "max_duty",  &motor_max_duty, int32_Box);
-        Menu_Set_Limit(v, 0, 50,1.0f);
         v = dynamicCreate_Menu_Number(pid, "base_duty", &motor_base_duty, int32_Box);
         Menu_Set_Limit(v, 0, 50,1.0f);
         v = dynamicCreate_Menu_Number(pid, "bend_cut",  &motor_bend_cut, float_Box);
         Menu_Set_Limit(v, 0, 1.0f,0.001f);
         v = dynamicCreate_Menu_Number(pid, "motor_kp",  &motor_kp, float_Box);
-        Menu_Set_Limit(v, 0, 10,0.05f);
+        Menu_Set_Limit(v, 0, 10,0.01f);
         v = dynamicCreate_Menu_Number(pid, "motor_kd",  &motor_kd, float_Box);
         Menu_Set_Limit(v, 0, 2,0.01f);
+        v = dynamicCreate_Menu_Number(pid, "diff_max",  &motor_diff_max, int32_Box);
+        Menu_Set_Limit(v, 2, 20,1.0f);
         dynamicCreate_Menu_Number(pid, "car_run",   &car_run,  bool_Box);
     }
-    
+
     // =====Threshold阈值文件夹=====
     {
         Menu_Item *vis = dynamicCreate_Menu_Folder(&head, "Threshold");
@@ -85,6 +87,8 @@ void menu_init(void)
         Menu_Set_Limit(v, 3, 15, 2.0);              // 窗口3~15，仅奇数有效
         v = dynamicCreate_Menu_Number(vis, "clip_val", &Clip_Value, int32_Box);
         Menu_Set_Limit(v, 0, 20, 1.0);              // 偏置0~20
+        v = dynamicCreate_Menu_Number(vis, "err_alpha", &err_alpha, float_Box);
+        Menu_Set_Limit(v, 0.1f, 1.0f, 0.05f);       // err平滑 0.1=强抑抖 1.0=关闭
     }
 
     // =====folder测试文件夹=====

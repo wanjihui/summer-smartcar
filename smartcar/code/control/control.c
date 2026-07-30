@@ -12,9 +12,11 @@ int   servo_dir      = DEFAULT_SERVO_DIR;
 int   motor_base_duty= DEFAULT_MOTOR_BASE;
 int   motor_max_duty = DEFAULT_MOTOR_MAX;
 float gyro_kd        = DEFAULT_GYRO_KD;
+float gyro_kd_curve   = DEFAULT_GYRO_KD_CURVE;
 float motor_bend_cut  = DEFAULT_MOTOR_BEND_CUT;
 float motor_kp       = DEFAULT_MOTOR_KP;
 float motor_kd       = DEFAULT_MOTOR_KD;
+int   motor_diff_max = DEFAULT_MOTOR_DIFF_MAX;
 bool  car_run        = false;    // 小车运行开关，菜单可切换
 
 static float servo_last_err  = 0;       // 上一帧偏差，舵机D项用
@@ -56,9 +58,31 @@ static void servo_update(void)
     // ----位置式 PD ----
     float pd = kp * e + kd * (e - servo_last_err);
 
-    // 直道陀螺仪阻尼
-    if (straight)
-        pd += gyro_kd * (float)mpu6050_get_gyro_z();
+    // 陀螺仪阻尼：
+    //   直道：gyro_kd × gyro_z，全量阻尼
+    //   弯道：gyro_kd_curve × boost × gyro_z
+    //         boost 只对偏航变号(摆动)放大，入弯单向加减速不误触发
+    {
+        static float gyro_prev = 0;
+        float gyro_z = (float)mpu6050_get_gyro_z();
+
+        if (straight)
+        {
+            pd += gyro_kd * gyro_z;
+        }
+        else
+        {
+            /* 变号检测：gyro_z 与上一帧异号 = 来回摆动 */
+            float boost;
+            if (gyro_z * gyro_prev < 0)
+                boost = 1.5f;   // 摆动 → 强阻尼
+            else
+                boost = 0.15f;  // 稳态/入弯/出弯 → 轻阻尼，不拖转向
+
+            gyro_prev = gyro_z;
+            pd += gyro_kd_curve * boost * gyro_z;
+        }
+    }
 
     servo_last_err = e;
 
@@ -81,7 +105,7 @@ static void servo_update(void)
 }
 
 
-//电机控制   
+//电机控制
 static void motor_update(void)
 {
     // ----PD算出差速----
@@ -101,8 +125,10 @@ static void motor_update(void)
     int base = motor_base_duty - bend_cut;         // 弯道基础速度降低
     if (base < 5) base = 5;                         // 死区12已是最低可用duty，base保底降到5
 
-    // 差速量：motor_kp低时(0.1~0.2)正常差速，高时急弯内轮可反转(pivot)
+    // 差速量：限幅防漂
     int diff = (int)Cha;
+    if (diff >  motor_diff_max) diff =  motor_diff_max;
+    if (diff < -motor_diff_max) diff = -motor_diff_max;
 
     int left  = base + diff;
     int right = base - diff;
@@ -119,14 +145,12 @@ static void motor_update(void)
     if (right > motor_max_duty)  right = motor_max_duty;
     if (right < -motor_max_duty)  right = -motor_max_duty;
 
-    motor_set_both((int8_t)left, (int8_t)right); 
+    motor_set_both((int8_t)left, (int8_t)right);
 }
 
 //控制总调用接口
 void control_update(void)
 {
     servo_update();         //先更新舵机
-    motor_update();         
+    motor_update();
 }
-
-

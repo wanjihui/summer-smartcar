@@ -35,6 +35,7 @@ extern volatile uint8_t vis_frame_ready; // 新帧已搜线完成，显示层可
 // ========== 自适应寻线参数（菜单可调）==========
 extern int32_t Block_Size;   // 局部窗口边长（奇数），默认9
 extern int32_t Clip_Value;   // 阈值偏置，越大越严格，默认4
+extern float   err_alpha;    // err EMA平滑系数，0.2~0.6
 #define MAX_TRACK_POINTS  200   // 单边最大追踪步数（编译期常量）
 
 // ========== 工具宏 ==========
@@ -54,4 +55,4 @@ int  is_straight(void);         // 直道判定，1=直道 0=弯道
 int  lost_line_left(void);      // 左丢线检测，-1=正常 else=丢线行号
 int  lost_line_right(void);     // 右丢线检测
 
-#endif 
+#endif
