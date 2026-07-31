@@ -20,8 +20,8 @@ extern float servo_max_add;  // 步进限制
 extern int   servo_dir;      // 方向翻转
 //=====电机=====
 extern int   motor_base_duty; // 基础占空比
+extern int   motor_corner_speed; // 弯道占空比
 extern int   motor_max_duty;  // 最大正转占空比
-extern float motor_bend_cut; // 弯道减速系数
 extern float motor_kp;
 extern float motor_kd;
 extern int   motor_diff_max;  // 差速上限（%），防漂

@@ -31,7 +31,7 @@
 #define DEFAULT_GYRO_KD        -0.006f   // 陀螺仪直道阻尼
 #define DEFAULT_GYRO_KD_CURVE  -0.0073f  // 陀螺仪弯道阻尼（0=关闭）
 #define DEFAULT_SERVO_CENTER   95.2f // 中位角度
-#define DEFAULT_SERVO_MAX_CHA  15.0f // 最大偏角
+#define DEFAULT_SERVO_MAX_CHA  13.0f // 最大偏角
 #define DEFAULT_SERVO_DEAD     2.0f  // 死区（像素）
 #define DEFAULT_SERVO_MAX_ADD  6.5f  // 步进限制（度/帧）
 #define DEFAULT_SERVO_DIR      1     // 0=正常 1=翻转
@@ -39,8 +39,8 @@
 
 // --- 电机 ---
 #define DEFAULT_MOTOR_BASE     25    // 基础占空比 %
+#define DEFAULT_MOTOR_CORNER_SPEED  20    // 弯道速度（占空比%）
 #define DEFAULT_MOTOR_MAX      30    // 最大占空比 %
-#define DEFAULT_MOTOR_BEND_CUT 0.015f // 弯道减速系数
 #define DEFAULT_MOTOR_KP       0.03f  // 差速 P 系数
 #define DEFAULT_MOTOR_KD       0.0f  // 差速 D 系数
 #define DEFAULT_MOTOR_DIFF_MAX 8     // 差速上限（%）防漂

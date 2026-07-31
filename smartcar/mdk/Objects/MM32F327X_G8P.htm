@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\MM32F327X_G8P.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\MM32F327X_G8P.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6240002: Last Updated: Fri Jul 31 05:51:19 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6240002: Last Updated: Fri Jul 31 17:03:02 2026
 <BR><P>
 <H3>Maximum Stack Usage =       1460 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1326,7 +1326,8 @@ Global Symbols
 <LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpgt
 <LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmple
 </UL>
-<BR>[Called By]<UL><LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_update
+<BR>[Called By]<UL><LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_update
+<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_update
 </UL>
 
 <P><STRONG><a name="[e3]"></a>key_clear_state</STRONG> (Thumb, 26 bytes, Stack size 4 bytes, zf_device_key.o(.text.key_clear_state))
@@ -1404,8 +1405,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[dd]"></a>menu_init</STRONG> (Thumb, 1010 bytes, Stack size 96 bytes, mymenu.o(.text.menu_init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = menu_init &rArr; dynamicCreate_Menu_Number &rArr; Create_Menu_Item
+<P><STRONG><a name="[dd]"></a>menu_init</STRONG> (Thumb, 1006 bytes, Stack size 104 bytes, mymenu.o(.text.menu_init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 176<LI>Call Chain = menu_init &rArr; dynamicCreate_Menu_Number &rArr; Create_Menu_Item
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Menu_Set_Limit
 <LI><a href="#[a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dynamicCreate_Menu_Number
@@ -2386,14 +2387,15 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update
 </UL>
 
-<P><STRONG><a name="[8c]"></a>motor_update</STRONG> (Thumb, 596 bytes, Stack size 64 bytes, control.o(.text.motor_update))
-<BR><BR>[Stack]<UL><LI>Max Depth = 824<LI>Call Chain = motor_update &rArr; motor_set_both &rArr; motor_set_left &rArr; pwm_set_duty &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
+<P><STRONG><a name="[8c]"></a>motor_update</STRONG> (Thumb, 566 bytes, Stack size 56 bytes, control.o(.text.motor_update))
+<BR><BR>[Stack]<UL><LI>Max Depth = 816<LI>Call Chain = motor_update &rArr; motor_set_both &rArr; motor_set_left &rArr; pwm_set_duty &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
 <LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
 <LI><a href="#[b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2iz
 <LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fadd
 <LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
+<LI><a href="#[d0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_straight
 <LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_set_both
 <LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmple
 </UL>

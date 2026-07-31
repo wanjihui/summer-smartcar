@@ -24,7 +24,7 @@
 #define SERVO_ANGLE_MIN         (0.0f)                   // 舵机最小角度 0°
 #define SERVO_ANGLE_MAX         (180.0f)                 // 舵机最大角度 180°
 #define SERVO_ANGLE_L_LIMIT     (75.0f)                  // 左转极限角度（可根据机械结构调节）
-#define SERVO_ANGLE_R_LIMIT     (105.0f)                 // 右转极限角度（可根据机械结构调节）
+#define SERVO_ANGLE_R_LIMIT     (115.0f)                 // 右转极限角度（可根据机械结构调节）
 #define SERVO_ANGLE_CENTER      (90.0f)                  // 舵机中位角度
 
 /*

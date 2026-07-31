@@ -13,7 +13,7 @@ int   motor_base_duty= DEFAULT_MOTOR_BASE;
 int   motor_max_duty = DEFAULT_MOTOR_MAX;
 float gyro_kd        = DEFAULT_GYRO_KD;
 float gyro_kd_curve   = DEFAULT_GYRO_KD_CURVE;
-float motor_bend_cut  = DEFAULT_MOTOR_BEND_CUT;
+int   motor_corner_speed = DEFAULT_MOTOR_CORNER_SPEED;
 float motor_kp       = DEFAULT_MOTOR_KP;
 float motor_kd       = DEFAULT_MOTOR_KD;
 int   motor_diff_max = DEFAULT_MOTOR_DIFF_MAX;
@@ -117,13 +117,11 @@ static void motor_update(void)
     float Cha = motor_kp * e + motor_kd * cha;
     motor_last_err = e;
 
-    // ----弯道减速 + 差速分配----
+    // ----直道/弯道速度切换 + 差速分配----
     // err>0偏右→右转: left=base+diff(快) right=base-diff(慢)
     // err<0偏左→左转: left=base-|diff|(慢) right=base+|diff|(快)
-    float e_abs = (e > 0) ? e : -e;
-    int bend_cut = (int)(e_abs * motor_bend_cut); // 弯越急降速越多
-    int base = motor_base_duty - bend_cut;         // 弯道基础速度降低
-    if (base < 5) base = 5;                         // 死区12已是最低可用duty，base保底降到5
+    int base = is_straight() ? motor_base_duty : motor_corner_speed;
+    if (base < 5) base = 5;                         // base保底5
 
     // 差速量：限幅防漂
     int diff = (int)Cha;

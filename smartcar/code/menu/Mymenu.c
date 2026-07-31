@@ -67,8 +67,8 @@ void menu_init(void)
         // 电机
         v = dynamicCreate_Menu_Number(pid, "base_duty", &motor_base_duty, int32_Box);
         Menu_Set_Limit(v, 0, 50,1.0f);
-        v = dynamicCreate_Menu_Number(pid, "bend_cut",  &motor_bend_cut, float_Box);
-        Menu_Set_Limit(v, 0, 1.0f,0.001f);
+        v = dynamicCreate_Menu_Number(pid, "cor_duty", &motor_corner_speed, int32_Box);
+        Menu_Set_Limit(v, 5, 50, 1.0f);
         v = dynamicCreate_Menu_Number(pid, "motor_kp",  &motor_kp, float_Box);
         Menu_Set_Limit(v, 0, 10,0.01f);
         v = dynamicCreate_Menu_Number(pid, "motor_kd",  &motor_kd, float_Box);
