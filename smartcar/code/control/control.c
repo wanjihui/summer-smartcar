@@ -10,14 +10,16 @@ float servo_dead     = DEFAULT_SERVO_DEAD;
 float servo_max_add  = DEFAULT_SERVO_MAX_ADD;
 int   servo_dir      = DEFAULT_SERVO_DIR;
 int   motor_base_duty= DEFAULT_MOTOR_BASE;
+int   motor_curve_duty = DEFAULT_MOTOR_CURVE_DUTY;  // 弯道占空比（is_straight判定为弯道时使用）
 int   motor_max_duty = DEFAULT_MOTOR_MAX;
 float gyro_kd        = DEFAULT_GYRO_KD;
-float motor_bend_cut  = DEFAULT_MOTOR_BEND_CUT;
+float gyro_kd_curve   = DEFAULT_GYRO_KD_CURVE;
 float motor_kp       = DEFAULT_MOTOR_KP;
 float motor_kd       = DEFAULT_MOTOR_KD;
+int   motor_diff_max = DEFAULT_MOTOR_DIFF_MAX;
 bool  car_run        = false;    // 小车运行开关，菜单可切换
 
-static float servo_last_err  = 0;       // 上一帧偏差，舵机D项用
+static float servo_last_err   = 0;       // 上一帧偏差，舵机D项用
 static float servo_last_angle = 0;      // 上一帧舵机角度，步进限制用
 static float motor_last_err   = 0;      // 上一帧偏差，电机D项用
 
@@ -29,15 +31,14 @@ void control_init(void)
 }
 
 //舵机控制
-static void servo_update(void)
+static void servo_update(int straight)
 {
     // ----死区处理----
     float e = err;                //err由vision算法计算
     if (e > -servo_dead && e < servo_dead) e = 0;
     if (servo_dir)             e = -e;
 
-    // ----根据赛道形状切换参数----
-    int straight = is_straight();   // 一次判断，多处复用
+    // ----根据赛道形状切换参数（straight由control_update统一判定）----
     float kp, kd;
     if (straight)
     {
@@ -56,9 +57,33 @@ static void servo_update(void)
     // ----位置式 PD ----
     float pd = kp * e + kd * (e - servo_last_err);
 
-    // 直道陀螺仪阻尼
-    if (straight)
-        pd += gyro_kd * (float)mpu6050_get_gyro_z();
+    // 陀螺仪阻尼：
+    //   直道：gyro_kd × gyro_z，全量阻尼
+    //   弯道：gyro_kd_curve × boost × gyro_z
+    //         boost 只对偏航变号(摆动)放大，入弯单向加减速不误触发
+    {
+        static float gyro_prev = 0;
+        /* 原始ADC → °/s：±2000dps量程下 1LSB≈1/16.4°/s，
+         * 直接用原始值乘系数会放大16倍，阻尼系数量级不可控 */
+        float gyro_z = mpu6050_gyro_transition(mpu6050_get_gyro_z());
+
+        if (straight)
+        {
+            pd += gyro_kd * gyro_z;
+        }
+        else
+        {
+            /* 变号检测：gyro_z 与上一帧异号 = 来回摆动 */
+            float boost;
+            if (gyro_z * gyro_prev < 0)
+                boost = 1.5f;   // 摆动 → 强阻尼
+            else
+                boost = 0.15f;  // 稳态/入弯/出弯 → 轻阻尼，不拖转向
+
+            gyro_prev = gyro_z;
+            pd += gyro_kd_curve * boost * gyro_z;
+        }
+    }
 
     servo_last_err = e;
 
@@ -81,8 +106,8 @@ static void servo_update(void)
 }
 
 
-//电机控制   
-static void motor_update(void)
+//电机控制
+static void motor_update(int straight)
 {
     // ----PD算出差速----
     float e=err;                                     // 偏差
@@ -93,16 +118,22 @@ static void motor_update(void)
     float Cha = motor_kp * e + motor_kd * cha;
     motor_last_err = e;
 
-    // ----弯道减速 + 差速分配----
+    // ----直道/弯道基础占空比分开控制----
     // err>0偏右→右转: left=base+diff(快) right=base-diff(慢)
     // err<0偏左→左转: left=base-|diff|(慢) right=base+|diff|(快)
-    float e_abs = (e > 0) ? e : -e;
-    int bend_cut = (int)(e_abs * motor_bend_cut); // 弯越急降速越多
-    int base = motor_base_duty - bend_cut;         // 弯道基础速度降低
+    // 直道: motor_base_duty（全速）
+    // 弯道: motor_curve_duty（菜单可调，一般低于直道）
+    int base;
+    if (straight)
+        base = motor_base_duty;
+    else
+        base = motor_curve_duty;
     if (base < 5) base = 5;                         // 死区12已是最低可用duty，base保底降到5
 
-    // 差速量：motor_kp低时(0.1~0.2)正常差速，高时急弯内轮可反转(pivot)
+    // 差速量：限幅防漂
     int diff = (int)Cha;
+    if (diff >  motor_diff_max) diff =  motor_diff_max;
+    if (diff < -motor_diff_max) diff = -motor_diff_max;
 
     int left  = base + diff;
     int right = base - diff;
@@ -125,8 +156,9 @@ static void motor_update(void)
 //控制总调用接口
 void control_update(void)
 {
-    servo_update();         //先更新舵机
-    motor_update();         
+    int straight = is_straight();   // 一帧只判定一次，舵机/电机共用同一结果
+    servo_update(straight);         //先更新舵机
+    motor_update(straight);
 }
 
 

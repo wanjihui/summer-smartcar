@@ -21,24 +21,27 @@
 // 全局可调参数默认值
 // ============================================================
 
-// --- 双阈值 ---
+// --- 预瞄位置 ---
 #define DEFAULT_LOOKAHEAD      45    // 预瞄距离（行）
 
 // --- 舵机 ---
-#define DEFAULT_SERVO_KP1      1.05f  // 基础P
+#define DEFAULT_SERVO_KP1      0.65f  // 基础P
 #define DEFAULT_SERVO_KP2      0.0f   // 二次P: err×|err|
 #define DEFAULT_SERVO_KD       0.0f  // D 系数
-#define DEFAULT_GYRO_KD        0.0f   // 陀螺仪直道阻尼（0=关闭）
+#define DEFAULT_GYRO_KD        0.0f   // 陀螺仪直道阻尼
+#define DEFAULT_GYRO_KD_CURVE  0.0f  // 陀螺仪弯道阻尼（0=关闭）
 #define DEFAULT_SERVO_CENTER   95.2f // 中位角度
 #define DEFAULT_SERVO_MAX_CHA  13.0f // 最大偏角
 #define DEFAULT_SERVO_DEAD     2.0f  // 死区（像素）
 #define DEFAULT_SERVO_MAX_ADD  4.0f  // 步进限制（度/帧）
 #define DEFAULT_SERVO_DIR      1     // 0=正常 1=翻转
+#define DEFAULT_ERR_ALPHA      1.0f // err平滑系数（EMA，0.2=强抑抖 0.6=快响应）
 
 // --- 电机 ---
-#define DEFAULT_MOTOR_BASE     25    // 基础占空比 %
+#define DEFAULT_MOTOR_BASE     28    // 基础占空比 %
+#define DEFAULT_MOTOR_CURVE_DUTY 15  // 弯道占空比 %（is_straight判定为弯道时使用）
 #define DEFAULT_MOTOR_MAX      30    // 最大占空比 %
-#define DEFAULT_MOTOR_BEND_CUT 0.0f // 弯道减速系数
 #define DEFAULT_MOTOR_KP       0.0f  // 差速 P 系数
-#define DEFAULT_MOTOR_KD       0.0f  // 差速 D 系数
+#define DEFAULT_MOTOR_KD       0.0f  // 差速 D 系数 
+#define DEFAULT_MOTOR_DIFF_MAX 8     // 差速上限（%）防漂
 #endif

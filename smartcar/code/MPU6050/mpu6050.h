@@ -18,8 +18,8 @@
 // 初始化 MPU6050（带重试，失败时 LED1 闪烁提示）
 void mpu6050_module_init(void);
 
-// PIT 中断回调（由 isr.c 的 TIM6_IRQHandler 调用，与编码器共享 TIM6）
-void mpu6050_pit_callback(void);
+// 数据更新（主循环每帧调用一次，control_update 之前读取）
+void mpu6050_update(void);
 
 // 获取三轴加速度原始值
 int16 mpu6050_get_acc_x(void);

@@ -22,6 +22,8 @@ typedef uint8 border_line[pho_h];        // 重定义一个边界线数组类型
 extern border_line l_border;       // 左边界，每行一个列号
 extern border_line r_border;       // 右边界
 extern border_line center_line;    // 中线 = (左+右)/2，车应该沿它走
+extern uint8 l_border_exist[pho_h];  // 左边界该行是否真实存在（1=真边界 0=出画伪边界/无）
+extern uint8 r_border_exist[pho_h];  // 右边界该行是否真实存在
 
 extern uint16 points_l[SEED_MAX_POINTS][2];  // 左边界种子点（用于完整描绘）
 extern uint16 points_r[SEED_MAX_POINTS][2];  // 右边界种子点
@@ -35,6 +37,7 @@ extern volatile uint8_t vis_frame_ready; // 新帧已搜线完成，显示层可
 // ========== 自适应寻线参数（菜单可调）==========
 extern int32_t Block_Size;   // 局部窗口边长（奇数），默认9
 extern int32_t Clip_Value;   // 阈值偏置，越大越严格，默认4
+extern float   err_alpha;    // err EMA平滑系数，0.2~0.6
 #define MAX_TRACK_POINTS  200   // 单边最大追踪步数（编译期常量）
 
 // ========== 工具宏 ==========
@@ -51,7 +54,5 @@ int  vis_deal(void);   //搜线，return 0正常 1丢线
 void vis_draw(void);   //图像显示
 void vis_bin_draw(void);  //二值化显示（调参）
 int  is_straight(void);         // 直道判定，1=直道 0=弯道
-int  lost_line_left(void);      // 左丢线检测，-1=正常 else=丢线行号
-int  lost_line_right(void);     // 右丢线检测
 
 #endif 

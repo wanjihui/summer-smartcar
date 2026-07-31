@@ -15,10 +15,6 @@ static bool k3_wait_release = false;                         // K3长按防抖�
 static Menu_Item *key;                   // 当前选中节点的指针
 static Menu_Item head;                   // 菜单的根节点
 
-static int32_t test = 10;
-static float test1 = 3.14;
-static bool test2 = true;
-
 //菜单初始化和构建
 void menu_init(void)
 {
@@ -47,11 +43,13 @@ void menu_init(void)
         v = dynamicCreate_Menu_Number(pid, "servokp1",  &servo_kp1, float_Box);
         Menu_Set_Limit(v, 0, 5,0.05f);
         v = dynamicCreate_Menu_Number(pid, "servokp2",  &servo_kp2, float_Box);
-        Menu_Set_Limit(v, 0, 0.005f,0.0001f);
+        Menu_Set_Limit(v, 0, 0.01f,0.0001f);
         v = dynamicCreate_Menu_Number(pid, "servo_kd",  &servo_kd,  float_Box);
         Menu_Set_Limit(v, 0, 2,0.01f);
         v = dynamicCreate_Menu_Number(pid, "gyro_kd",   &gyro_kd, float_Box);
-        Menu_Set_Limit(v, -0.05f, 0.05f, 0.0005f);  // gyro_kd（ADC原始值大）
+        Menu_Set_Limit(v, -0.05f, 0.05f, 0.0005f);
+        v = dynamicCreate_Menu_Number(pid, "gyro_kdc",  &gyro_kd_curve, float_Box);
+        Menu_Set_Limit(v, -0.01f, 0.01f, 0.0001f);
         v = dynamicCreate_Menu_Number(pid, "lookhead", &lookahead, uint8_Box);
         Menu_Set_Limit(v, 5, 60, 5.0f);
         v = dynamicCreate_Menu_Number(pid, "max_add", &servo_max_add, float_Box);
@@ -63,16 +61,16 @@ void menu_init(void)
 
 
         // 电机
-        v = dynamicCreate_Menu_Number(pid, "max_duty",  &motor_max_duty, int32_Box);
-        Menu_Set_Limit(v, 0, 50,1.0f);
         v = dynamicCreate_Menu_Number(pid, "base_duty", &motor_base_duty, int32_Box);
         Menu_Set_Limit(v, 0, 50,1.0f);
-        v = dynamicCreate_Menu_Number(pid, "bend_cut",  &motor_bend_cut, float_Box);
-        Menu_Set_Limit(v, 0, 1.0f,0.001f);
+        v = dynamicCreate_Menu_Number(pid, "cur_duty", &motor_curve_duty, int32_Box);
+        Menu_Set_Limit(v, 0, 50,1.0f);
         v = dynamicCreate_Menu_Number(pid, "motor_kp",  &motor_kp, float_Box);
-        Menu_Set_Limit(v, 0, 10,0.05f);
+        Menu_Set_Limit(v, 0, 10,0.01f);
         v = dynamicCreate_Menu_Number(pid, "motor_kd",  &motor_kd, float_Box);
         Menu_Set_Limit(v, 0, 2,0.01f);
+        v = dynamicCreate_Menu_Number(pid, "diff_max",  &motor_diff_max, int32_Box);
+        Menu_Set_Limit(v, 2, 20,1.0f);
         dynamicCreate_Menu_Number(pid, "car_run",   &car_run,  bool_Box);
     }
     
@@ -85,18 +83,8 @@ void menu_init(void)
         Menu_Set_Limit(v, 3, 15, 2.0);              // 窗口3~15，仅奇数有效
         v = dynamicCreate_Menu_Number(vis, "clip_val", &Clip_Value, int32_Box);
         Menu_Set_Limit(v, 0, 20, 1.0);              // 偏置0~20
-    }
-
-    // =====folder测试文件夹=====
-    {
-    Menu_Item *folder = dynamicCreate_Menu_Folder(&head, "folder");
-    Menu_Item *num1=dynamicCreate_Menu_Number(folder, "aaa", &test, int32_Box);
-    Menu_Set_Limit(num1, 0, 100,1.0f);
-
-    Menu_Item *num2 = dynamicCreate_Menu_Number(folder, "bbb", &test1, float_Box);
-    Menu_Set_Limit(num2, -5.0f, 5.0f,1.0f);
-
-    dynamicCreate_Menu_Number(folder, "ccc", &test2, bool_Box);
+        v = dynamicCreate_Menu_Number(vis, "err_alpha", &err_alpha, float_Box);
+        Menu_Set_Limit(v, 0.1f, 1.0f, 0.05f);       // err平滑 0.1=强抑抖 1.0=关闭
     }
 
     key = head.first_son;
@@ -369,13 +357,20 @@ void menu(void)
         if(key_get_state(KEY_4) == KEY_SHORT_PRESS)
         { key_clear_state(KEY_4); K4_back(); }
 
+        /* 显示降频：每4帧刷一次屏（50FPS下≈12.5Hz）。图像是给人看的，
+         * 无需每帧刷新；SPI写屏约18ms，减少对控制链路的阻塞 */
+        static uint8 disp_cnt = 0;
         if (vis_frame_ready)
         {
-            if (display_mode == DISPLAY_MODE_BIN)
-                vis_bin_draw();
-            else if (display_mode == DISPLAY_MODE_TRACK)
-                vis_draw();
-            menu_show();
+            if (++disp_cnt >= 4)
+            {
+                disp_cnt = 0;
+                if (display_mode == DISPLAY_MODE_BIN)
+                    vis_bin_draw();
+                else if (display_mode == DISPLAY_MODE_TRACK)
+                    vis_draw();
+                menu_show();
+            }
             vis_frame_ready = 0;
         }
     }

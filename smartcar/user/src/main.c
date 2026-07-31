@@ -75,8 +75,8 @@ int main (void)
     menu_init();       					// 初始化菜单结构
     motor_init();      					// 初始化电机驱动
     //encoder_init();    					// 初始化编码器（正交解码 + PIT 中断）
-    pit_ms_init(TIM6_PIT, 10);   // 启动TIM6(MPU6050+编码器共用,10ms/100Hz)
-    mpu6050_module_init();      // 初始化 MPU6050 陀螺仪/加速度计
+    pit_ms_init(TIM6_PIT, 10);   // 启动TIM6(编码器,10ms/100Hz)
+    mpu6050_module_init();      // 初始化 MPU6050 陀螺仪/加速度计（数据在主循环读）
     servo_init();               // 初始化舵机（TIM2_CH1 PA15 50Hz PWM）
     control_init();             //pid初始化
     ips200_clear();		 					//主循环前清屏
@@ -87,13 +87,16 @@ int main (void)
 				{
 					mt9v03x_finish_flag = 0;//立即清零，防止新帧标志在后续处理中被覆盖
 					vis_deal();           //搜线 误差算法
-					if(car_run)	control_update();     //舵机 电机控制
+					if(car_run)
+					{
+						mpu6050_update();     //主循环读MPU6050，数据紧跟控制时刻（原TIM6中断100Hz读取已移除）
+						control_update();     //舵机 电机控制
+					}
 					vis_frame_ready = 1;  //通知显示层：新帧已处理lkii+，可以刷新
 				}
 		    if(!car_run) {motor_stop();}     //car_run=F立即停车，不受帧标志影响
 
 			menu();					      // 菜单主循环：按键模式切换 → 菜单/摄像头分发
-			system_delay_ms(5);//主循环延时
     }
 }
 // **************************** 代码区域 ****************************

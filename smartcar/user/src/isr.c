@@ -109,8 +109,8 @@ void TIM5_IRQHandler (void)
 void TIM6_IRQHandler (void)
 {
     encoder_pit_callback();
-    mpu6050_pit_callback();
     // 此处编写用户代码
+    // MPU6050 读取已移至主循环（mpu6050_update），软IIC忙等不再占用中断
 
     // 此处编写用户代码
     TIM6->SR &= ~TIM6->SR;                                                      // 清空中断状态
