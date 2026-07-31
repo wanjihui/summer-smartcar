@@ -1,82 +1,26 @@
-﻿
+
 #include "config.h"
 
  border_line l_border;                      // 左边界，每行一个列号
  border_line r_border;                      // 右边界
  border_line center_line;                   // 中线（边框平滑 + 中线平滑后，绘图和err共用）
- uint8 l_border_cnt[pho_h];                 // 左边界每行的点数（用于显示厚度）
- uint8 r_border_cnt[pho_h];                 // 右边界每行的点数
  uint8 l_border_exist[pho_h];               // 左边界该行是否真实存在（1=真边界 0=出画伪边界/无）
  uint8 r_border_exist[pho_h];               // 右边界该行是否真实存在
 
  volatile float err;                        // 中线偏离图像中心的像素均值，>0偏右
  volatile uint8_t vis_frame_ready;          // 新帧处理完成，显示层可刷新
+ volatile int16  asc_valid_dbg = 0;          // 诊断：ASC窗口有效行数（vis_draw显示用）
+ volatile uint8  hold_dbg = 0;               // 诊断：锁存激活标志（vis_draw显示用）
 
- uint8 lookahead = DEFAULT_LOOKAHEAD;       // 预瞄行数（从行100向上偏移），菜单可调
-
-/* ================================================================
- * 局部窗口参数（菜单可调）
- *   Block_Size: 局部窗口边长（奇数），默认 9×9
- *   Clip_Value: 阈值 = 窗口均值 - 偏置，越大越严格
- * ================================================================ */
-int32_t Block_Size = 9;
-int32_t Clip_Value = 4;
-float   err_alpha = DEFAULT_ERR_ALPHA;
-int     grow_scan_complete = 0;                     // 生长完成标志：边界到达对侧屏幕边缘=扫描完成
+ uint8 asc_far = DEFAULT_ASC_FAR;             // ASC采样远行（顶部行），菜单可调，默认10
+uint8 straight_far = DEFAULT_STRAIGHT_FAR;    // 直线判定采样远行（顶部行），菜单可调，默认30
+static int16 last_valid_width = 60;            // 最近双边真实路宽（逐行扫描外推基准）
 
 /* ================================================================
  * Otsu 二值化图像缓存
  *   0=黑（背景）, 255=白（赛道）
  * ================================================================ */
 uint8 Image_Used[pho_h][pho_w];
-
-/* ================================================================
- * 4 方向行进表（移植自 MCZSCS）
- *   dir=0→上, 1→右, 2→下, 3→左
- *   dir_front[dir]:      直行方向
- *   dir_frontleft[dir]:  左手前（左巡线用）
- *   dir_frontright[dir]: 右手前（右巡线用）
- * ================================================================ */
-static const int dir_front[4][2]      = {{ 0,-1}, { 1, 0}, { 0, 1}, {-1, 0}};
-static const int dir_frontleft[4][2]  = {{-1,-1}, { 1,-1}, { 1, 1}, {-1, 1}};
-static const int dir_frontright[4][2] = {{ 1,-1}, { 1, 1}, {-1, 1}, {-1,-1}};
-
-/* ================================================================
- * 滑动窗口增量更新 O(n) — 移植自 MCZSCS Image.c updata_sum()
- * ================================================================ */
-static int updata_sum(int sum, int x, int y, int half, int dirx, int diry)
-{
-    uint8 flag = 0;
-    if (diry != 0)
-    {
-        if (diry > 0)
-        {
-            for (int dx = -half; dx <= half; ++dx)
-            { sum -= AT(x + dx, y - half); sum += AT(x + dx, y + half + 1); }
-        }
-        else
-        {
-            for (int dx = -half; dx <= half; ++dx)
-            { sum -= AT(x + dx, y + half); sum += AT(x + dx, y - half - 1); }
-        }
-        flag = 1;
-    }
-    if (dirx != 0)
-    {
-        if (flag) y += diry;
-        if (dirx > 0)
-        {
-            for (int dy = -half; dy <= half; ++dy)
-            { sum -= AT(x - half, y + dy); sum += AT(x + half + 1, y + dy); }
-        }
-        else
-        {
-            for (int dy = -half; dy <= half; ++dy)
-            { sum -= AT(x + half, y + dy); sum += AT(x - half - 1, y + dy); }
-        }
-    }
-    return sum;
-}
 
 /* ================================================================
  * 大津法 (Otsu) — 下采样 4x，安全钳 20~235
@@ -118,493 +62,6 @@ static int compute_otsu(void)
     return best_th;
 }
 
-/* ================================================================
- * find_seeds — 从图像底部向上全屏扫描找左右种子
- *
- * 基于二值图 Image_Used（0=黑/背景，255=白/赛道）
- * 左右各自从边缘向中心扫描，找首次 黑→白 跳变作为赛道边界
- *
- * 左右各选3行候选（y=115,100,85），取中位数种子，抗单行野值
- *
- * 调参: 无独立参数，依赖 Otsu 阈值质量
- * 返回: 左右种子坐标，(llx,lly) 和 (rrx,rry)，-1 表示未找到
- * ================================================================ */
-static void find_seeds(int *llx, int *lly, int *rrx, int *rry)
-{
-    *llx = -1; *rrx = -1;
-
-    /* 候选行：底部3行采样，避免单行噪声误判 */
-    int sample_rows[3] = {115, 100, 85};
-    int lx_cand[3], ly_cand[3], rx_cand[3], ry_cand[3];
-    int lc = 0, rc = 0;
-
-    for (int i = 0; i < 3; i++)
-    {
-        int y = sample_rows[i];
-
-        /* 左种子：从左边缘全行扫，找 B→W→W→W（≥3连白，过滤噪点） */
-        for (int x = 1; x < pho_w - 3; x++)
-        {
-            if (Image_Used[y][x - 1] == 0
-                && Image_Used[y][x] == 255
-                && Image_Used[y][x + 1] == 255
-                && Image_Used[y][x + 2] == 255)
-            {
-                lx_cand[lc] = x;
-                ly_cand[lc] = y;
-                lc++;
-                break;
-            }
-        }
-
-        /* 右种子：从右边缘全行扫，找 W→W→W→B（≥3连白，过滤噪点）*/
-        for (int x = pho_w_max - 1; x >= 3; x--)
-        {
-            if (Image_Used[y][x + 1] == 0
-                && Image_Used[y][x] == 255
-                && Image_Used[y][x - 1] == 255
-                && Image_Used[y][x - 2] == 255)
-            {
-                rx_cand[rc] = x;
-                ry_cand[rc] = y;
-                rc++;
-                break;
-            }
-        }
-    }
-
-    /* 取中位数种子（抗单行野值）*/
-    if (lc >= 2)
-    {
-        for (int a = 0; a < lc - 1; a++)
-            for (int b = a + 1; b < lc; b++)
-                if (lx_cand[a] > lx_cand[b])
-                {
-                    int t = lx_cand[a]; lx_cand[a] = lx_cand[b]; lx_cand[b] = t;
-                    t = ly_cand[a]; ly_cand[a] = ly_cand[b]; ly_cand[b] = t;
-                }
-        int mi = lc / 2;
-        *llx = lx_cand[mi];
-        *lly = ly_cand[mi];
-    }
-    else if (lc == 1) { *llx = lx_cand[0]; *lly = ly_cand[0]; }
-
-    if (rc >= 2)
-    {
-        for (int a = 0; a < rc - 1; a++)
-            for (int b = a + 1; b < rc; b++)
-                if (rx_cand[a] > rx_cand[b])
-                {
-                    int t = rx_cand[a]; rx_cand[a] = rx_cand[b]; rx_cand[b] = t;
-                    t = ry_cand[a]; ry_cand[a] = ry_cand[b]; ry_cand[b] = t;
-                }
-        int mi = rc / 2;
-        *rrx = rx_cand[mi];
-        *rry = ry_cand[mi];
-    }
-    else if (rc == 1) { *rrx = rx_cand[0]; *rry = ry_cand[0]; }
-}
-/* ================================================================
- * 底部扫描：逐行扫 118→(种子行+1)，直接填 l_border/r_border
- * 种子行以下无种子覆盖，逐行扫更快更准
- * ================================================================ */
-static void bottom_scan(int seed_y)
-{
-    int end = seed_y + 1;
-    if (end < 41) end = 41;
-    for (int y = 118; y >= end; y--)
-    {
-        // 找该行最长连续白段
-        int best_s = -1, best_e = -1, best_len = 0;
-        int run_s = -1;
-        for (int x = 0; x < pho_w; x++)
-        {
-            if (Image_Used[y][x] == 255)
-            {
-                if (run_s < 0) run_s = x;
-            }
-            else
-            {
-                if (run_s >= 0)
-                {
-                    int len = x - run_s;
-                    if (len > best_len) { best_len = len; best_s = run_s; best_e = x - 1; }
-                    run_s = -1;
-                }
-            }
-        }
-        if (run_s >= 0)
-        {
-            int len = pho_w - run_s;
-            if (len > best_len) { best_len = len; best_s = run_s; best_e = pho_w - 1; }
-        }
-
-        if (best_len >= 3)
-        {
-            /* 只填补空缺，不覆盖 pho_border 已设置的有效数据。
-             * exist 按白段端点的黑白跳变记录该侧是否真边界：
-             * 贴边（起点0/终点187）→ 出画伪边界 → exist=0，pho_center 走单边分支 */
-            if (l_border[y] == BORDER_INVALID)
-            {
-                l_border[y] = (uint8)best_s;
-                l_border_cnt[y] = (uint8)(best_e - best_s + 1);  // 白段实际宽度，单边外推用
-                l_border_exist[y] = (best_s > 0 && Image_Used[y][best_s - 1] == 0);  // 黑→白跳变
-            }
-            if (r_border[y] == BORDER_INVALID)
-            {
-                r_border[y] = (uint8)best_e;
-                r_border_cnt[y] = (uint8)(best_e - best_s + 1);  // 白段实际宽度
-                r_border_exist[y] = (best_e < pho_w_max && Image_Used[y][best_e + 1] == 0);  // 白→黑跳变
-            }
-        }
-    }
-}
-
-/* ================================================================
- * 种子生长 — 4方向摸墙 + 局部自适应阈值
- *
- * 移植自 MCZSCS findline_adaptive，适配无IPM像素空间
- * 每步只看2个方向（前方+侧前方），3种动作（直走/转向前进/原地转）
- * 局部9×9滑动窗口阈值自动适应远近亮度变化
- *
- * 保底: 连续转4次没前进 → 逐行从边缘向中心重扫找新起点
- * 调参: Block_Size(窗口,默认9), Clip_Value(偏置,默认4)
- * ================================================================ */
-
-uint16 points_l[SEED_MAX_POINTS][2];  // 左边界种子坐标存储
-uint16 points_r[SEED_MAX_POINTS][2];  // 右边界种子坐标存储
-uint16 data_l, data_r;                // 左右各自实际存储点数
-
-/* ---左边界生长（4方向左手摸墙 + 局部自适应阈值 + 断点逐行回退）--- */
-static void seed_grow_left(int lx, int ly)
-{
-    int half = Block_Size >> 1;
-    int cx = lx, cy = ly;
-    int idx = 0;
-    int dir = 0;          // 0=上 1=右 2=下 3=左
-    int turn = 0;         // 连续转弯计数
-    int last_y = cy;
-    int same_row_cnt = 1;
-    int had_recovery = 0; // 是否触发过保底跳转（跳转后到边缘不算自然完成）
-
-    /* 初始化局部窗口和 */
-    int local_sum = 0;
-    for (int dy = -half; dy <= half; dy++)
-        for (int dx = -half; dx <= half; dx++)
-            local_sum += AT(cx + dx, cy + dy);
-    int local_thres = local_sum / (Block_Size * Block_Size) - Clip_Value;
-
-    while (idx < MAX_TRACK_POINTS
-           && cx > 0 && cx < pho_w - 1
-           && cy > 1 && cy < pho_h - 1)
-    {
-        /* 安全钳：窗口全黑时 local_thres 可能为负 → 黑白误判 → 跟丢。
-         * 钳位到 ≥1，确保 Image_Used 的二值 (0/255) 正确分类。 */
-        if (local_thres < 1) local_thres = 1;
-
-        /* 存入当前点 */
-        points_l[idx][0] = cx;
-        points_l[idx][1] = cy;
-        idx++;
-
-        /* 同行连续8点 → 振荡，停止 */
-        if (cy == last_y)
-        {
-            same_row_cnt++;
-            if (same_row_cnt >= 8) break;
-        }
-        else { same_row_cnt = 1; last_y = cy; }
-
-        int front     = AT(cx + dir_front[dir][0],     cy + dir_front[dir][1]);
-        int frontleft = AT(cx + dir_frontleft[dir][0], cy + dir_frontleft[dir][1]);
-
-        if (front < local_thres)
-        {
-            /* 前方是黑 → 右转贴墙 */
-            dir = (dir + 1) & 3;
-            turn++;
-            if (turn >= 4)
-            {
-                /* ======== 保底：逐行从边缘→中心扫描（黑→白跳变） ======== */
-                had_recovery = 1;  // 标记发生过跳转
-                int found = 0;
-                for (int ry = cy - 1; ry > 20 && !found; ry--)
-                {
-                    for (int x = 1; x < pho_w - 1; x++)
-                    {
-                        if (Image_Used[ry][x - 1] == 0
-                            && Image_Used[ry][x] == 255)
-                        {
-                            cx = x; cy = ry; dir = 0; turn = 0;
-                            local_sum = 0;
-                            for (int dy = -half; dy <= half; dy++)
-                                for (int dx = -half; dx <= half; dx++)
-                                    local_sum += AT(cx + dx, cy + dy);
-                            local_thres = local_sum
-                                        / (Block_Size * Block_Size) - Clip_Value;
-                            found = 1;
-                            break;
-                        }
-                    }
-                }
-                if (!found) break;  // 所有行都扫不到 → 真丢了
-            }
-        }
-        else if (frontleft < local_thres)
-        {
-            /* 左前方是黑 → 直走 */
-            local_sum = updata_sum(local_sum, cx, cy, half,
-                                   dir_front[dir][0], dir_front[dir][1]);
-            cx += dir_front[dir][0];
-            cy += dir_front[dir][1];
-            turn = 0;
-            had_recovery = 0;  // 成功直走 → 恢复正常生长状态
-            local_thres = local_sum / (Block_Size * Block_Size) - Clip_Value;
-        }
-        else
-        {
-            /* 前方和左前方都是白 → 左转靠墙 */
-            local_sum = updata_sum(local_sum, cx, cy, half,
-                                   dir_frontleft[dir][0], dir_frontleft[dir][1]);
-            cx += dir_frontleft[dir][0];
-            cy += dir_frontleft[dir][1];
-            dir = (dir + 3) & 3;       // 等价于 dir-1
-            turn = 0;
-            had_recovery = 0;  // 成功靠墙 → 恢复正常生长状态
-            local_thres = local_sum / (Block_Size * Block_Size) - Clip_Value;
-        }
-
-        /* 只有自然生长到边界才算扫描完成 */
-        if (!had_recovery)
-        {
-            if (cy < 20)
-            {
-                grow_scan_complete = 1;  // 爬到顶部 → 扫描完成
-                break;
-            }
-            if (cx <= pho_w_min + 2)
-            {
-                grow_scan_complete = 1;  // 左边界到达左屏幕边缘 → 扫描完成
-                break;
-            }
-            if (cx >= pho_w_max - 2)
-            {
-                grow_scan_complete = 1;  // 左边界到达右屏幕边缘 → 扫描完成
-                break;
-            }
-        }
-    }
-
-    /* 兜底：循环因 while 条件退出（cx/cy 越界）也视为到达边界（仅自然生长） */
-    if (!had_recovery && !grow_scan_complete
-        && (cx <= 1 || cx >= pho_w - 2 || cy <= 1))
-        grow_scan_complete = 1;
-
-    data_l = idx;
-}
-
-/* ---右边界生长（4方向右手摸墙 + 局部自适应阈值 + 断点逐行回退）--- */
-static void seed_grow_right(int rx, int ry)
-{
-    int half = Block_Size >> 1;
-    int cx = rx, cy = ry;
-    int idx = 0;
-    int dir = 0;          // 0=上 1=右 2=下 3=左
-    int turn = 0;
-    int last_y = cy;
-    int same_row_cnt = 1;
-    int had_recovery = 0; // 是否触发过保底跳转（跳转后到边缘不算自然完成）
-
-    /* 初始化局部窗口和 */
-    int local_sum = 0;
-    for (int dy = -half; dy <= half; dy++)
-        for (int dx = -half; dx <= half; dx++)
-            local_sum += AT(cx + dx, cy + dy);
-    int local_thres = local_sum / (Block_Size * Block_Size) - Clip_Value;
-
-    while (idx < MAX_TRACK_POINTS
-           && cx > 0 && cx < pho_w - 1
-           && cy > 1 && cy < pho_h - 1)
-    {
-        /* 安全钳：窗口全黑时 local_thres 可能为负 → 黑白误判 → 跟丢。
-         * 钳位到 ≥1，确保 Image_Used 的二值 (0/255) 正确分类。 */
-        if (local_thres < 1) local_thres = 1;
-
-        /* 存入当前点 */
-        points_r[idx][0] = cx;
-        points_r[idx][1] = cy;
-        idx++;
-
-        /* 同行连续8点 → 振荡，停止 */
-        if (cy == last_y)
-        {
-            same_row_cnt++;
-            if (same_row_cnt >= 8) break;
-        }
-        else { same_row_cnt = 1; last_y = cy; }
-
-        int front      = AT(cx + dir_front[dir][0],      cy + dir_front[dir][1]);
-        int frontright = AT(cx + dir_frontright[dir][0], cy + dir_frontright[dir][1]);
-
-        if (front < local_thres)
-        {
-            /* 前方是黑 → 左转贴墙 */
-            dir = (dir + 3) & 3;       // 等价于 dir-1
-            turn++;
-            if (turn >= 4)
-            {
-                /* ======== 保底：逐行从边缘→中心扫描（黑→白跳变） ======== */
-                had_recovery = 1;  // 标记发生过跳转
-                int found = 0;
-                for (int ry_idx = cy - 1; ry_idx > 20 && !found; ry_idx--)
-                {
-                    for (int x = pho_w_max - 1; x >= 1; x--)
-                    {
-                        if (Image_Used[ry_idx][x + 1] == 0
-                            && Image_Used[ry_idx][x] == 255)
-                        {
-                            cx = x; cy = ry_idx; dir = 0; turn = 0;
-                            local_sum = 0;
-                            for (int dy = -half; dy <= half; dy++)
-                                for (int dx = -half; dx <= half; dx++)
-                                    local_sum += AT(cx + dx, cy + dy);
-                            local_thres = local_sum
-                                        / (Block_Size * Block_Size) - Clip_Value;
-                            found = 1;
-                            break;
-                        }
-                    }
-                }
-                if (!found) break;
-            }
-        }
-        else if (frontright < local_thres)
-        {
-            /* 右前方是黑 → 直走 */
-            local_sum = updata_sum(local_sum, cx, cy, half,
-                                   dir_front[dir][0], dir_front[dir][1]);
-            cx += dir_front[dir][0];
-            cy += dir_front[dir][1];
-            turn = 0;
-            had_recovery = 0;  // 成功直走 → 恢复正常生长状态
-            local_thres = local_sum / (Block_Size * Block_Size) - Clip_Value;
-        }
-        else
-        {
-            /* 前方和右前方都是白 → 右转靠墙 */
-            local_sum = updata_sum(local_sum, cx, cy, half,
-                                   dir_frontright[dir][0], dir_frontright[dir][1]);
-            cx += dir_frontright[dir][0];
-            cy += dir_frontright[dir][1];
-            dir = (dir + 1) & 3;       // 右转
-            turn = 0;
-            had_recovery = 0;  // 成功靠墙 → 恢复正常生长状态
-            local_thres = local_sum / (Block_Size * Block_Size) - Clip_Value;
-        }
-
-        /* 只有自然生长到边界才算扫描完成 */
-        if (!had_recovery)
-        {
-            if (cy < 20)
-            {
-                grow_scan_complete = 1;  // 爬到顶部 → 扫描完成
-                break;
-            }
-            if (cx <= pho_w_min + 2)
-            {
-                grow_scan_complete = 1;  // 右边界到达左屏幕边缘 → 扫描完成
-                break;
-            }
-            if (cx >= pho_w_max - 2)
-            {
-                grow_scan_complete = 1;  // 右边界到达右屏幕边缘 → 扫描完成
-                break;
-            }
-        }
-    }
-
-    /* 兜底：循环因 while 条件退出（cx/cy 越界）也视为到达边界（仅自然生长） */
-    if (!had_recovery && !grow_scan_complete
-        && (cx <= 1 || cx >= pho_w - 2 || cy <= 1))
-        grow_scan_complete = 1;
-
-    data_r = idx;
-}
-
-/* ================================================================
- * 从种子点序列提取按行边界数组
- *
- * 种子点是黑像素（边界外侧），dir 将其转为白像素（赛道内侧）：
- *   dir = +1（左边界）→ 向右移1列，取最小x，显示时往右画count个点
- *   dir = -1（右边界）→ 向左移1列，取最大x，显示时往左画count个点
- *
- * 未生长到的行默认填 BORDER_INVALID（无数据标记）
- * ================================================================ */
-static uint8 row_xs[SEED_MAX_POINTS];  // 同行x值排序缓存（可重用）
-
-static void pho_border(uint16 points[][2], uint16 total,
-                       border_line border, uint8 *cnt_out, uint8 *exist_out, int dir)
-{
-    /* 先全部填 BORDER_INVALID，表示"无数据" */
-    for (int y = 0; y < pho_h; y++)
-    {
-        border[y] = BORDER_INVALID;
-        cnt_out[y] = 0;
-        exist_out[y] = 0;
-    }
-
-    if (total == 0) return;
-
-    /* 按 y 分组，dir>0 取最小x（第一个），dir<0 取最大x（最后一个） */
-    int cur_y  = points[0][1];
-    int cnt = 0;
-
-    for (int i = 0; i < total; i++)
-    {
-        int py = points[i][1];
-        int px = points[i][0];
-
-        if (py != cur_y)
-        {
-            if (cnt > 0)
-            {
-                for (int a = 0; a < cnt - 1; a++)
-                    for (int b = a + 1; b < cnt; b++)
-                        if (row_xs[a] > row_xs[b])
-                            { uint8 t = row_xs[a]; row_xs[a] = row_xs[b]; row_xs[b] = t; }
-
-                int pick = (dir > 0) ? row_xs[0] : row_xs[cnt - 1];
-                int val = pick + dir;
-                if (val < pho_w_min) val = pho_w_min;
-                if (val > pho_w_max) val = pho_w_max;
-                border[cur_y] = (uint8)val;
-                cnt_out[cur_y] = (uint8)cnt;
-                exist_out[cur_y] = 1;   // 生长点描出的边界真实可见
-            }
-
-            cur_y = py;
-            cnt = 0;
-        }
-        row_xs[cnt++] = (uint8)px;
-    }
-
-    // 最后一组结算
-    if (cnt > 0)
-    {
-        for (int a = 0; a < cnt - 1; a++)
-            for (int b = a + 1; b < cnt; b++)
-                if (row_xs[a] > row_xs[b])
-                    { uint8 t = row_xs[a]; row_xs[a] = row_xs[b]; row_xs[b] = t; }
-
-        int pick = (dir > 0) ? row_xs[0] : row_xs[cnt - 1];
-        int val = pick + dir;
-        if (val < pho_w_min) val = pho_w_min;
-        if (val > pho_w_max) val = pho_w_max;
-        border[cur_y] = (uint8)val;
-        cnt_out[cur_y] = (uint8)cnt;
-        exist_out[cur_y] = 1;
-    }
-}
 
 
 /* ================================================================
@@ -636,13 +93,12 @@ static void border_smooth(border_line border)
  * pho_center — 中线生成 + 偏差计算
  *
  * 1. border_smooth(l_border/r_border) — 平滑左右边界
- * 2. center_line[]: 双边→中点, 单边→中点到屏幕边, 都缺→白像素重心
+ * 2. center_line[]: 双边→中点(记录宽度), 单边→真实路宽外推, 都缺→白像素重心
  * 3. border_smooth(center_line) — 平滑中线
- * 4. 在 y_look±10 窗口内收集 center_line≠255 的行 → 自适应步长采样 → 均值 = err
+ * 4. ASC多行加权平均: 100→自适应far, 权重2.0→2.5线性递增(远重近轻), 均值=err
  *
- * 调参: lookahead(预瞄行,默认30); 单边→白像素重心
+ * 调参: far(ASC远行基准,默认10)+自适应分段偏移; 单边→最新真实路宽外推; 双侧丢线→锁存
  * ================================================================ */
-static int candidates[pho_h];  // 候选行缓存（可重用）
 
 /* ================================================================
  * 直道判定：检查中线是否接近竖直直线
@@ -652,19 +108,22 @@ static int candidates[pho_h];  // 候选行缓存（可重用）
  *   - 中线已经 border_smooth 平滑，抗噪更好
  *   - 只需一条线的斜率+偏离检查，比旧版左右各6点更简洁
  *
- * y_start=100, y_end=55：中段区域
+ * y_start=100, y_end=straight_far（默认30）：中段区域，终点菜单可调
  * 返回: 1=直道  0=弯道
  * ================================================================ */
 int is_straight(void)
 {
-    int y_start = 100, y_end = 40, step = 5;
+    int y_start = 100, step = 5;
+    int y_end = (int)straight_far;
+    if (y_end < 5)  y_end = 5;
+    if (y_end > 95) y_end = 95;
 
     /* 两端必须有效 */
     if (center_line[y_start] == BORDER_INVALID
         || center_line[y_end] == BORDER_INVALID)
         return 0;
 
-    /* 中线斜率：|k| < 0.45 → 60行内偏移 <27px */
+    /* 中线斜率：|k| < 0.45 → (100-y_end)行内偏移 <0.45×行数 px */
     float kc = (float)(center_line[y_end] - center_line[y_start])
              / (float)(y_end - y_start);
     if (kc > 0.45f || kc < -0.45f) return 0;
@@ -685,11 +144,242 @@ int is_straight(void)
     return (ok >= 8) ? 1 : 0;
 }
 
-static void pho_center(int both_lost)
+/* ================================================================
+ * calc_adaptive_far — 自适应预瞄远行
+ *
+ * 用上一帧 err 的 |err| 分段选择 ASC 采样远行：
+ *   直道看远（far 减小，预瞄更远），弯道看近（far 增大，跟住弯心）
+ * 偏移相对菜单调好的 asc_far，阈值/偏移为编译期常量(ADAPT_*)，
+ * 最终钳位 5~95
+ * ================================================================ */
+static int calc_adaptive_far(void)
+{
+    float e = (err > 0) ? err : -err;
+    int y_far = (int)asc_far;
+
+    if      (e <= (float)ADAPT_ERR_TH1) y_far += ADAPT_OFF_STR;
+    else if (e <= (float)ADAPT_ERR_TH2) y_far += ADAPT_OFF_SML;
+    else                                y_far += ADAPT_OFF_BIG;
+
+    if (y_far < 10)  y_far = 10;
+    if (y_far > 100) y_far = 100;
+    return y_far;
+}
+
+/* ================================================================
+ * sweep_boundaries — 逐行扫描替代种子生长
+ *
+ * 从底行最长白列出发，逐行向上扫边界：
+ *   左边界: 从 prev_l ± range 搜 B→W→W（黑→白→白）= 真左边界
+ *   右边界: 从 prev_r ± range 搜 W→B（白→黑）= 真右边界
+ *   单边丢: last_valid_width 外推，exist=0
+ *   双边丢: 中心区域白检测 → 十字继续 / 黑区5行停止
+ *
+ * 直接填充 l_border[] / r_border[] / exist[]，替代种子生长全流程。
+ * 返回: 1=双侧丢线（pho_center安全钳触发） 0=正常
+ * ================================================================ */
+static int sweep_boundaries(void)
+{
+    /* ---- 底行找最长白列作种子 ---- */
+    int y_bot = pho_h - 1;
+    int best_s = -1, best_e = -1, best_len = 0;
+    int run_s = -1;
+    for (int x = 0; x < pho_w; x++)
+    {
+        if (Image_Used[y_bot][x] == 255)
+        { if (run_s < 0) run_s = x; }
+        else if (run_s >= 0)
+        {
+            int len = x - run_s;
+            if (len > best_len) { best_len = len; best_s = run_s; best_e = x - 1; }
+            run_s = -1;
+        }
+    }
+    if (run_s >= 0)
+    { int len = pho_w - run_s;
+      if (len > best_len) { best_len = len; best_s = run_s; best_e = pho_w - 1; } }
+
+    if (best_len < 3) return 1;  /* 底行无赛道 */
+
+    /* 验证真边界（exist=黑白跳变） */
+    int prev_l = best_s;
+    int prev_r = best_e;
+    int l_exist = (best_s > 0 && Image_Used[y_bot][best_s - 1] == 0);
+    int r_exist = (best_e < pho_w_max && Image_Used[y_bot][best_e + 1] == 0);
+
+    last_valid_width = best_e - best_s;
+    if (last_valid_width < 20)  last_valid_width = 20;
+    if (last_valid_width > 160) last_valid_width = 160;
+
+    l_border[y_bot] = (uint8)best_s;
+    r_border[y_bot] = (uint8)best_e;
+    l_border_exist[y_bot] = (uint8)l_exist;
+    r_border_exist[y_bot] = (uint8)r_exist;
+
+    /* ---- 向上逐行扫描 ---- */
+    int consec_lost = 0;
+
+    for (int y = y_bot - 1; y >= 0; y--)
+    {
+        int range = last_valid_width / 4;
+        if (range < 3) range = 3;
+        if (range > 25) range = 25;
+
+        int new_l = BORDER_INVALID, new_r = BORDER_INVALID;
+        int found_l = 0, found_r = 0;
+        int l_real = 0, r_real = 0;
+
+        /* --- 搜左边界: 从 prev_l-range 向右找 B→W→W --- */
+        {
+            int x0 = prev_l - range; if (x0 < 0) x0 = 0;
+            int x1 = prev_l + range; if (x1 > pho_w - 3) x1 = pho_w - 3;
+            for (int x = x0; x <= x1; x++)
+            {
+                if (Image_Used[y][x] == 0
+                    && Image_Used[y][x + 1] == 255
+                    && Image_Used[y][x + 2] == 255)
+                { new_l = x + 1; l_real = 1; found_l = 1; break; }
+            }
+            /* 局部未找到 → 扩大范围（3×range半径）搜 B→W→W */
+            if (!found_l)
+            {
+                int lx0 = prev_l - range * 3; if (lx0 < 0) lx0 = 0;
+                int lx1 = prev_l + range * 3; if (lx1 > pho_w - 3) lx1 = pho_w - 3;
+                for (int x = lx0; x <= lx1; x++)
+                {
+                    if (Image_Used[y][x] == 0
+                        && Image_Used[y][x + 1] == 255
+                        && Image_Used[y][x + 2] == 255)
+                    { new_l = x + 1; l_real = 1; found_l = 1; break; }
+                }
+            }
+        }
+
+        /* --- 搜右边界: 从 prev_r+range 向左找 W→B（白→黑跳变） --- */
+        {
+            int x0 = prev_r + range; if (x0 >= pho_w) x0 = pho_w_max;
+            int x1 = prev_r - range; if (x1 < 0) x1 = 0;
+            for (int x = x0; x >= x1; x--)
+            {
+                if (Image_Used[y][x] == 255
+                    && x + 1 < pho_w
+                    && Image_Used[y][x + 1] == 0)
+                { new_r = x; r_real = 1; found_r = 1; break; }
+            }
+            /* 局部未找到 → 扩大范围（3×range半径）搜 W→B */
+            if (!found_r)
+            {
+                int rx0 = prev_r + range * 3; if (rx0 >= pho_w) rx0 = pho_w_max;
+                int rx1 = prev_r - range * 3; if (rx1 < 0) rx1 = 0;
+                for (int x = rx0; x >= rx1; x--)
+                {
+                    if (Image_Used[y][x] == 255
+                        && x + 1 < pho_w
+                        && Image_Used[y][x + 1] == 0)
+                    { new_r = x; r_real = 1; found_r = 1; break; }
+                }
+            }
+        }
+
+        /* --- 处理边界状态 --- */
+        if (found_l && found_r)
+        {
+            /* 双边都找到 → 更新路宽 */
+            last_valid_width = new_r - new_l;
+            if (last_valid_width < 20)  last_valid_width = 20;
+            if (last_valid_width > 160) last_valid_width = 160;
+            consec_lost = 0;
+        }
+        else if (found_l && !found_r)
+        {
+            if (y >= 70)
+            {
+                /* 底部单边 → 屏幕边缘作对侧，pho_center中点=强转向 */
+                new_r = pho_w_max;
+                r_real = 1;
+            }
+            else
+            {
+                /* 上部单边 → 路宽外推 */
+                new_r = new_l + last_valid_width;
+                if (new_r > pho_w_max) new_r = pho_w_max;
+            }
+            consec_lost = 0;
+        }
+        else if (!found_l && found_r)
+        {
+            if (y >= 70)
+            {
+                new_l = 0;
+                l_real = 1;
+            }
+            else
+            {
+                new_l = new_r - last_valid_width;
+                if (new_l < 0) new_l = 0;
+            }
+            consec_lost = 0;
+        }
+        else
+        {
+            /* 双边丢: 检测中心区域白像素 → 十字路口 vs 真丢线 */
+            int center_w = 0;
+            int cs = pho_center_x - 20; if (cs < 0) cs = 0;
+            int ce = pho_center_x + 20; if (ce >= pho_w) ce = pho_w_max;
+            for (int x = cs; x <= ce; x++)
+                if (Image_Used[y][x] == 255) center_w++;
+
+            if (center_w > 10)
+            {
+                /* 十字路口 / 大弯: 沿用上一行边界 */
+                new_l = prev_l; new_r = prev_r;
+                l_real = 0; r_real = 0;
+                consec_lost = 0;
+            }
+            else
+            {
+                /* 真丢线 */
+                consec_lost++;
+                if (consec_lost >= 5)
+                {
+                    /* 5行连续全黑 → 停止，上方全标无效 */
+                    for (int ry = y; ry >= 0; ry--)
+                    {
+                        l_border[ry] = BORDER_INVALID;
+                        r_border[ry] = BORDER_INVALID;
+                        l_border_exist[ry] = 0;
+                        r_border_exist[ry] = 0;
+                    }
+                    return 1;
+                }
+                /* 本行标无效，沿用prev继续试 */
+                l_border[y] = BORDER_INVALID;
+                r_border[y] = BORDER_INVALID;
+                l_border_exist[y] = 0;
+                r_border_exist[y] = 0;
+                continue;
+            }
+        }
+
+        /* 写入本行 */
+        l_border[y] = (uint8)new_l;
+        r_border[y] = (uint8)new_r;
+        l_border_exist[y] = (uint8)l_real;
+        r_border_exist[y] = (uint8)r_real;
+        prev_l = new_l;
+        prev_r = new_r;
+    }
+
+    return 0;
+}
+
+static void pho_center(void)
 {
     // ---- 平滑边界 ----
     border_smooth(l_border);
     border_smooth(r_border);
+
+    static int last_real_width = 60;   // 最近一次双边真实宽度（单边外推基准）
 
     // ---- 生成 center_line[]（显示 + err 共用） ----
     for (int y = pho_h - 1; y >= 0; y--)
@@ -698,25 +388,24 @@ static void pho_center(int both_lost)
         int r = (int)r_border[y];
         int c;
 
-        /* exist[] 区分真边界与补线填的伪边界（贴边=出画）：
-         * 双边真 → 中点；单边真 → 外推 + cnt 放大；都无 → 白重心 */
+        /* 双边真 → 中点（记录宽度为外推基准）；
+         * 单边真 → 最近真实路宽外推（不再拉到屏幕边缘）；
+         * 都无 → 白像素重心 */
         if (l != BORDER_INVALID && r != BORDER_INVALID
             && l_border_exist[y] && r_border_exist[y])
         {
             c = (l + r) / 2;
+            last_real_width = r - l;
+            if (last_real_width < 20)  last_real_width = 20;
+            if (last_real_width > 160) last_real_width = 160;
         }
         else if (l != BORDER_INVALID && l_border_exist[y])
         {
-            /* 单边时取最远边界点（l + cnt - 1），等效扩宽赛道 → 加大err */
-            int far_l = (int)l + (int)l_border_cnt[y] - 1;
-            if (far_l > pho_w_max) far_l = pho_w_max;
-            c = (far_l + pho_w_max) / 2;
+            c = l + last_real_width / 2;
         }
         else if (r != BORDER_INVALID && r_border_exist[y])
         {
-            int far_r = (int)r - (int)r_border_cnt[y] + 1;
-            if (far_r < pho_w_min) far_r = pho_w_min;
-            c = far_r / 2;
+            c = r - last_real_width / 2;
         }
         else
         {
@@ -748,189 +437,71 @@ static void pho_center(int both_lost)
     // ---- 平滑中线（消除半宽偏移可能引入的不连续）----
     border_smooth(center_line);
 
-    // ---- 动态预瞄：弯道看近(err大)、直道看远(err小) ----
-    // 弯曲量 = 中线相对"端点连线"的偏离均值（二阶量，不依赖上一帧err）：
-    //   直道即使横向偏移大，各点仍近似共线 → curve_est≈0 → 看远
-    //   弯道中点线向内弯，curve_est 随曲率增大 → 看近
-    // 旧版用绝对偏移会把"偏置直道"误判成弯道
-    int curve_est = 0, ce_cnt = 0;
-    {
-        int y_a = 100, y_b = 85;
-        int ca = center_line[y_a], cb = center_line[y_b];
-        if (ca != BORDER_INVALID && cb != BORDER_INVALID)
-        {
-            for (int y = 95; y >= 90; y -= 5)
-            {
-                int c = center_line[y];
-                if (c == BORDER_INVALID) continue;
-                float expect = (float)ca + (float)(cb - ca) * (float)(y - y_a)
-                             / (float)(y_b - y_a);
-                float d = (float)c - expect;
-                if (d < 0) d = -d;
-                curve_est += (int)d;
-                ce_cnt++;
-            }
-        }
-    }
-    if (ce_cnt > 0) curve_est /= ce_cnt;
-    // curve_est≈0~6(直道) → 看远;  >24(急弯) → 看近
-    int delta_look = (curve_est > 24) ? 25 : (curve_est > 12) ? 15 : (curve_est > 6) ? 5 : 0;
-    int y_look = 100 - (int)lookahead + delta_look;  // 弯道时y_look增大=看更近
-    if (y_look < 20) y_look = 20;
-    if (y_look >= pho_h) y_look = pho_h - 1;
+    // ---- ASC 多行加权平均（远行由自适应预瞄决定）----
+    // 范围 100→自适应far（直道看远/弯道看近），权重 2.0→2.5 线性递增，远行权重大=预瞄靠前
+    int y_near = 100;
+    int y_far  = calc_adaptive_far();
 
-    // ---- 从中线数组直接采样计算 err ----
-    int window_top  = y_look - 10;
-    int window_bot  = y_look + 10;
-    if (window_top < 0)  window_top = 0;
-    if (window_bot >= pho_h) window_bot = pho_h - 1;
+    float total_dev = 0.0f, total_w = 0.0f;
+    int   asc_valid = 0;                             // ASC范围内有效行数（替代both_lost判断）
+    float w = 2.0f;
+    float w_step = 0.5f / (float)(y_near - y_far);   // 2.0 → 2.5 均匀递增
 
-    // 收集窗口内中线有效的行
-    int cand_cnt = 0;
-    for (int y = window_bot; y >= window_top; y--)
+    for (int y = y_near; y >= y_far; y--)
     {
         uint8 c = center_line[y];
-        if (c == BORDER_INVALID) continue;
-        if (c < 3 || c > pho_w_max - 3) continue;   // 中线贴边，不可靠
-
-        candidates[cand_cnt++] = y;
-    }
-
-    // 自适应采样率
-    int step;
-    if (cand_cnt >= 16)           step = 4;
-    else if (cand_cnt >= 12)      step = 3;
-    else if (cand_cnt >= 8)       step = 2;
-    else
-    {
-        // 不足8行 → 向下扩展
-        int expand_y = window_bot + 1;
-        while (cand_cnt < 8 && expand_y < pho_h)
+        if (c != BORDER_INVALID && c >= 3 && c <= pho_w_max - 3)
         {
-            if (center_line[expand_y] != BORDER_INVALID)
-                candidates[cand_cnt++] = expand_y;
-            expand_y++;
+            total_dev += ((float)c - (float)pho_center_x) * w;
+            total_w   += w;
+            asc_valid++;
         }
-        step = 2;
+        w += w_step;   // 每行都递增，无效行也消耗权重，保证远行必定到2.5
     }
 
-    // 按步长采样取均值
-    int sum = 0, cnt = 0;
-    for (int i = 0; i < cand_cnt; i += step)
+    if (total_w > 0.0f)
     {
-        int y = candidates[i];
-        sum += ((int)center_line[y] - pho_center_x);
-        cnt++;
-    }
+        float new_err = total_dev / total_w;
 
-    if (cnt > 0)
-    {
-        float new_err = (float)sum / (float)cnt;
-
-        /* EMA 时间域平滑：
-         *   中线公式在双边/单边/丢线切换时可能跳变 ±15px，
-         *   用指数移动平均 err = α×raw + (1-α)×prev 消除突变。
-         *   α 越大响应越快但抑抖越弱，菜单可调 err_alpha。 */
-        static float err_prev = 0;
-        static int   err_init = 0;
-        if (!err_init) { err_prev = new_err; err_init = 1; }
-
-        /* 双侧丢线安全钳：弯道中(fallback_scan)err会错误归零→车直冲
-         *   |上一帧err|>15 说明在弯道 → 本帧err锁住不动, 最多维持5帧 */
-        static int hold_cnt = 0;
-        if (both_lost)
+        /* 双侧丢线安全钳：弯道中err会错误归零→车直冲。
+         * |上一帧err|>15 说明在弯道 → 锁住err最多HOLD_MAX_FRAMES帧。
+         * 使用ASC范围内有效行数（而非全局both_lost）判定：
+         *   - 图像顶部丢线是常态（远处压缩/弯道出画），不影响ASC范围内有大量有效数据
+         *   - 只有当ASC窗口本身有效行<ASC_MIN_VALID(10行)时才触发锁存
+         * 锁存超时强制恢复实时计算（旋转车身/赛道出画等误锁场景
+         * 最长锁0.1s，不会永久卡死），且解锁后需赛道恢复
+         * （asc_valid>=ASC_MIN_VALID）才允许重新进入锁存，避免锁-放抖动 */
+        static float last_err = 0;
+        static uint8 lock_active = 0;
+        static uint8 hold_cnt = 0;
+        static uint8 lock_allowed = 1;
+        if (asc_valid < ASC_MIN_VALID)
         {
-            float prev_abs = (err_prev > 0) ? err_prev : -err_prev;
-            if (prev_abs > 15.0f && hold_cnt < 5)
+            float prev_abs = (last_err > 0) ? last_err : -last_err;
+            if (prev_abs > 15.0f && lock_allowed)
+            { lock_active = 1; hold_cnt = 0; }   // 进入锁存
+            if (lock_active)
             {
-                hold_cnt++;
-                new_err = err_prev;  // 锁住err, 舵机/差速保持过弯状态
-            }
-            else if (hold_cnt >= 5)
-            {
-                hold_cnt = 0;        // 5帧后仍未恢复 → 真丢了, 放弃锁存
+                new_err = last_err;              // 锁住err, 舵机/差速保持过弯状态
+                if (++hold_cnt >= HOLD_MAX_FRAMES)
+                { lock_active = 0; lock_allowed = 0; }  // 超时强制解锁，等赛道恢复
             }
         }
         else
         {
-            hold_cnt = 0;            // 恢复正常, 清零计数器
+            lock_active = 0;
+            lock_allowed = 1;                    // ASC窗口恢复 → 解除并允许再锁
         }
 
-        float a = err_alpha;
-        if (a < 0.1f) a = 0.1f;   /* 安全钳 */
-        if (a > 1.0f) a = 1.0f;
-
-        err = a * new_err + (1.0f - a) * err_prev;
-        err_prev = err;
+        err = new_err;
+        last_err = err;
+        hold_dbg = lock_active;
     }
-    // else: err 保留上帧不变
+    // else: 总权重为0 → err保留上帧不变
+    asc_valid_dbg = asc_valid;
 }
 
-/* ================================================================
- * fallback_scan — 种子完全找不到时的最后手段
- *
- * 每行独立扫全行，找最长连续白段 → l=段首, r=段尾
- * len≥3 才写入，不依赖种子/邻域/上一行
- * ================================================================ */
-static void fallback_scan(void)
-{
-    int useful_rows = 0;
-
-    for (int y = 1; y < pho_h - 1; y++)
-    {
-        /* 该行已有有效边界数据 → 跳过，不覆盖 */
-        if (l_border[y] != BORDER_INVALID && r_border[y] != BORDER_INVALID)
-            continue;
-
-        // 找该行最长连续白段
-        int best_s = -1, best_e = -1, best_len = 0;
-        int run_s = -1;
-        for (int x = 0; x < pho_w; x++)
-        {
-            if (Image_Used[y][x] == 255)
-            {
-                if (run_s < 0) run_s = x;
-            }
-            else
-            {
-                if (run_s >= 0)
-                {
-                    int len = x - run_s;
-                    if (len > best_len) { best_len = len; best_s = run_s; best_e = x - 1; }
-                    run_s = -1;
-                }
-            }
-        }
-        if (run_s >= 0)
-        {
-            int len = pho_w - run_s;
-            if (len > best_len) { best_len = len; best_s = run_s; best_e = pho_w - 1; }
-        }
-
-        if (best_len >= 3)
-        {
-            /* 恢复原填充逻辑：贴边也填（白段端点即边界值）。
-             * exist 按端点黑白跳变记录该侧是否真边界：
-             * 贴边（起点0 / 终点pho_w_max）→ 出画伪边界 → exist=0，
-             * pho_center 据此走单边分支（far_l/far_r 用 cnt 放大 err） */
-            uint8 l_real = (best_s > 0 && Image_Used[y][best_s - 1] == 0);        // 黑→白跳变
-            uint8 r_real = (best_e < pho_w_max && Image_Used[y][best_e + 1] == 0);  // 白→黑跳变
-
-            /* 只填补空缺的边界，不覆盖已有数据 */
-            if (l_border[y] == BORDER_INVALID)
-            { l_border[y] = (uint8)best_s; l_border_cnt[y] = (uint8)(best_e - best_s + 1); l_border_exist[y] = l_real; }
-            if (r_border[y] == BORDER_INVALID)
-            { r_border[y] = (uint8)best_e; r_border_cnt[y] = (uint8)(best_e - best_s + 1); r_border_exist[y] = r_real; }
-            useful_rows++;
-        }
-    }
-
-    if (useful_rows > 0)
-    {
-        border_smooth(l_border);
-        border_smooth(r_border);
-    }
-}
+/* ---- 旧 fallback_scan 已删除，sweep_boundaries() 内置兜底处理 ---- */
 
 
 /* ================================================================
@@ -939,16 +510,14 @@ static void fallback_scan(void)
  * 算法：自底向上逐行传播连通标记
  *   1. 底部行：所有白像素初始标记为连通
  *   2. 向上逐行：膨胀上一行的连通标记（±2列），当前行只保留
- *      与膨胀标记重叠的白像素，不连通的清零
- *   3. 每行做完后水平双向填充，填补标记空洞
+ *      与膨胀标记重叠的白像素，不连通的清零（正扫中向左传播连通）
  *
- * 优势：±2列膨胀容忍小间断，水平填充连起断续白段，
- *       白墙/反光/场边杂物不与底部连通 → 被滤除
+ * 优势：±2列膨胀容忍小间断，白墙/反光/场边杂物不与底部连通 → 被滤除
  * ================================================================ */
 static void filter_bottom_connected(void)
 {
     uint8 connected[pho_w];
-    uint8 dilated[pho_w];
+    uint8 prev[pho_w];
 
     /* 底部行：所有白像素初始标记为连通 */
     for (int x = 0; x < pho_w; x++)
@@ -957,35 +526,36 @@ static void filter_bottom_connected(void)
     /* 向上逐行传播 */
     for (int y = pho_h - 2; y >= 0; y--)
     {
-        /* 膨胀上一行连通标记：±2 列 */
+        /* 保存上一行连通标记（合并循环在读connected的同时写它，必须用副本） */
         for (int x = 0; x < pho_w; x++)
-        {
-            dilated[x] = connected[x];
-            if (x > 0        && connected[x - 1]) dilated[x] = 1;
-            if (x > 1        && connected[x - 2]) dilated[x] = 1;
-            if (x < pho_w - 1 && connected[x + 1]) dilated[x] = 1;
-            if (x < pho_w - 2 && connected[x + 2]) dilated[x] = 1;
-        }
+            prev[x] = connected[x];
 
-        /* 当前行：只保留与膨胀标记重叠的白像素 */
+        /* Pass 1: 合并 膨胀+过滤+正扫（±2列膨胀，从prev读） */
         for (int x = 0; x < pho_w; x++)
         {
-            if (Image_Used[y][x] == 255 && dilated[x])
-                connected[x] = 1;
+            if (Image_Used[y][x] == 255)
+            {
+                /* 检查上方连通：prev[x] ±2 列 或 左边已连通 */
+                if (prev[x]
+                    || (x > 0        && prev[x - 1])
+                    || (x > 1        && prev[x - 2])
+                    || (x < pho_w - 1 && prev[x + 1])
+                    || (x < pho_w - 2 && prev[x + 2])
+                    || (x > 0        && connected[x - 1]))
+                {
+                    connected[x] = 1;
+                }
+                else
+                {
+                    connected[x] = 0;
+                    Image_Used[y][x] = 0;
+                }
+            }
             else
             {
                 connected[x] = 0;
-                Image_Used[y][x] = 0;   // 不连通 → 清零
             }
         }
-
-        /* 水平填充 */
-        for (int x = 1; x < pho_w; x++)
-            if (Image_Used[y][x] == 255 && connected[x - 1])
-                connected[x] = 1;
-        for (int x = pho_w - 2; x >= 0; x--)
-            if (Image_Used[y][x] == 255 && connected[x + 1])
-                connected[x] = 1;
     }
 }
 
@@ -1010,21 +580,12 @@ static int camera_is_covered(void)
  * 流程：
  *   1. Otsu 自适应阈值 + 一次性二值化 → Image_Used[][]
  *   2. 手遮检测 → 停车
- *   3. bottom_connect_filter → 只留与底部连通的白（清环境白）
- *   4. find_seeds(115→70) → 找左右种子（基于二值图）
- *   5. seed_grow_left/right  → 4方向自适应摸墙追踪
- *   6. pho_border → 种子序列提取按行边界
- *   7. bottom_scan / fallback_scan → 补全缺失行
- *   8. pho_center → 拟合中线 + 计算 err
- *
- * 移植自 MCZSCS + loongson_learn，适配无 IPM 的 MM32 平台
+ *   3. 底部连通滤波 → 只留与底部连通的白
+ *   4. sweep_boundaries → 逐行扫描边界（替代种子生长全流程）
+ *   5. pho_center → 中线 + 偏差
  * ================================================================ */
-int vis_deal(void)
+void vis_deal(void)
 {
-    int llx, lly, rrx, rry;
-    data_l = 0; data_r = 0;
-    grow_scan_complete = 0;  // 每帧重置生长完成标志
-
     /* ---- Otsu 自适应阈值（每5帧重算，EMA滤波抑制跳变）---- */
     static int cached_th = -1;
     static int frame_since_otsu = 0;
@@ -1034,7 +595,6 @@ int vis_deal(void)
         int th = compute_otsu();
         if (th > 0)
         {
-            /* EMA 滤波：th_ema = α×th_new + (1-α)×th_old, α=0.3 */
             if (cached_th < 0)
                 cached_th = th;
             else
@@ -1054,10 +614,10 @@ int vis_deal(void)
     {
         motor_stop();
         car_run = false;
-        return 1;
+        return;
     }
 
-    /* ---- 底部连通滤波：清除不接触底部的环境白色 ---- */
+    /* ---- 底部连通滤波 ---- */
     filter_bottom_connected();
 
     /* ---- 清空边界数组 ---- */
@@ -1065,126 +625,16 @@ int vis_deal(void)
     {
         l_border[y] = BORDER_INVALID;
         r_border[y] = BORDER_INVALID;
-        l_border_cnt[y] = 0;
-        r_border_cnt[y] = 0;
         l_border_exist[y] = 0;
         r_border_exist[y] = 0;
     }
 
-    /* ---- 找种子 → 生长 → 边界提取 ---- */
-    /* 帧间一致性：记录上一帧成功种子，本帧失败时在旧种子邻域重搜 */
-    static int prev_llx = -1, prev_lly = -1, prev_rrx = -1, prev_rry = -1;
-    static int prev_both_ok = 0;  /* 上一帧双边都找到 */
-
-    find_seeds(&llx, &lly, &rrx, &rry);
-
-    /* 本帧一侧失败但上一帧双边OK → 在旧种子±8邻域内重搜 */
-    if (prev_both_ok)
-    {
-        if (llx < 0 && prev_llx >= 0)
-        {
-            int y = prev_lly;
-            int x0 = (prev_llx - 8 > 1) ? prev_llx - 8 : 1;
-            int x1 = (prev_llx + 8 < pho_w - 2) ? prev_llx + 8 : pho_w - 2;
-            for (int x = x0; x <= x1 && llx < 0; x++)
-            {
-                if (Image_Used[y][x - 1] == 0 && Image_Used[y][x] == 255)
-                { llx = x; lly = y; }
-            }
-            if (llx < 0)
-            {
-                for (int dy = 1; dy <= 10 && llx < 0; dy++)
-                {
-                    int y_up = y - dy, y_dn = y + dy;
-                    if (y_up >= 70)
-                    {
-                        for (int x = x0; x <= x1 && llx < 0; x++)
-                            if (Image_Used[y_up][x - 1] == 0 && Image_Used[y_up][x] == 255)
-                            { llx = x; lly = y_up; }
-                    }
-                    if (llx < 0 && y_dn <= 118)
-                    {
-                        for (int x = x0; x <= x1 && llx < 0; x++)
-                            if (Image_Used[y_dn][x - 1] == 0 && Image_Used[y_dn][x] == 255)
-                            { llx = x; lly = y_dn; }
-                    }
-                }
-            }
-        }
-        if (rrx < 0 && prev_rrx >= 0)
-        {
-            int y = prev_rry;
-            int x0 = (prev_rrx - 8 > 1) ? prev_rrx - 8 : 1;
-            int x1 = (prev_rrx + 8 < pho_w_max - 1) ? prev_rrx + 8 : pho_w_max - 1;
-            for (int x = x1; x >= x0 && rrx < 0; x--)
-            {
-                if (Image_Used[y][x + 1] == 0 && Image_Used[y][x] == 255)
-                { rrx = x; rry = y; }
-            }
-            if (rrx < 0)
-            {
-                for (int dy = 1; dy <= 10 && rrx < 0; dy++)
-                {
-                    int y_up = y - dy, y_dn = y + dy;
-                    if (y_up >= 70)
-                    {
-                        for (int x = x1; x >= x0 && rrx < 0; x--)
-                            if (Image_Used[y_up][x + 1] == 0 && Image_Used[y_up][x] == 255)
-                            { rrx = x; rry = y_up; }
-                    }
-                    if (rrx < 0 && y_dn <= 118)
-                    {
-                        for (int x = x1; x >= x0 && rrx < 0; x--)
-                            if (Image_Used[y_dn][x + 1] == 0 && Image_Used[y_dn][x] == 255)
-                            { rrx = x; rry = y_dn; }
-                    }
-                }
-            }
-        }
-    }
-
-    /* 更新帧间记忆 */
-    prev_both_ok = (llx >= 0 && rrx >= 0) ? 1 : 0;
-    if (llx >= 0) { prev_llx = llx; prev_lly = lly; }
-    if (rrx >= 0) { prev_rrx = rrx; prev_rry = rry; }
-
-    if (llx >= 0)
-    {
-        seed_grow_left(llx, lly);
-        pho_border(points_l, data_l, l_border, l_border_cnt, l_border_exist, +1);
-    }
-    if (rrx >= 0)
-    {
-        seed_grow_right(rrx, rry);
-        pho_border(points_r, data_r, r_border, r_border_cnt, r_border_exist, -1);
-    }
-
-    /* ---- 补全 / 回退 ---- */
-    {
-        /* 取较低种子行（min）确保 bottom_scan 填满两侧种子以下全部行 */
-        int gap_start = 79;
-        if (llx >= 0 && lly < gap_start) gap_start = lly;
-        if (rrx >= 0 && rry < gap_start) gap_start = rry;
-        if (gap_start < 41) gap_start = 41;
-
-        if (llx >= 0 || rrx >= 0)
-        {
-            bottom_scan(gap_start);
-        }
-        /* fallback 始终运行：只填 BORDER_INVALID 行，不覆盖已有数据。
-         * 生长中途断掉留下的空缺行也靠它补全。 */
-        fallback_scan();
-    }
-
-    /* 记录本帧是否双侧丢线，供 pho_center 做安全钳
-     * grow_scan_complete=1 时边界已到对侧边缘，不算丢线 */
-    static int both_lost = 0;
-    both_lost = (llx < 0 && rrx < 0 && !grow_scan_complete) ? 1 : 0;
+    /* ---- 逐行扫描边界（替代种子生长 + pho_border + 补全）---- */
+    sweep_boundaries();
 
     /* ---- 中线 + 偏差 ---- */
-    pho_center(both_lost);
-    vis_frame_ready = 1;   // 通知显示层新帧就绪
-    return 0;
+    pho_center();
+    vis_frame_ready = 1;
 }
 
 /* ================================================================

@@ -50,7 +50,9 @@ void menu_init(void)
         Menu_Set_Limit(v, -0.05f, 0.05f, 0.0005f);
         v = dynamicCreate_Menu_Number(pid, "gyro_kdc",  &gyro_kd_curve, float_Box);
         Menu_Set_Limit(v, -0.01f, 0.01f, 0.0001f);
-        v = dynamicCreate_Menu_Number(pid, "lookhead", &lookahead, uint8_Box);
+        v = dynamicCreate_Menu_Number(pid, "far", &asc_far, uint8_Box);
+        Menu_Set_Limit(v, 5, 60, 5.0f);
+        v = dynamicCreate_Menu_Number(pid, "st_far", &straight_far, uint8_Box);
         Menu_Set_Limit(v, 5, 60, 5.0f);
         v = dynamicCreate_Menu_Number(pid, "max_add", &servo_max_add, float_Box);
         Menu_Set_Limit(v, 0.5f, 20,0.5f);
@@ -73,18 +75,15 @@ void menu_init(void)
         Menu_Set_Limit(v, 2, 20,1.0f);
         dynamicCreate_Menu_Number(pid, "car_run",   &car_run,  bool_Box);
     }
-    
-    // =====Threshold阈值文件夹=====
+
+    // =====Debug文件夹=====
     {
-        Menu_Item *vis = dynamicCreate_Menu_Folder(&head, "Threshold");
+        Menu_Item *dbg = dynamicCreate_Menu_Folder(&head, "Debug");
         Menu_Item *v;
 
-        v = dynamicCreate_Menu_Number(vis, "block_sz", &Block_Size, int32_Box);
-        Menu_Set_Limit(v, 3, 15, 2.0);              // 窗口3~15，仅奇数有效
-        v = dynamicCreate_Menu_Number(vis, "clip_val", &Clip_Value, int32_Box);
-        Menu_Set_Limit(v, 0, 20, 1.0);              // 偏置0~20
-        v = dynamicCreate_Menu_Number(vis, "err_alpha", &err_alpha, float_Box);
-        Menu_Set_Limit(v, 0.1f, 1.0f, 0.05f);       // err平滑 0.1=强抑抖 1.0=关闭
+        v = dynamicCreate_Menu_Number(dbg, "err",     (float*)&err, float_Box);
+        v = dynamicCreate_Menu_Number(dbg, "valid",   (int16*)&asc_valid_dbg, int16_Box);
+        v = dynamicCreate_Menu_Number(dbg, "hold",    (uint8*)&hold_dbg, uint8_Box);
     }
 
     key = head.first_son;
@@ -290,10 +289,11 @@ static void k3_long_handle(void)
     if(display_mode == DISPLAY_MODE_MENU)
     {
         display_mode = DISPLAY_MODE_BIN;
+        key = head.first_son;   // 兜底：无Debug文件夹时回根目录
         Menu_Item *s = head.first_son;
         for (int i = 0; i < head.sons; i++)
         {
-            if (s->kind == MENU_Folder && s->name[0] == 'T')
+            if (s->kind == MENU_Folder && s->name[0] == 'D')
             { key = s->first_son; key->select = false; break; }
             s = s->next_brother;
         }

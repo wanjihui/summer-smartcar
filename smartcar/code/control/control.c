@@ -57,32 +57,18 @@ static void servo_update(int straight)
     // ----位置式 PD ----
     float pd = kp * e + kd * (e - servo_last_err);
 
-    // 陀螺仪阻尼：
-    //   直道：gyro_kd × gyro_z，全量阻尼
-    //   弯道：gyro_kd_curve × boost × gyro_z
-    //         boost 只对偏航变号(摆动)放大，入弯单向加减速不误触发
+    // 陀螺仪前馈（ASC风格）：pd -= gyro × gyro_z
+    //   "车已经在转了，视觉少打点"
+    //   量化去噪 /20*20，系数可以安全开到 0.01-0.03 不抖
     {
-        static float gyro_prev = 0;
-        /* 原始ADC → °/s：±2000dps量程下 1LSB≈1/16.4°/s，
-         * 直接用原始值乘系数会放大16倍，阻尼系数量级不可控 */
-        float gyro_z = mpu6050_gyro_transition(mpu6050_get_gyro_z());
+        int gz = (int)mpu6050_gyro_transition(mpu6050_get_gyro_z());
+        gz = (gz / 20) * 20;                       // ASC风格量化，±10°/s以下不触发
+        float gyro_z = (float)gz;
 
         if (straight)
-        {
-            pd += gyro_kd * gyro_z;
-        }
+            pd -= gyro_kd * gyro_z;
         else
-        {
-            /* 变号检测：gyro_z 与上一帧异号 = 来回摆动 */
-            float boost;
-            if (gyro_z * gyro_prev < 0)
-                boost = 1.5f;   // 摆动 → 强阻尼
-            else
-                boost = 0.15f;  // 稳态/入弯/出弯 → 轻阻尼，不拖转向
-
-            gyro_prev = gyro_z;
-            pd += gyro_kd_curve * boost * gyro_z;
-        }
+            pd -= gyro_kd_curve * gyro_z;
     }
 
     servo_last_err = e;
