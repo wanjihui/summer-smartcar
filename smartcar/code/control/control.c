@@ -74,7 +74,7 @@ static void servo_update(int straight)
     servo_last_err = e;
 
     // ----像素err转换为角度----
-    float angle_rate = servo_max_cha / 50.0f;
+    float angle_rate = servo_max_cha / 35.0f;  // 映射斜率: max_cha/35, 入弯小err也有足够转角
     float angle_cha = pd * angle_rate;
 
     if (angle_cha >  servo_max_cha) angle_cha =  servo_max_cha;

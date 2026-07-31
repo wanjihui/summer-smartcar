@@ -37,10 +37,10 @@
 #define ASC_MIN_VALID     10    // ASC窗口最小有效行数，低于此行数才触发err锁存（避免顶部常态丢线误锁）
 
 // --- 舵机 ---
-#define DEFAULT_SERVO_KP1      1.05f  // 基础P
+#define DEFAULT_SERVO_KP1      0.85f  // 基础P
 #define DEFAULT_SERVO_KP2      0.0f   // 二次P: err×|err|
 #define DEFAULT_SERVO_KD       0.06f  // D 系数
-#define DEFAULT_GYRO_KD        0.015f // 陀螺仪前馈（直道），正=减Gyro项
+#define DEFAULT_GYRO_KD        0.02f // 陀螺仪前馈（直道），正=减Gyro项
 #define DEFAULT_GYRO_KD_CURVE  0.02f  // 陀螺仪前馈（弯道），正=减Gyro项
 #define DEFAULT_SERVO_CENTER   95.2f // 中位角度
 #define DEFAULT_SERVO_MAX_CHA  13.0f // 最大偏角
