@@ -1,7 +1,7 @@
 Dependencies for Project 'mm32f327x_g8p', Target 'mm32f327x_g8p_project': (DO NOT MODIFY !)
 CompilerVersion: 6240000::V6.24::ARMCLANG
 F (..\USER\src\main.c)(0x6A6BC398)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/main.o -MMD)
-I (..\user\inc\config.h)(0x6A6BC726)
+I (..\user\inc\config.h)(0x6A6BCC7E)
 I (..\..\libraries\zf_common\zf_common_headfile.h)(0x6A6BC398)
 I (..\..\libraries\sdk\hal_device_registers.h)(0x6A6BC398)
 I (..\..\libraries\sdk\mm32f3277g.h)(0x6A6BC398)
@@ -171,7 +171,7 @@ I (..\..\libraries\components\fatfs\source\ff.h)(0x6A6A2085)
 I (..\code\encoder\encoder.h)(0x6A6A2087)
 I (..\code\MPU6050\mpu6050.h)(0x6A6A2087)
 F (..\user\inc\isr.h)(0x6A6BC398)()
-F (..\user\inc\config.h)(0x6A6BC726)()
+F (..\user\inc\config.h)(0x6A6BCC7E)()
 F (..\..\libraries\zf_common\zf_common_clock.c)(0x6A6BC398)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/zf_common_clock.o -MMD)
 I (..\..\libraries\zf_common\zf_common_function.h)(0x6A6BC398)
 I (..\..\libraries\zf_common\zf_common_typedef.h)(0x6A6BC398)
@@ -994,7 +994,7 @@ F (..\code\menu\menu.c)(0x6A6BC398)(-xc -std=c99 --target=arm-arm-none-eabi -mcp
 I (..\code\menu\menu.h)(0x6A6BC398)
 F (..\code\menu\menu.h)(0x6A6BC398)()
 F (..\code\menu\Mymenu.c)(0x6A6BC3B6)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/mymenu.o -MMD)
-I (..\user\inc\config.h)(0x6A6BC726)
+I (..\user\inc\config.h)(0x6A6BCC7E)
 I (..\..\libraries\zf_common\zf_common_headfile.h)(0x6A6BC398)
 I (..\..\libraries\sdk\hal_device_registers.h)(0x6A6BC398)
 I (..\..\libraries\sdk\mm32f3277g.h)(0x6A6BC398)
@@ -1406,8 +1406,8 @@ I (..\..\libraries\zf_device\zf_device_wireless_uart.h)(0x6A6BC398)
 I (..\..\libraries\components\fatfs\source\ffconf.h)(0x6A6A2085)
 I (..\..\libraries\components\fatfs\source\ff.h)(0x6A6A2085)
 F (..\code\servo\servo.h)(0x6A6A2087)()
-F (..\code\vision\vision.c)(0x6A6BC4DE)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/vision.o -MMD)
-I (..\user\inc\config.h)(0x6A6BC726)
+F (..\code\vision\vision.c)(0x6A6C46BA)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/vision.o -MMD)
+I (..\user\inc\config.h)(0x6A6BCC7E)
 I (..\..\libraries\zf_common\zf_common_headfile.h)(0x6A6BC398)
 I (..\..\libraries\sdk\hal_device_registers.h)(0x6A6BC398)
 I (..\..\libraries\sdk\mm32f3277g.h)(0x6A6BC398)
@@ -1496,7 +1496,7 @@ I (..\code\vision\vision.h)(0x6A6BC4DE)
 I (..\code\control\control.h)(0x6A6BC3B6)
 F (..\code\vision\vision.h)(0x6A6BC4DE)()
 F (..\code\control\control.c)(0x6A6BC3B6)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source -I ../code/menu -I ../code/motor -I ../code/encoder -I ../code/MPU6050 -I ../code/servo -I ../code/vision -I ../code/control-IC:/Users/Lenovo/AppData/Local/Arm/Packs/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-D__UVISION_VERSION="543" -DMM32F3273G8P-o ./objects/control.o -MMD)
-I (..\user\inc\config.h)(0x6A6BC726)
+I (..\user\inc\config.h)(0x6A6BCC7E)
 I (..\..\libraries\zf_common\zf_common_headfile.h)(0x6A6BC398)
 I (..\..\libraries\sdk\hal_device_registers.h)(0x6A6BC398)
 I (..\..\libraries\sdk\mm32f3277g.h)(0x6A6BC398)

@@ -3406,6 +3406,7 @@ Section Cross References
     vision.o(.text.vis_deal) refers to ffixi.o(.text) for __aeabi_f2iz
     vision.o(.text.vis_deal) refers to zf_device_mt9v03x.o(.bss.mt9v03x_image) for mt9v03x_image
     vision.o(.text.vis_deal) refers to vision.o(.bss.Image_Used) for Image_Used
+    vision.o(.text.vis_deal) refers to vision.o(.text.filter_bottom_connected) for filter_bottom_connected
     vision.o(.text.vis_deal) refers to vision.o(.text.camera_is_covered) for camera_is_covered
     vision.o(.text.vis_deal) refers to motor.o(.text.motor_stop) for motor_stop
     vision.o(.text.vis_deal) refers to control.o(.bss.car_run) for car_run
@@ -3438,6 +3439,8 @@ Section Cross References
     vision.o(.text.compute_otsu) refers to fmul.o(.text) for __aeabi_fmul
     vision.o(.text.compute_otsu) refers to fcmple.o(.text) for __aeabi_fcmple
     vision.o(.ARM.exidx.text.compute_otsu) refers to vision.o(.text.compute_otsu) for [Anonymous Symbol]
+    vision.o(.text.filter_bottom_connected) refers to vision.o(.bss.Image_Used) for Image_Used
+    vision.o(.ARM.exidx.text.filter_bottom_connected) refers to vision.o(.text.filter_bottom_connected) for [Anonymous Symbol]
     vision.o(.text.camera_is_covered) refers to vision.o(.bss.Image_Used) for Image_Used
     vision.o(.ARM.exidx.text.camera_is_covered) refers to vision.o(.text.camera_is_covered) for [Anonymous Symbol]
     vision.o(.text.find_seeds) refers to vision.o(.text.find_seeds_at) for find_seeds_at
@@ -5645,6 +5648,7 @@ Removing Unused input sections from the image.
     Removing vision.o(.ARM.exidx.text.is_straight), (8 bytes).
     Removing vision.o(.ARM.exidx.text.vis_deal), (8 bytes).
     Removing vision.o(.ARM.exidx.text.compute_otsu), (8 bytes).
+    Removing vision.o(.ARM.exidx.text.filter_bottom_connected), (8 bytes).
     Removing vision.o(.ARM.exidx.text.camera_is_covered), (8 bytes).
     Removing vision.o(.ARM.exidx.text.find_seeds), (8 bytes).
     Removing vision.o(.ARM.exidx.text.find_seeds_at), (8 bytes).
@@ -5686,7 +5690,7 @@ Removing Unused input sections from the image.
     Removing dsqrt.o(.text), (162 bytes).
     Removing cdcmple.o(.text), (48 bytes).
 
-1871 unused section(s) (total 212557 bytes) removed from the image.
+1872 unused section(s) (total 212565 bytes) removed from the image.
 
 ==============================================================================
 
@@ -6011,248 +6015,250 @@ Image Symbol Table
     [Anonymous Symbol]                       0x08003470   Section        0  zf_common_fifo.o(.text.fifo_used)
     [Anonymous Symbol]                       0x08003498   Section        0  zf_common_fifo.o(.text.fifo_write_buffer)
     [Anonymous Symbol]                       0x08003694   Section        0  zf_common_fifo.o(.text.fifo_write_element)
-    find_seeds                               0x08003755   Thumb Code    50  vision.o(.text.find_seeds)
-    [Anonymous Symbol]                       0x08003754   Section        0  vision.o(.text.find_seeds)
-    find_seeds_at                            0x08003789   Thumb Code   808  vision.o(.text.find_seeds_at)
-    [Anonymous Symbol]                       0x08003788   Section        0  vision.o(.text.find_seeds_at)
-    [Anonymous Symbol]                       0x08003ab0   Section        0  zf_common_function.o(.text.func_float_to_str)
-    [Anonymous Symbol]                       0x08003cfc   Section        0  zf_common_function.o(.text.func_get_greatest_common_divisor)
-    [Anonymous Symbol]                       0x08003d40   Section        0  zf_common_function.o(.text.func_int_to_str)
-    [Anonymous Symbol]                       0x08003e34   Section        0  zf_driver_gpio.o(.text.gpio_get_level)
-    [Anonymous Symbol]                       0x08003e64   Section        0  zf_driver_gpio.o(.text.gpio_init)
-    [Anonymous Symbol]                       0x0800404c   Section        0  zf_driver_gpio.o(.text.gpio_set_level)
-    [Anonymous Symbol]                       0x080040b0   Section        0  zf_device_gps_tau1201.o(.text.gps_uart_callback)
-    [Anonymous Symbol]                       0x080041ec   Section        0  zf_common_interrupt.o(.text.interrupt_disable)
-    [Anonymous Symbol]                       0x08004200   Section        0  zf_common_interrupt.o(.text.interrupt_enable)
-    [Anonymous Symbol]                       0x08004214   Section        0  zf_common_interrupt.o(.text.interrupt_global_disable)
-    [Anonymous Symbol]                       0x08004238   Section        0  zf_common_interrupt.o(.text.interrupt_init)
-    [Anonymous Symbol]                       0x08004244   Section        0  zf_common_interrupt.o(.text.interrupt_set_priority)
-    [Anonymous Symbol]                       0x08004260   Section        0  zf_device_ips200.o(.text.ips200_clear)
-    ips200_debug_init                        0x08004371   Thumb Code   138  zf_device_ips200.o(.text.ips200_debug_init)
-    [Anonymous Symbol]                       0x08004370   Section        0  zf_device_ips200.o(.text.ips200_debug_init)
-    [Anonymous Symbol]                       0x080043fc   Section        0  zf_device_ips200.o(.text.ips200_draw_point)
-    [Anonymous Symbol]                       0x080044e8   Section        0  zf_device_ips200.o(.text.ips200_init)
-    [Anonymous Symbol]                       0x0800495c   Section        0  zf_device_ips200.o(.text.ips200_set_color)
-    [Anonymous Symbol]                       0x08004988   Section        0  zf_device_ips200.o(.text.ips200_set_dir)
-    [Anonymous Symbol]                       0x080049f0   Section        0  zf_device_ips200.o(.text.ips200_set_font)
-    ips200_set_region                        0x08004a09   Thumb Code   196  zf_device_ips200.o(.text.ips200_set_region)
-    [Anonymous Symbol]                       0x08004a08   Section        0  zf_device_ips200.o(.text.ips200_set_region)
-    [Anonymous Symbol]                       0x08004acc   Section        0  zf_device_ips200.o(.text.ips200_show_char)
-    [Anonymous Symbol]                       0x08004dac   Section        0  zf_device_ips200.o(.text.ips200_show_float)
-    [Anonymous Symbol]                       0x08004f0c   Section        0  zf_device_ips200.o(.text.ips200_show_gray_image)
-    [Anonymous Symbol]                       0x08005120   Section        0  zf_device_ips200.o(.text.ips200_show_int)
-    [Anonymous Symbol]                       0x08005220   Section        0  zf_device_ips200.o(.text.ips200_show_string)
-    ips200_write_16bit_data                  0x080052fd   Thumb Code   214  zf_device_ips200.o(.text.ips200_write_16bit_data)
-    [Anonymous Symbol]                       0x080052fc   Section        0  zf_device_ips200.o(.text.ips200_write_16bit_data)
-    ips200_write_8bit_data                   0x080053d5   Thumb Code   174  zf_device_ips200.o(.text.ips200_write_8bit_data)
-    [Anonymous Symbol]                       0x080053d4   Section        0  zf_device_ips200.o(.text.ips200_write_8bit_data)
-    ips200_write_command                     0x08005485   Thumb Code   234  zf_device_ips200.o(.text.ips200_write_command)
-    [Anonymous Symbol]                       0x08005484   Section        0  zf_device_ips200.o(.text.ips200_write_command)
-    [Anonymous Symbol]                       0x08005570   Section        0  vision.o(.text.is_straight)
-    k1_handle                                0x080056c9   Thumb Code   874  mymenu.o(.text.k1_handle)
-    [Anonymous Symbol]                       0x080056c8   Section        0  mymenu.o(.text.k1_handle)
-    k2_handle                                0x08005a35   Thumb Code   856  mymenu.o(.text.k2_handle)
-    [Anonymous Symbol]                       0x08005a34   Section        0  mymenu.o(.text.k2_handle)
-    k3_handle                                0x08005d8d   Thumb Code    26  mymenu.o(.text.k3_handle)
-    [Anonymous Symbol]                       0x08005d8c   Section        0  mymenu.o(.text.k3_handle)
-    k3_long_handle                           0x08005da9   Thumb Code   228  mymenu.o(.text.k3_long_handle)
-    [Anonymous Symbol]                       0x08005da8   Section        0  mymenu.o(.text.k3_long_handle)
-    k4_handle                                0x08005e8d   Thumb Code    58  mymenu.o(.text.k4_handle)
-    [Anonymous Symbol]                       0x08005e8c   Section        0  mymenu.o(.text.k4_handle)
-    [Anonymous Symbol]                       0x08005ec8   Section        0  zf_device_key.o(.text.key_clear_state)
-    [Anonymous Symbol]                       0x08005ee4   Section        0  zf_device_key.o(.text.key_get_state)
-    [Anonymous Symbol]                       0x08005efc   Section        0  zf_device_key.o(.text.key_init)
-    [Anonymous Symbol]                       0x08005f78   Section        0  zf_device_key.o(.text.key_scanner)
-    [Anonymous Symbol]                       0x08006078   Section        0  main.o(.text.main)
-    [Anonymous Symbol]                       0x080061bc   Section        0  mymenu.o(.text.menu)
-    [Anonymous Symbol]                       0x0800632c   Section        0  mymenu.o(.text.menu_init)
-    [Anonymous Symbol]                       0x08006720   Section        0  mymenu.o(.text.menu_show)
-    [Anonymous Symbol]                       0x08006778   Section        0  motor.o(.text.motor_init)
-    [Anonymous Symbol]                       0x080067c4   Section        0  motor.o(.text.motor_set_both)
-    [Anonymous Symbol]                       0x080067e4   Section        0  motor.o(.text.motor_set_left)
-    [Anonymous Symbol]                       0x08006860   Section        0  motor.o(.text.motor_set_right)
-    [Anonymous Symbol]                       0x080068dc   Section        0  motor.o(.text.motor_stop)
-    motor_update                             0x080068f5   Thumb Code   596  control.o(.text.motor_update)
-    [Anonymous Symbol]                       0x080068f4   Section        0  control.o(.text.motor_update)
-    [Anonymous Symbol]                       0x08006b48   Section        0  zf_device_mpu6050.o(.text.mpu6050_get_acc)
-    [Anonymous Symbol]                       0x08006ba8   Section        0  zf_device_mpu6050.o(.text.mpu6050_get_gyro)
-    [Anonymous Symbol]                       0x08006c08   Section        0  mpu6050.o(.text.mpu6050_get_gyro_z)
-    [Anonymous Symbol]                       0x08006c18   Section        0  zf_device_mpu6050.o(.text.mpu6050_init)
-    [Anonymous Symbol]                       0x08006cc4   Section        0  mpu6050.o(.text.mpu6050_module_init)
-    [Anonymous Symbol]                       0x08006d10   Section        0  mpu6050.o(.text.mpu6050_pit_callback)
-    mpu6050_self1_check                      0x08006d1d   Thumb Code   116  zf_device_mpu6050.o(.text.mpu6050_self1_check)
-    [Anonymous Symbol]                       0x08006d1c   Section        0  zf_device_mpu6050.o(.text.mpu6050_self1_check)
-    mt9v03x_dma_handler                      0x08006d91   Thumb Code    22  zf_device_mt9v03x.o(.text.mt9v03x_dma_handler)
-    [Anonymous Symbol]                       0x08006d90   Section        0  zf_device_mt9v03x.o(.text.mt9v03x_dma_handler)
-    mt9v03x_get_config                       0x08006da9   Thumb Code   290  zf_device_mt9v03x.o(.text.mt9v03x_get_config)
-    [Anonymous Symbol]                       0x08006da8   Section        0  zf_device_mt9v03x.o(.text.mt9v03x_get_config)
-    [Anonymous Symbol]                       0x08006ecc   Section        0  zf_device_mt9v03x.o(.text.mt9v03x_get_version)
-    [Anonymous Symbol]                       0x08006f6c   Section        0  zf_device_mt9v03x.o(.text.mt9v03x_init)
-    mt9v03x_read_word_sccb                   0x08007111   Thumb Code    60  zf_device_config.o(.text.mt9v03x_read_word_sccb)
-    [Anonymous Symbol]                       0x08007110   Section        0  zf_device_config.o(.text.mt9v03x_read_word_sccb)
-    mt9v03x_set_config                       0x0800714d   Thumb Code   248  zf_device_mt9v03x.o(.text.mt9v03x_set_config)
-    [Anonymous Symbol]                       0x0800714c   Section        0  zf_device_mt9v03x.o(.text.mt9v03x_set_config)
-    [Anonymous Symbol]                       0x08007244   Section        0  zf_device_config.o(.text.mt9v03x_set_config_sccb)
-    mt9v03x_uart_handler                     0x08007bf5   Thumb Code    64  zf_device_mt9v03x.o(.text.mt9v03x_uart_handler)
-    [Anonymous Symbol]                       0x08007bf4   Section        0  zf_device_mt9v03x.o(.text.mt9v03x_uart_handler)
-    mt9v03x_vsync_handler                    0x08007c35   Thumb Code    54  zf_device_mt9v03x.o(.text.mt9v03x_vsync_handler)
-    [Anonymous Symbol]                       0x08007c34   Section        0  zf_device_mt9v03x.o(.text.mt9v03x_vsync_handler)
-    mt9v03x_write_word_sccb                  0x08007c6d   Thumb Code    50  zf_device_config.o(.text.mt9v03x_write_word_sccb)
-    [Anonymous Symbol]                       0x08007c6c   Section        0  zf_device_config.o(.text.mt9v03x_write_word_sccb)
-    pho_border                               0x08007ca1   Thumb Code   536  vision.o(.text.pho_border)
-    [Anonymous Symbol]                       0x08007ca0   Section        0  vision.o(.text.pho_border)
-    pho_center                               0x08007eb9   Thumb Code  1310  vision.o(.text.pho_center)
-    [Anonymous Symbol]                       0x08007eb8   Section        0  vision.o(.text.pho_center)
-    [Anonymous Symbol]                       0x080083d8   Section        0  zf_driver_pit.o(.text.pit_init)
-    [Anonymous Symbol]                       0x0800850c   Section        0  zf_driver_pwm.o(.text.pwm_init)
-    [Anonymous Symbol]                       0x08008764   Section        0  zf_driver_pwm.o(.text.pwm_set_duty)
-    seed_grow_left                           0x08008895   Thumb Code  1588  vision.o(.text.seed_grow_left)
-    [Anonymous Symbol]                       0x08008894   Section        0  vision.o(.text.seed_grow_left)
-    seed_grow_right                          0x08008ec9   Thumb Code  1586  vision.o(.text.seed_grow_right)
-    [Anonymous Symbol]                       0x08008ec8   Section        0  vision.o(.text.seed_grow_right)
-    [Anonymous Symbol]                       0x080094fc   Section        0  servo.o(.text.servo_init)
-    [Anonymous Symbol]                       0x08009510   Section        0  servo.o(.text.servo_set_angle)
-    servo_update                             0x08009579   Thumb Code   686  control.o(.text.servo_update)
-    [Anonymous Symbol]                       0x08009578   Section        0  control.o(.text.servo_update)
-    [Anonymous Symbol]                       0x08009828   Section        0  zf_device_type.o(.text.set_camera_type)
-    show_key                                 0x080098b5   Thumb Code   158  mymenu.o(.text.show_key)
-    [Anonymous Symbol]                       0x080098b4   Section        0  mymenu.o(.text.show_key)
-    show_number                              0x08009955   Thumb Code   194  mymenu.o(.text.show_number)
-    [Anonymous Symbol]                       0x08009954   Section        0  mymenu.o(.text.show_number)
-    [Anonymous Symbol]                       0x08009a18   Section        0  zf_driver_soft_iic.o(.text.soft_iic_init)
-    [Anonymous Symbol]                       0x08009aa8   Section        0  zf_driver_soft_iic.o(.text.soft_iic_read_8bit_register)
-    [Anonymous Symbol]                       0x08009b1c   Section        0  zf_driver_soft_iic.o(.text.soft_iic_read_8bit_registers)
-    soft_iic_read_data                       0x08009bb5   Thumb Code   356  zf_driver_soft_iic.o(.text.soft_iic_read_data)
-    [Anonymous Symbol]                       0x08009bb4   Section        0  zf_driver_soft_iic.o(.text.soft_iic_read_data)
-    [Anonymous Symbol]                       0x08009d18   Section        0  zf_driver_soft_iic.o(.text.soft_iic_sccb_read_register)
-    [Anonymous Symbol]                       0x08009d90   Section        0  zf_driver_soft_iic.o(.text.soft_iic_sccb_write_register)
-    soft_iic_send_ack                        0x08009de9   Thumb Code   282  zf_driver_soft_iic.o(.text.soft_iic_send_ack)
-    [Anonymous Symbol]                       0x08009de8   Section        0  zf_driver_soft_iic.o(.text.soft_iic_send_ack)
-    soft_iic_send_data                       0x08009f05   Thumb Code   296  zf_driver_soft_iic.o(.text.soft_iic_send_data)
-    [Anonymous Symbol]                       0x08009f04   Section        0  zf_driver_soft_iic.o(.text.soft_iic_send_data)
-    soft_iic_start                           0x0800a02d   Thumb Code   218  zf_driver_soft_iic.o(.text.soft_iic_start)
-    [Anonymous Symbol]                       0x0800a02c   Section        0  zf_driver_soft_iic.o(.text.soft_iic_start)
-    soft_iic_stop                            0x0800a109   Thumb Code   218  zf_driver_soft_iic.o(.text.soft_iic_stop)
-    [Anonymous Symbol]                       0x0800a108   Section        0  zf_driver_soft_iic.o(.text.soft_iic_stop)
-    soft_iic_wait_ack                        0x0800a1e5   Thumb Code   248  zf_driver_soft_iic.o(.text.soft_iic_wait_ack)
-    [Anonymous Symbol]                       0x0800a1e4   Section        0  zf_driver_soft_iic.o(.text.soft_iic_wait_ack)
-    [Anonymous Symbol]                       0x0800a2dc   Section        0  zf_driver_soft_iic.o(.text.soft_iic_write_8bit_register)
-    [Anonymous Symbol]                       0x0800a334   Section        0  zf_driver_spi.o(.text.spi_init)
-    [Anonymous Symbol]                       0x0800a69c   Section        0  zf_driver_spi.o(.text.spi_write_16bit)
-    [Anonymous Symbol]                       0x0800a754   Section        0  zf_driver_spi.o(.text.spi_write_8bit)
-    [Anonymous Symbol]                       0x0800a7dc   Section        0  zf_driver_delay.o(.text.system_delay_ms)
-    [Anonymous Symbol]                       0x0800a878   Section        0  zf_driver_timer.o(.text.timer_clear)
-    [Anonymous Symbol]                       0x0800a92c   Section        0  zf_driver_timer.o(.text.timer_clock_enable)
-    [Anonymous Symbol]                       0x0800a9e4   Section        0  zf_driver_timer.o(.text.timer_etr_init)
-    [Anonymous Symbol]                       0x0800ab10   Section        0  zf_driver_timer.o(.text.timer_funciton_check)
-    [Anonymous Symbol]                       0x0800ab78   Section        0  zf_driver_timer.o(.text.timer_get)
-    [Anonymous Symbol]                       0x0800ac30   Section        0  zf_device_tsl1401.o(.text.tsl1401_collect_pit_handler)
-    type_default_callback                    0x0800ad11   Thumb Code     2  zf_device_type.o(.text.type_default_callback)
-    [Anonymous Symbol]                       0x0800ad10   Section        0  zf_device_type.o(.text.type_default_callback)
-    [Anonymous Symbol]                       0x0800ad14   Section        0  zf_driver_uart.o(.text.uart_init)
-    [Anonymous Symbol]                       0x0800afa0   Section        0  zf_driver_uart.o(.text.uart_query_byte)
-    [Anonymous Symbol]                       0x0800b008   Section        0  zf_driver_uart.o(.text.uart_rx_interrupt)
-    [Anonymous Symbol]                       0x0800b0a8   Section        0  zf_driver_uart.o(.text.uart_write_buffer)
-    [Anonymous Symbol]                       0x0800b114   Section        0  zf_driver_uart.o(.text.uart_write_byte)
-    [Anonymous Symbol]                       0x0800b154   Section        0  zf_driver_uart.o(.text.uart_write_string)
-    updata_sum                               0x0800b195   Thumb Code  1354  vision.o(.text.updata_sum)
-    [Anonymous Symbol]                       0x0800b194   Section        0  vision.o(.text.updata_sum)
-    [Anonymous Symbol]                       0x0800b6e0   Section        0  vision.o(.text.vis_bin_draw)
-    [Anonymous Symbol]                       0x0800b708   Section        0  vision.o(.text.vis_deal)
-    [Anonymous Symbol]                       0x0800bfa0   Section        0  vision.o(.text.vis_draw)
-    i.__0sprintf                             0x0800c0f8   Section        0  printfa.o(i.__0sprintf)
-    i.__scatterload_copy                     0x0800c120   Section       14  handlers.o(i.__scatterload_copy)
-    i.__scatterload_null                     0x0800c12e   Section        2  handlers.o(i.__scatterload_null)
-    i.__scatterload_zeroinit                 0x0800c130   Section       14  handlers.o(i.__scatterload_zeroinit)
-    _fp_digits                               0x0800c141   Thumb Code   366  printfa.o(i._fp_digits)
-    i._fp_digits                             0x0800c140   Section        0  printfa.o(i._fp_digits)
-    _printf_core                             0x0800c2c5   Thumb Code  1744  printfa.o(i._printf_core)
-    i._printf_core                           0x0800c2c4   Section        0  printfa.o(i._printf_core)
-    _printf_post_padding                     0x0800c9a1   Thumb Code    36  printfa.o(i._printf_post_padding)
-    i._printf_post_padding                   0x0800c9a0   Section        0  printfa.o(i._printf_post_padding)
-    _printf_pre_padding                      0x0800c9c5   Thumb Code    46  printfa.o(i._printf_pre_padding)
-    i._printf_pre_padding                    0x0800c9c4   Section        0  printfa.o(i._printf_pre_padding)
-    _sputc                                   0x0800c9f3   Thumb Code    10  printfa.o(i._sputc)
-    i._sputc                                 0x0800c9f2   Section        0  printfa.o(i._sputc)
-    .L__const.debug_protective_handler.pin_list 0x0800c9fc   Data         172  zf_common_debug.o(.rodata..L__const.debug_protective_handler.pin_list)
-    .L__const.vis_deal.alt_rows              0x0800caa8   Data          60  vision.o(.rodata..L__const.vis_deal.alt_rows)
-    dir_front                                0x0800d2fc   Data          32  vision.o(.rodata.dir_front)
-    [Anonymous Symbol]                       0x0800d2fc   Section        0  vision.o(.rodata.dir_front)
-    dir_frontleft                            0x0800d31c   Data          32  vision.o(.rodata.dir_frontleft)
-    [Anonymous Symbol]                       0x0800d31c   Section        0  vision.o(.rodata.dir_frontleft)
-    dir_frontright                           0x0800d33c   Data          32  vision.o(.rodata.dir_frontright)
-    [Anonymous Symbol]                       0x0800d33c   Section        0  vision.o(.rodata.dir_frontright)
-    key_index                                0x0800d35c   Data           4  zf_device_key.o(.rodata.key_index)
-    [Anonymous Symbol]                       0x0800d35c   Section        0  zf_device_key.o(.rodata.key_index)
-    .L.str.6                                 0x0800d360   Data          21  zf_common_debug.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x0800d360   Section        0  zf_common_debug.o(.rodata.str1.1)
-    .L.str.5                                 0x0800d375   Data          25  zf_common_debug.o(.rodata.str1.1)
-    .L.str.4                                 0x0800d38e   Data           9  zf_common_debug.o(.rodata.str1.1)
-    .L.str.1                                 0x0800d397   Data          12  zf_common_debug.o(.rodata.str1.1)
-    .L.str                                   0x0800d3a3   Data          13  zf_common_debug.o(.rodata.str1.1)
-    .L.str.2                                 0x0800d3b0   Data           9  zf_common_debug.o(.rodata.str1.1)
-    .L.str.3                                 0x0800d3b9   Data          13  zf_common_debug.o(.rodata.str1.1)
-    .L.str                                   0x0800d3c6   Data          43  zf_common_fifo.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x0800d3c6   Section        0  zf_common_fifo.o(.rodata.str1.1)
-    .L.str                                   0x0800d3f1   Data          47  zf_common_function.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x0800d3f1   Section        0  zf_common_function.o(.rodata.str1.1)
-    .L.str                                   0x0800d420   Data          44  zf_driver_delay.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x0800d420   Section        0  zf_driver_delay.o(.rodata.str1.1)
-    .L.str                                   0x0800d44c   Data          42  zf_driver_pit.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x0800d44c   Section        0  zf_driver_pit.o(.rodata.str1.1)
-    .L.str                                   0x0800d476   Data          42  zf_driver_pwm.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x0800d476   Section        0  zf_driver_pwm.o(.rodata.str1.1)
-    .L.str                                   0x0800d4a0   Data          47  zf_driver_soft_iic.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x0800d4a0   Section        0  zf_driver_soft_iic.o(.rodata.str1.1)
-    .L.str                                   0x0800d4cf   Data          42  zf_driver_spi.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x0800d4cf   Section        0  zf_driver_spi.o(.rodata.str1.1)
-    .L.str                                   0x0800d4f9   Data          44  zf_driver_timer.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x0800d4f9   Section        0  zf_driver_timer.o(.rodata.str1.1)
-    .L.str                                   0x0800d525   Data          43  zf_driver_uart.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x0800d525   Section        0  zf_driver_uart.o(.rodata.str1.1)
-    .L.str.1                                 0x0800d550   Data           4  zf_device_gps_tau1201.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x0800d550   Section        0  zf_device_gps_tau1201.o(.rodata.str1.1)
-    .L.str                                   0x0800d554   Data           4  zf_device_gps_tau1201.o(.rodata.str1.1)
-    .L.str                                   0x0800d558   Data          45  zf_device_ips200.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x0800d558   Section        0  zf_device_ips200.o(.rodata.str1.1)
-    .L.str                                   0x0800d585   Data          42  zf_device_key.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x0800d585   Section        0  zf_device_key.o(.rodata.str1.1)
-    .L.str                                   0x0800d5af   Data          26  zf_device_mpu6050.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x0800d5af   Section        0  zf_device_mpu6050.o(.rodata.str1.1)
-    .L.str.1                                 0x0800d5c9   Data          46  zf_device_mpu6050.o(.rodata.str1.1)
-    .L.str.2                                 0x0800d5f7   Data          26  zf_device_mt9v03x.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x0800d5f7   Section        0  zf_device_mt9v03x.o(.rodata.str1.1)
-    .L.str                                   0x0800d611   Data          26  zf_device_mt9v03x.o(.rodata.str1.1)
-    .L.str.1                                 0x0800d62b   Data          46  zf_device_mt9v03x.o(.rodata.str1.1)
-    .L.str.27                                0x0800d659   Data           3  mymenu.o(.rodata.str1.1)
-    [Anonymous Symbol]                       0x0800d659   Section        0  mymenu.o(.rodata.str1.1)
-    .L.str.2                                 0x0800d65c   Data           9  mymenu.o(.rodata.str1.1)
-    .L.str.3                                 0x0800d665   Data           9  mymenu.o(.rodata.str1.1)
-    .L.str.25                                0x0800d66e   Data           3  mymenu.o(.rodata.str1.1)
-    .L.str.26                                0x0800d671   Data           3  mymenu.o(.rodata.str1.1)
-    .L.str.1                                 0x0800d674   Data           4  mymenu.o(.rodata.str1.1)
-    .L.str                                   0x0800d678   Data           5  mymenu.o(.rodata.str1.1)
-    .L.str.22                                0x0800d67d   Data           4  mymenu.o(.rodata.str1.1)
-    .L.str.20                                0x0800d681   Data          10  mymenu.o(.rodata.str1.1)
-    .L.str.23                                0x0800d68b   Data           4  mymenu.o(.rodata.str1.1)
-    .L.str.24                                0x0800d68f   Data           4  mymenu.o(.rodata.str1.1)
-    .L.str.6                                 0x0800d693   Data           9  mymenu.o(.rodata.str1.1)
-    .L.str.7                                 0x0800d69c   Data           9  mymenu.o(.rodata.str1.1)
-    .L.str.8                                 0x0800d6a5   Data           8  mymenu.o(.rodata.str1.1)
-    .L.str.5                                 0x0800d6ad   Data           8  mymenu.o(.rodata.str1.1)
-    .L.str.4                                 0x0800d6b5   Data           9  mymenu.o(.rodata.str1.1)
-    .L.str.14                                0x0800d6be   Data           9  mymenu.o(.rodata.str1.1)
-    .L.str.17                                0x0800d6c7   Data          10  mymenu.o(.rodata.str1.1)
-    .L.str.10                                0x0800d6d1   Data           9  mymenu.o(.rodata.str1.1)
-    .L.str.19                                0x0800d6da   Data           9  mymenu.o(.rodata.str1.1)
-    .L.str.16                                0x0800d6e3   Data           8  mymenu.o(.rodata.str1.1)
-    .L.str.13                                0x0800d6eb   Data           9  mymenu.o(.rodata.str1.1)
-    .L.str.21                                0x0800d6f4   Data           7  mymenu.o(.rodata.str1.1)
-    .L.str.9                                 0x0800d6fb   Data           7  mymenu.o(.rodata.str1.1)
-    .L.str.12                                0x0800d702   Data           9  mymenu.o(.rodata.str1.1)
-    .L.str.15                                0x0800d70b   Data           9  mymenu.o(.rodata.str1.1)
-    .L.str.11                                0x0800d714   Data          10  mymenu.o(.rodata.str1.1)
-    .L.str.18                                0x0800d71e   Data           9  mymenu.o(.rodata.str1.1)
+    filter_bottom_connected                  0x08003755   Thumb Code   490  vision.o(.text.filter_bottom_connected)
+    [Anonymous Symbol]                       0x08003754   Section        0  vision.o(.text.filter_bottom_connected)
+    find_seeds                               0x08003941   Thumb Code    50  vision.o(.text.find_seeds)
+    [Anonymous Symbol]                       0x08003940   Section        0  vision.o(.text.find_seeds)
+    find_seeds_at                            0x08003975   Thumb Code   808  vision.o(.text.find_seeds_at)
+    [Anonymous Symbol]                       0x08003974   Section        0  vision.o(.text.find_seeds_at)
+    [Anonymous Symbol]                       0x08003c9c   Section        0  zf_common_function.o(.text.func_float_to_str)
+    [Anonymous Symbol]                       0x08003ee8   Section        0  zf_common_function.o(.text.func_get_greatest_common_divisor)
+    [Anonymous Symbol]                       0x08003f2c   Section        0  zf_common_function.o(.text.func_int_to_str)
+    [Anonymous Symbol]                       0x08004020   Section        0  zf_driver_gpio.o(.text.gpio_get_level)
+    [Anonymous Symbol]                       0x08004050   Section        0  zf_driver_gpio.o(.text.gpio_init)
+    [Anonymous Symbol]                       0x08004238   Section        0  zf_driver_gpio.o(.text.gpio_set_level)
+    [Anonymous Symbol]                       0x0800429c   Section        0  zf_device_gps_tau1201.o(.text.gps_uart_callback)
+    [Anonymous Symbol]                       0x080043d8   Section        0  zf_common_interrupt.o(.text.interrupt_disable)
+    [Anonymous Symbol]                       0x080043ec   Section        0  zf_common_interrupt.o(.text.interrupt_enable)
+    [Anonymous Symbol]                       0x08004400   Section        0  zf_common_interrupt.o(.text.interrupt_global_disable)
+    [Anonymous Symbol]                       0x08004424   Section        0  zf_common_interrupt.o(.text.interrupt_init)
+    [Anonymous Symbol]                       0x08004430   Section        0  zf_common_interrupt.o(.text.interrupt_set_priority)
+    [Anonymous Symbol]                       0x0800444c   Section        0  zf_device_ips200.o(.text.ips200_clear)
+    ips200_debug_init                        0x0800455d   Thumb Code   138  zf_device_ips200.o(.text.ips200_debug_init)
+    [Anonymous Symbol]                       0x0800455c   Section        0  zf_device_ips200.o(.text.ips200_debug_init)
+    [Anonymous Symbol]                       0x080045e8   Section        0  zf_device_ips200.o(.text.ips200_draw_point)
+    [Anonymous Symbol]                       0x080046d4   Section        0  zf_device_ips200.o(.text.ips200_init)
+    [Anonymous Symbol]                       0x08004b48   Section        0  zf_device_ips200.o(.text.ips200_set_color)
+    [Anonymous Symbol]                       0x08004b74   Section        0  zf_device_ips200.o(.text.ips200_set_dir)
+    [Anonymous Symbol]                       0x08004bdc   Section        0  zf_device_ips200.o(.text.ips200_set_font)
+    ips200_set_region                        0x08004bf5   Thumb Code   196  zf_device_ips200.o(.text.ips200_set_region)
+    [Anonymous Symbol]                       0x08004bf4   Section        0  zf_device_ips200.o(.text.ips200_set_region)
+    [Anonymous Symbol]                       0x08004cb8   Section        0  zf_device_ips200.o(.text.ips200_show_char)
+    [Anonymous Symbol]                       0x08004f98   Section        0  zf_device_ips200.o(.text.ips200_show_float)
+    [Anonymous Symbol]                       0x080050f8   Section        0  zf_device_ips200.o(.text.ips200_show_gray_image)
+    [Anonymous Symbol]                       0x0800530c   Section        0  zf_device_ips200.o(.text.ips200_show_int)
+    [Anonymous Symbol]                       0x0800540c   Section        0  zf_device_ips200.o(.text.ips200_show_string)
+    ips200_write_16bit_data                  0x080054e9   Thumb Code   214  zf_device_ips200.o(.text.ips200_write_16bit_data)
+    [Anonymous Symbol]                       0x080054e8   Section        0  zf_device_ips200.o(.text.ips200_write_16bit_data)
+    ips200_write_8bit_data                   0x080055c1   Thumb Code   174  zf_device_ips200.o(.text.ips200_write_8bit_data)
+    [Anonymous Symbol]                       0x080055c0   Section        0  zf_device_ips200.o(.text.ips200_write_8bit_data)
+    ips200_write_command                     0x08005671   Thumb Code   234  zf_device_ips200.o(.text.ips200_write_command)
+    [Anonymous Symbol]                       0x08005670   Section        0  zf_device_ips200.o(.text.ips200_write_command)
+    [Anonymous Symbol]                       0x0800575c   Section        0  vision.o(.text.is_straight)
+    k1_handle                                0x080058b5   Thumb Code   874  mymenu.o(.text.k1_handle)
+    [Anonymous Symbol]                       0x080058b4   Section        0  mymenu.o(.text.k1_handle)
+    k2_handle                                0x08005c21   Thumb Code   856  mymenu.o(.text.k2_handle)
+    [Anonymous Symbol]                       0x08005c20   Section        0  mymenu.o(.text.k2_handle)
+    k3_handle                                0x08005f79   Thumb Code    26  mymenu.o(.text.k3_handle)
+    [Anonymous Symbol]                       0x08005f78   Section        0  mymenu.o(.text.k3_handle)
+    k3_long_handle                           0x08005f95   Thumb Code   228  mymenu.o(.text.k3_long_handle)
+    [Anonymous Symbol]                       0x08005f94   Section        0  mymenu.o(.text.k3_long_handle)
+    k4_handle                                0x08006079   Thumb Code    58  mymenu.o(.text.k4_handle)
+    [Anonymous Symbol]                       0x08006078   Section        0  mymenu.o(.text.k4_handle)
+    [Anonymous Symbol]                       0x080060b4   Section        0  zf_device_key.o(.text.key_clear_state)
+    [Anonymous Symbol]                       0x080060d0   Section        0  zf_device_key.o(.text.key_get_state)
+    [Anonymous Symbol]                       0x080060e8   Section        0  zf_device_key.o(.text.key_init)
+    [Anonymous Symbol]                       0x08006164   Section        0  zf_device_key.o(.text.key_scanner)
+    [Anonymous Symbol]                       0x08006264   Section        0  main.o(.text.main)
+    [Anonymous Symbol]                       0x080063a8   Section        0  mymenu.o(.text.menu)
+    [Anonymous Symbol]                       0x08006518   Section        0  mymenu.o(.text.menu_init)
+    [Anonymous Symbol]                       0x0800690c   Section        0  mymenu.o(.text.menu_show)
+    [Anonymous Symbol]                       0x08006964   Section        0  motor.o(.text.motor_init)
+    [Anonymous Symbol]                       0x080069b0   Section        0  motor.o(.text.motor_set_both)
+    [Anonymous Symbol]                       0x080069d0   Section        0  motor.o(.text.motor_set_left)
+    [Anonymous Symbol]                       0x08006a4c   Section        0  motor.o(.text.motor_set_right)
+    [Anonymous Symbol]                       0x08006ac8   Section        0  motor.o(.text.motor_stop)
+    motor_update                             0x08006ae1   Thumb Code   596  control.o(.text.motor_update)
+    [Anonymous Symbol]                       0x08006ae0   Section        0  control.o(.text.motor_update)
+    [Anonymous Symbol]                       0x08006d34   Section        0  zf_device_mpu6050.o(.text.mpu6050_get_acc)
+    [Anonymous Symbol]                       0x08006d94   Section        0  zf_device_mpu6050.o(.text.mpu6050_get_gyro)
+    [Anonymous Symbol]                       0x08006df4   Section        0  mpu6050.o(.text.mpu6050_get_gyro_z)
+    [Anonymous Symbol]                       0x08006e04   Section        0  zf_device_mpu6050.o(.text.mpu6050_init)
+    [Anonymous Symbol]                       0x08006eb0   Section        0  mpu6050.o(.text.mpu6050_module_init)
+    [Anonymous Symbol]                       0x08006efc   Section        0  mpu6050.o(.text.mpu6050_pit_callback)
+    mpu6050_self1_check                      0x08006f09   Thumb Code   116  zf_device_mpu6050.o(.text.mpu6050_self1_check)
+    [Anonymous Symbol]                       0x08006f08   Section        0  zf_device_mpu6050.o(.text.mpu6050_self1_check)
+    mt9v03x_dma_handler                      0x08006f7d   Thumb Code    22  zf_device_mt9v03x.o(.text.mt9v03x_dma_handler)
+    [Anonymous Symbol]                       0x08006f7c   Section        0  zf_device_mt9v03x.o(.text.mt9v03x_dma_handler)
+    mt9v03x_get_config                       0x08006f95   Thumb Code   290  zf_device_mt9v03x.o(.text.mt9v03x_get_config)
+    [Anonymous Symbol]                       0x08006f94   Section        0  zf_device_mt9v03x.o(.text.mt9v03x_get_config)
+    [Anonymous Symbol]                       0x080070b8   Section        0  zf_device_mt9v03x.o(.text.mt9v03x_get_version)
+    [Anonymous Symbol]                       0x08007158   Section        0  zf_device_mt9v03x.o(.text.mt9v03x_init)
+    mt9v03x_read_word_sccb                   0x080072fd   Thumb Code    60  zf_device_config.o(.text.mt9v03x_read_word_sccb)
+    [Anonymous Symbol]                       0x080072fc   Section        0  zf_device_config.o(.text.mt9v03x_read_word_sccb)
+    mt9v03x_set_config                       0x08007339   Thumb Code   248  zf_device_mt9v03x.o(.text.mt9v03x_set_config)
+    [Anonymous Symbol]                       0x08007338   Section        0  zf_device_mt9v03x.o(.text.mt9v03x_set_config)
+    [Anonymous Symbol]                       0x08007430   Section        0  zf_device_config.o(.text.mt9v03x_set_config_sccb)
+    mt9v03x_uart_handler                     0x08007de1   Thumb Code    64  zf_device_mt9v03x.o(.text.mt9v03x_uart_handler)
+    [Anonymous Symbol]                       0x08007de0   Section        0  zf_device_mt9v03x.o(.text.mt9v03x_uart_handler)
+    mt9v03x_vsync_handler                    0x08007e21   Thumb Code    54  zf_device_mt9v03x.o(.text.mt9v03x_vsync_handler)
+    [Anonymous Symbol]                       0x08007e20   Section        0  zf_device_mt9v03x.o(.text.mt9v03x_vsync_handler)
+    mt9v03x_write_word_sccb                  0x08007e59   Thumb Code    50  zf_device_config.o(.text.mt9v03x_write_word_sccb)
+    [Anonymous Symbol]                       0x08007e58   Section        0  zf_device_config.o(.text.mt9v03x_write_word_sccb)
+    pho_border                               0x08007e8d   Thumb Code   536  vision.o(.text.pho_border)
+    [Anonymous Symbol]                       0x08007e8c   Section        0  vision.o(.text.pho_border)
+    pho_center                               0x080080a5   Thumb Code  1310  vision.o(.text.pho_center)
+    [Anonymous Symbol]                       0x080080a4   Section        0  vision.o(.text.pho_center)
+    [Anonymous Symbol]                       0x080085c4   Section        0  zf_driver_pit.o(.text.pit_init)
+    [Anonymous Symbol]                       0x080086f8   Section        0  zf_driver_pwm.o(.text.pwm_init)
+    [Anonymous Symbol]                       0x08008950   Section        0  zf_driver_pwm.o(.text.pwm_set_duty)
+    seed_grow_left                           0x08008a81   Thumb Code  1588  vision.o(.text.seed_grow_left)
+    [Anonymous Symbol]                       0x08008a80   Section        0  vision.o(.text.seed_grow_left)
+    seed_grow_right                          0x080090b5   Thumb Code  1586  vision.o(.text.seed_grow_right)
+    [Anonymous Symbol]                       0x080090b4   Section        0  vision.o(.text.seed_grow_right)
+    [Anonymous Symbol]                       0x080096e8   Section        0  servo.o(.text.servo_init)
+    [Anonymous Symbol]                       0x080096fc   Section        0  servo.o(.text.servo_set_angle)
+    servo_update                             0x08009765   Thumb Code   686  control.o(.text.servo_update)
+    [Anonymous Symbol]                       0x08009764   Section        0  control.o(.text.servo_update)
+    [Anonymous Symbol]                       0x08009a14   Section        0  zf_device_type.o(.text.set_camera_type)
+    show_key                                 0x08009aa1   Thumb Code   158  mymenu.o(.text.show_key)
+    [Anonymous Symbol]                       0x08009aa0   Section        0  mymenu.o(.text.show_key)
+    show_number                              0x08009b41   Thumb Code   194  mymenu.o(.text.show_number)
+    [Anonymous Symbol]                       0x08009b40   Section        0  mymenu.o(.text.show_number)
+    [Anonymous Symbol]                       0x08009c04   Section        0  zf_driver_soft_iic.o(.text.soft_iic_init)
+    [Anonymous Symbol]                       0x08009c94   Section        0  zf_driver_soft_iic.o(.text.soft_iic_read_8bit_register)
+    [Anonymous Symbol]                       0x08009d08   Section        0  zf_driver_soft_iic.o(.text.soft_iic_read_8bit_registers)
+    soft_iic_read_data                       0x08009da1   Thumb Code   356  zf_driver_soft_iic.o(.text.soft_iic_read_data)
+    [Anonymous Symbol]                       0x08009da0   Section        0  zf_driver_soft_iic.o(.text.soft_iic_read_data)
+    [Anonymous Symbol]                       0x08009f04   Section        0  zf_driver_soft_iic.o(.text.soft_iic_sccb_read_register)
+    [Anonymous Symbol]                       0x08009f7c   Section        0  zf_driver_soft_iic.o(.text.soft_iic_sccb_write_register)
+    soft_iic_send_ack                        0x08009fd5   Thumb Code   282  zf_driver_soft_iic.o(.text.soft_iic_send_ack)
+    [Anonymous Symbol]                       0x08009fd4   Section        0  zf_driver_soft_iic.o(.text.soft_iic_send_ack)
+    soft_iic_send_data                       0x0800a0f1   Thumb Code   296  zf_driver_soft_iic.o(.text.soft_iic_send_data)
+    [Anonymous Symbol]                       0x0800a0f0   Section        0  zf_driver_soft_iic.o(.text.soft_iic_send_data)
+    soft_iic_start                           0x0800a219   Thumb Code   218  zf_driver_soft_iic.o(.text.soft_iic_start)
+    [Anonymous Symbol]                       0x0800a218   Section        0  zf_driver_soft_iic.o(.text.soft_iic_start)
+    soft_iic_stop                            0x0800a2f5   Thumb Code   218  zf_driver_soft_iic.o(.text.soft_iic_stop)
+    [Anonymous Symbol]                       0x0800a2f4   Section        0  zf_driver_soft_iic.o(.text.soft_iic_stop)
+    soft_iic_wait_ack                        0x0800a3d1   Thumb Code   248  zf_driver_soft_iic.o(.text.soft_iic_wait_ack)
+    [Anonymous Symbol]                       0x0800a3d0   Section        0  zf_driver_soft_iic.o(.text.soft_iic_wait_ack)
+    [Anonymous Symbol]                       0x0800a4c8   Section        0  zf_driver_soft_iic.o(.text.soft_iic_write_8bit_register)
+    [Anonymous Symbol]                       0x0800a520   Section        0  zf_driver_spi.o(.text.spi_init)
+    [Anonymous Symbol]                       0x0800a888   Section        0  zf_driver_spi.o(.text.spi_write_16bit)
+    [Anonymous Symbol]                       0x0800a940   Section        0  zf_driver_spi.o(.text.spi_write_8bit)
+    [Anonymous Symbol]                       0x0800a9c8   Section        0  zf_driver_delay.o(.text.system_delay_ms)
+    [Anonymous Symbol]                       0x0800aa64   Section        0  zf_driver_timer.o(.text.timer_clear)
+    [Anonymous Symbol]                       0x0800ab18   Section        0  zf_driver_timer.o(.text.timer_clock_enable)
+    [Anonymous Symbol]                       0x0800abd0   Section        0  zf_driver_timer.o(.text.timer_etr_init)
+    [Anonymous Symbol]                       0x0800acfc   Section        0  zf_driver_timer.o(.text.timer_funciton_check)
+    [Anonymous Symbol]                       0x0800ad64   Section        0  zf_driver_timer.o(.text.timer_get)
+    [Anonymous Symbol]                       0x0800ae1c   Section        0  zf_device_tsl1401.o(.text.tsl1401_collect_pit_handler)
+    type_default_callback                    0x0800aefd   Thumb Code     2  zf_device_type.o(.text.type_default_callback)
+    [Anonymous Symbol]                       0x0800aefc   Section        0  zf_device_type.o(.text.type_default_callback)
+    [Anonymous Symbol]                       0x0800af00   Section        0  zf_driver_uart.o(.text.uart_init)
+    [Anonymous Symbol]                       0x0800b18c   Section        0  zf_driver_uart.o(.text.uart_query_byte)
+    [Anonymous Symbol]                       0x0800b1f4   Section        0  zf_driver_uart.o(.text.uart_rx_interrupt)
+    [Anonymous Symbol]                       0x0800b294   Section        0  zf_driver_uart.o(.text.uart_write_buffer)
+    [Anonymous Symbol]                       0x0800b300   Section        0  zf_driver_uart.o(.text.uart_write_byte)
+    [Anonymous Symbol]                       0x0800b340   Section        0  zf_driver_uart.o(.text.uart_write_string)
+    updata_sum                               0x0800b381   Thumb Code  1354  vision.o(.text.updata_sum)
+    [Anonymous Symbol]                       0x0800b380   Section        0  vision.o(.text.updata_sum)
+    [Anonymous Symbol]                       0x0800b8cc   Section        0  vision.o(.text.vis_bin_draw)
+    [Anonymous Symbol]                       0x0800b8f4   Section        0  vision.o(.text.vis_deal)
+    [Anonymous Symbol]                       0x0800c190   Section        0  vision.o(.text.vis_draw)
+    i.__0sprintf                             0x0800c2e8   Section        0  printfa.o(i.__0sprintf)
+    i.__scatterload_copy                     0x0800c310   Section       14  handlers.o(i.__scatterload_copy)
+    i.__scatterload_null                     0x0800c31e   Section        2  handlers.o(i.__scatterload_null)
+    i.__scatterload_zeroinit                 0x0800c320   Section       14  handlers.o(i.__scatterload_zeroinit)
+    _fp_digits                               0x0800c331   Thumb Code   366  printfa.o(i._fp_digits)
+    i._fp_digits                             0x0800c330   Section        0  printfa.o(i._fp_digits)
+    _printf_core                             0x0800c4b5   Thumb Code  1744  printfa.o(i._printf_core)
+    i._printf_core                           0x0800c4b4   Section        0  printfa.o(i._printf_core)
+    _printf_post_padding                     0x0800cb91   Thumb Code    36  printfa.o(i._printf_post_padding)
+    i._printf_post_padding                   0x0800cb90   Section        0  printfa.o(i._printf_post_padding)
+    _printf_pre_padding                      0x0800cbb5   Thumb Code    46  printfa.o(i._printf_pre_padding)
+    i._printf_pre_padding                    0x0800cbb4   Section        0  printfa.o(i._printf_pre_padding)
+    _sputc                                   0x0800cbe3   Thumb Code    10  printfa.o(i._sputc)
+    i._sputc                                 0x0800cbe2   Section        0  printfa.o(i._sputc)
+    .L__const.debug_protective_handler.pin_list 0x0800cbec   Data         172  zf_common_debug.o(.rodata..L__const.debug_protective_handler.pin_list)
+    .L__const.vis_deal.alt_rows              0x0800cc98   Data          60  vision.o(.rodata..L__const.vis_deal.alt_rows)
+    dir_front                                0x0800d4ec   Data          32  vision.o(.rodata.dir_front)
+    [Anonymous Symbol]                       0x0800d4ec   Section        0  vision.o(.rodata.dir_front)
+    dir_frontleft                            0x0800d50c   Data          32  vision.o(.rodata.dir_frontleft)
+    [Anonymous Symbol]                       0x0800d50c   Section        0  vision.o(.rodata.dir_frontleft)
+    dir_frontright                           0x0800d52c   Data          32  vision.o(.rodata.dir_frontright)
+    [Anonymous Symbol]                       0x0800d52c   Section        0  vision.o(.rodata.dir_frontright)
+    key_index                                0x0800d54c   Data           4  zf_device_key.o(.rodata.key_index)
+    [Anonymous Symbol]                       0x0800d54c   Section        0  zf_device_key.o(.rodata.key_index)
+    .L.str.6                                 0x0800d550   Data          21  zf_common_debug.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x0800d550   Section        0  zf_common_debug.o(.rodata.str1.1)
+    .L.str.5                                 0x0800d565   Data          25  zf_common_debug.o(.rodata.str1.1)
+    .L.str.4                                 0x0800d57e   Data           9  zf_common_debug.o(.rodata.str1.1)
+    .L.str.1                                 0x0800d587   Data          12  zf_common_debug.o(.rodata.str1.1)
+    .L.str                                   0x0800d593   Data          13  zf_common_debug.o(.rodata.str1.1)
+    .L.str.2                                 0x0800d5a0   Data           9  zf_common_debug.o(.rodata.str1.1)
+    .L.str.3                                 0x0800d5a9   Data          13  zf_common_debug.o(.rodata.str1.1)
+    .L.str                                   0x0800d5b6   Data          43  zf_common_fifo.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x0800d5b6   Section        0  zf_common_fifo.o(.rodata.str1.1)
+    .L.str                                   0x0800d5e1   Data          47  zf_common_function.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x0800d5e1   Section        0  zf_common_function.o(.rodata.str1.1)
+    .L.str                                   0x0800d610   Data          44  zf_driver_delay.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x0800d610   Section        0  zf_driver_delay.o(.rodata.str1.1)
+    .L.str                                   0x0800d63c   Data          42  zf_driver_pit.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x0800d63c   Section        0  zf_driver_pit.o(.rodata.str1.1)
+    .L.str                                   0x0800d666   Data          42  zf_driver_pwm.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x0800d666   Section        0  zf_driver_pwm.o(.rodata.str1.1)
+    .L.str                                   0x0800d690   Data          47  zf_driver_soft_iic.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x0800d690   Section        0  zf_driver_soft_iic.o(.rodata.str1.1)
+    .L.str                                   0x0800d6bf   Data          42  zf_driver_spi.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x0800d6bf   Section        0  zf_driver_spi.o(.rodata.str1.1)
+    .L.str                                   0x0800d6e9   Data          44  zf_driver_timer.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x0800d6e9   Section        0  zf_driver_timer.o(.rodata.str1.1)
+    .L.str                                   0x0800d715   Data          43  zf_driver_uart.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x0800d715   Section        0  zf_driver_uart.o(.rodata.str1.1)
+    .L.str.1                                 0x0800d740   Data           4  zf_device_gps_tau1201.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x0800d740   Section        0  zf_device_gps_tau1201.o(.rodata.str1.1)
+    .L.str                                   0x0800d744   Data           4  zf_device_gps_tau1201.o(.rodata.str1.1)
+    .L.str                                   0x0800d748   Data          45  zf_device_ips200.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x0800d748   Section        0  zf_device_ips200.o(.rodata.str1.1)
+    .L.str                                   0x0800d775   Data          42  zf_device_key.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x0800d775   Section        0  zf_device_key.o(.rodata.str1.1)
+    .L.str                                   0x0800d79f   Data          26  zf_device_mpu6050.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x0800d79f   Section        0  zf_device_mpu6050.o(.rodata.str1.1)
+    .L.str.1                                 0x0800d7b9   Data          46  zf_device_mpu6050.o(.rodata.str1.1)
+    .L.str.2                                 0x0800d7e7   Data          26  zf_device_mt9v03x.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x0800d7e7   Section        0  zf_device_mt9v03x.o(.rodata.str1.1)
+    .L.str                                   0x0800d801   Data          26  zf_device_mt9v03x.o(.rodata.str1.1)
+    .L.str.1                                 0x0800d81b   Data          46  zf_device_mt9v03x.o(.rodata.str1.1)
+    .L.str.27                                0x0800d849   Data           3  mymenu.o(.rodata.str1.1)
+    [Anonymous Symbol]                       0x0800d849   Section        0  mymenu.o(.rodata.str1.1)
+    .L.str.2                                 0x0800d84c   Data           9  mymenu.o(.rodata.str1.1)
+    .L.str.3                                 0x0800d855   Data           9  mymenu.o(.rodata.str1.1)
+    .L.str.25                                0x0800d85e   Data           3  mymenu.o(.rodata.str1.1)
+    .L.str.26                                0x0800d861   Data           3  mymenu.o(.rodata.str1.1)
+    .L.str.1                                 0x0800d864   Data           4  mymenu.o(.rodata.str1.1)
+    .L.str                                   0x0800d868   Data           5  mymenu.o(.rodata.str1.1)
+    .L.str.22                                0x0800d86d   Data           4  mymenu.o(.rodata.str1.1)
+    .L.str.20                                0x0800d871   Data          10  mymenu.o(.rodata.str1.1)
+    .L.str.23                                0x0800d87b   Data           4  mymenu.o(.rodata.str1.1)
+    .L.str.24                                0x0800d87f   Data           4  mymenu.o(.rodata.str1.1)
+    .L.str.6                                 0x0800d883   Data           9  mymenu.o(.rodata.str1.1)
+    .L.str.7                                 0x0800d88c   Data           9  mymenu.o(.rodata.str1.1)
+    .L.str.8                                 0x0800d895   Data           8  mymenu.o(.rodata.str1.1)
+    .L.str.5                                 0x0800d89d   Data           8  mymenu.o(.rodata.str1.1)
+    .L.str.4                                 0x0800d8a5   Data           9  mymenu.o(.rodata.str1.1)
+    .L.str.14                                0x0800d8ae   Data           9  mymenu.o(.rodata.str1.1)
+    .L.str.17                                0x0800d8b7   Data          10  mymenu.o(.rodata.str1.1)
+    .L.str.10                                0x0800d8c1   Data           9  mymenu.o(.rodata.str1.1)
+    .L.str.19                                0x0800d8ca   Data           9  mymenu.o(.rodata.str1.1)
+    .L.str.16                                0x0800d8d3   Data           8  mymenu.o(.rodata.str1.1)
+    .L.str.13                                0x0800d8db   Data           9  mymenu.o(.rodata.str1.1)
+    .L.str.21                                0x0800d8e4   Data           7  mymenu.o(.rodata.str1.1)
+    .L.str.9                                 0x0800d8eb   Data           7  mymenu.o(.rodata.str1.1)
+    .L.str.12                                0x0800d8f2   Data           9  mymenu.o(.rodata.str1.1)
+    .L.str.15                                0x0800d8fb   Data           9  mymenu.o(.rodata.str1.1)
+    .L.str.11                                0x0800d904   Data          10  mymenu.o(.rodata.str1.1)
+    .L.str.18                                0x0800d90e   Data           9  mymenu.o(.rodata.str1.1)
     adc_index                                0x20000008   Data           8  zf_driver_adc.o(.data.adc_index)
     [Anonymous Symbol]                       0x20000008   Section        0  zf_driver_adc.o(.data.adc_index)
     dm1xa_distance_mm                        0x2000001c   Data           2  zf_device_dm1xa.o(.data.dm1xa_distance_mm)
@@ -6575,95 +6581,95 @@ Image Symbol Table
     fifo_used                                0x08003471   Thumb Code    40  zf_common_fifo.o(.text.fifo_used)
     fifo_write_buffer                        0x08003499   Thumb Code   506  zf_common_fifo.o(.text.fifo_write_buffer)
     fifo_write_element                       0x08003695   Thumb Code   190  zf_common_fifo.o(.text.fifo_write_element)
-    func_float_to_str                        0x08003ab1   Thumb Code   588  zf_common_function.o(.text.func_float_to_str)
-    func_get_greatest_common_divisor         0x08003cfd   Thumb Code    66  zf_common_function.o(.text.func_get_greatest_common_divisor)
-    func_int_to_str                          0x08003d41   Thumb Code   242  zf_common_function.o(.text.func_int_to_str)
-    gpio_get_level                           0x08003e35   Thumb Code    46  zf_driver_gpio.o(.text.gpio_get_level)
-    gpio_init                                0x08003e65   Thumb Code   488  zf_driver_gpio.o(.text.gpio_init)
-    gpio_set_level                           0x0800404d   Thumb Code    98  zf_driver_gpio.o(.text.gpio_set_level)
-    gps_uart_callback                        0x080040b1   Thumb Code   314  zf_device_gps_tau1201.o(.text.gps_uart_callback)
-    interrupt_disable                        0x080041ed   Thumb Code    20  zf_common_interrupt.o(.text.interrupt_disable)
-    interrupt_enable                         0x08004201   Thumb Code    20  zf_common_interrupt.o(.text.interrupt_enable)
-    interrupt_global_disable                 0x08004215   Thumb Code    36  zf_common_interrupt.o(.text.interrupt_global_disable)
-    interrupt_init                           0x08004239   Thumb Code    10  zf_common_interrupt.o(.text.interrupt_init)
-    interrupt_set_priority                   0x08004245   Thumb Code    28  zf_common_interrupt.o(.text.interrupt_set_priority)
-    ips200_clear                             0x08004261   Thumb Code   270  zf_device_ips200.o(.text.ips200_clear)
-    ips200_draw_point                        0x080043fd   Thumb Code   234  zf_device_ips200.o(.text.ips200_draw_point)
-    ips200_init                              0x080044e9   Thumb Code  1138  zf_device_ips200.o(.text.ips200_init)
-    ips200_set_color                         0x0800495d   Thumb Code    42  zf_device_ips200.o(.text.ips200_set_color)
-    ips200_set_dir                           0x08004989   Thumb Code   102  zf_device_ips200.o(.text.ips200_set_dir)
-    ips200_set_font                          0x080049f1   Thumb Code    24  zf_device_ips200.o(.text.ips200_set_font)
-    ips200_show_char                         0x08004acd   Thumb Code   734  zf_device_ips200.o(.text.ips200_show_char)
-    ips200_show_float                        0x08004dad   Thumb Code   350  zf_device_ips200.o(.text.ips200_show_float)
-    ips200_show_gray_image                   0x08004f0d   Thumb Code   532  zf_device_ips200.o(.text.ips200_show_gray_image)
-    ips200_show_int                          0x08005121   Thumb Code   256  zf_device_ips200.o(.text.ips200_show_int)
-    ips200_show_string                       0x08005221   Thumb Code   220  zf_device_ips200.o(.text.ips200_show_string)
-    is_straight                              0x08005571   Thumb Code   344  vision.o(.text.is_straight)
-    key_clear_state                          0x08005ec9   Thumb Code    26  zf_device_key.o(.text.key_clear_state)
-    key_get_state                            0x08005ee5   Thumb Code    24  zf_device_key.o(.text.key_get_state)
-    key_init                                 0x08005efd   Thumb Code   122  zf_device_key.o(.text.key_init)
-    key_scanner                              0x08005f79   Thumb Code   256  zf_device_key.o(.text.key_scanner)
-    main                                     0x08006079   Thumb Code   324  main.o(.text.main)
-    menu                                     0x080061bd   Thumb Code   368  mymenu.o(.text.menu)
-    menu_init                                0x0800632d   Thumb Code  1010  mymenu.o(.text.menu_init)
-    menu_show                                0x08006721   Thumb Code    86  mymenu.o(.text.menu_show)
-    motor_init                               0x08006779   Thumb Code    76  motor.o(.text.motor_init)
-    motor_set_both                           0x080067c5   Thumb Code    32  motor.o(.text.motor_set_both)
-    motor_set_left                           0x080067e5   Thumb Code   122  motor.o(.text.motor_set_left)
-    motor_set_right                          0x08006861   Thumb Code   122  motor.o(.text.motor_set_right)
-    motor_stop                               0x080068dd   Thumb Code    22  motor.o(.text.motor_stop)
-    mpu6050_get_acc                          0x08006b49   Thumb Code    94  zf_device_mpu6050.o(.text.mpu6050_get_acc)
-    mpu6050_get_gyro                         0x08006ba9   Thumb Code    94  zf_device_mpu6050.o(.text.mpu6050_get_gyro)
-    mpu6050_get_gyro_z                       0x08006c09   Thumb Code    14  mpu6050.o(.text.mpu6050_get_gyro_z)
-    mpu6050_init                             0x08006c19   Thumb Code   172  zf_device_mpu6050.o(.text.mpu6050_init)
-    mpu6050_module_init                      0x08006cc5   Thumb Code    74  mpu6050.o(.text.mpu6050_module_init)
-    mpu6050_pit_callback                     0x08006d11   Thumb Code    12  mpu6050.o(.text.mpu6050_pit_callback)
-    mt9v03x_get_version                      0x08006ecd   Thumb Code   160  zf_device_mt9v03x.o(.text.mt9v03x_get_version)
-    mt9v03x_init                             0x08006f6d   Thumb Code   420  zf_device_mt9v03x.o(.text.mt9v03x_init)
-    mt9v03x_set_config_sccb                  0x08007245   Thumb Code  2478  zf_device_config.o(.text.mt9v03x_set_config_sccb)
-    pit_init                                 0x080083d9   Thumb Code   306  zf_driver_pit.o(.text.pit_init)
-    pwm_init                                 0x0800850d   Thumb Code   598  zf_driver_pwm.o(.text.pwm_init)
-    pwm_set_duty                             0x08008765   Thumb Code   302  zf_driver_pwm.o(.text.pwm_set_duty)
-    servo_init                               0x080094fd   Thumb Code    20  servo.o(.text.servo_init)
-    servo_set_angle                          0x08009511   Thumb Code   102  servo.o(.text.servo_set_angle)
-    set_camera_type                          0x08009829   Thumb Code   138  zf_device_type.o(.text.set_camera_type)
-    soft_iic_init                            0x08009a19   Thumb Code   142  zf_driver_soft_iic.o(.text.soft_iic_init)
-    soft_iic_read_8bit_register              0x08009aa9   Thumb Code   114  zf_driver_soft_iic.o(.text.soft_iic_read_8bit_register)
-    soft_iic_read_8bit_registers             0x08009b1d   Thumb Code   152  zf_driver_soft_iic.o(.text.soft_iic_read_8bit_registers)
-    soft_iic_sccb_read_register              0x08009d19   Thumb Code   120  zf_driver_soft_iic.o(.text.soft_iic_sccb_read_register)
-    soft_iic_sccb_write_register             0x08009d91   Thumb Code    86  zf_driver_soft_iic.o(.text.soft_iic_sccb_write_register)
-    soft_iic_write_8bit_register             0x0800a2dd   Thumb Code    86  zf_driver_soft_iic.o(.text.soft_iic_write_8bit_register)
-    spi_init                                 0x0800a335   Thumb Code   870  zf_driver_spi.o(.text.spi_init)
-    spi_write_16bit                          0x0800a69d   Thumb Code   184  zf_driver_spi.o(.text.spi_write_16bit)
-    spi_write_8bit                           0x0800a755   Thumb Code   134  zf_driver_spi.o(.text.spi_write_8bit)
-    system_delay_ms                          0x0800a7dd   Thumb Code   154  zf_driver_delay.o(.text.system_delay_ms)
-    timer_clear                              0x0800a879   Thumb Code   178  zf_driver_timer.o(.text.timer_clear)
-    timer_clock_enable                       0x0800a92d   Thumb Code   182  zf_driver_timer.o(.text.timer_clock_enable)
-    timer_etr_init                           0x0800a9e5   Thumb Code   298  zf_driver_timer.o(.text.timer_etr_init)
-    timer_funciton_check                     0x0800ab11   Thumb Code   104  zf_driver_timer.o(.text.timer_funciton_check)
-    timer_get                                0x0800ab79   Thumb Code   182  zf_driver_timer.o(.text.timer_get)
-    tsl1401_collect_pit_handler              0x0800ac31   Thumb Code   224  zf_device_tsl1401.o(.text.tsl1401_collect_pit_handler)
-    uart_init                                0x0800ad15   Thumb Code   652  zf_driver_uart.o(.text.uart_init)
-    uart_query_byte                          0x0800afa1   Thumb Code   102  zf_driver_uart.o(.text.uart_query_byte)
-    uart_rx_interrupt                        0x0800b009   Thumb Code   160  zf_driver_uart.o(.text.uart_rx_interrupt)
-    uart_write_buffer                        0x0800b0a9   Thumb Code   108  zf_driver_uart.o(.text.uart_write_buffer)
-    uart_write_byte                          0x0800b115   Thumb Code    64  zf_driver_uart.o(.text.uart_write_byte)
-    uart_write_string                        0x0800b155   Thumb Code    64  zf_driver_uart.o(.text.uart_write_string)
-    vis_bin_draw                             0x0800b6e1   Thumb Code    38  vision.o(.text.vis_bin_draw)
-    vis_deal                                 0x0800b709   Thumb Code  2198  vision.o(.text.vis_deal)
-    vis_draw                                 0x0800bfa1   Thumb Code   344  vision.o(.text.vis_draw)
-    __0sprintf                               0x0800c0f9   Thumb Code    34  printfa.o(i.__0sprintf)
-    __1sprintf                               0x0800c0f9   Thumb Code     0  printfa.o(i.__0sprintf)
-    __2sprintf                               0x0800c0f9   Thumb Code     0  printfa.o(i.__0sprintf)
-    __c89sprintf                             0x0800c0f9   Thumb Code     0  printfa.o(i.__0sprintf)
-    sprintf                                  0x0800c0f9   Thumb Code     0  printfa.o(i.__0sprintf)
-    __scatterload_copy                       0x0800c121   Thumb Code    14  handlers.o(i.__scatterload_copy)
-    __scatterload_null                       0x0800c12f   Thumb Code     2  handlers.o(i.__scatterload_null)
-    __scatterload_zeroinit                   0x0800c131   Thumb Code    14  handlers.o(i.__scatterload_zeroinit)
-    ascii_font_6x8                           0x0800cae4   Data         552  zf_common_font.o(.rodata.ascii_font_6x8)
-    ascii_font_8x16                          0x0800cd0c   Data        1520  zf_common_font.o(.rodata.ascii_font_8x16)
-    Region$$Table$$Base                      0x0800d728   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x0800d748   Number         0  anon$$obj.o(Region$$Table)
+    func_float_to_str                        0x08003c9d   Thumb Code   588  zf_common_function.o(.text.func_float_to_str)
+    func_get_greatest_common_divisor         0x08003ee9   Thumb Code    66  zf_common_function.o(.text.func_get_greatest_common_divisor)
+    func_int_to_str                          0x08003f2d   Thumb Code   242  zf_common_function.o(.text.func_int_to_str)
+    gpio_get_level                           0x08004021   Thumb Code    46  zf_driver_gpio.o(.text.gpio_get_level)
+    gpio_init                                0x08004051   Thumb Code   488  zf_driver_gpio.o(.text.gpio_init)
+    gpio_set_level                           0x08004239   Thumb Code    98  zf_driver_gpio.o(.text.gpio_set_level)
+    gps_uart_callback                        0x0800429d   Thumb Code   314  zf_device_gps_tau1201.o(.text.gps_uart_callback)
+    interrupt_disable                        0x080043d9   Thumb Code    20  zf_common_interrupt.o(.text.interrupt_disable)
+    interrupt_enable                         0x080043ed   Thumb Code    20  zf_common_interrupt.o(.text.interrupt_enable)
+    interrupt_global_disable                 0x08004401   Thumb Code    36  zf_common_interrupt.o(.text.interrupt_global_disable)
+    interrupt_init                           0x08004425   Thumb Code    10  zf_common_interrupt.o(.text.interrupt_init)
+    interrupt_set_priority                   0x08004431   Thumb Code    28  zf_common_interrupt.o(.text.interrupt_set_priority)
+    ips200_clear                             0x0800444d   Thumb Code   270  zf_device_ips200.o(.text.ips200_clear)
+    ips200_draw_point                        0x080045e9   Thumb Code   234  zf_device_ips200.o(.text.ips200_draw_point)
+    ips200_init                              0x080046d5   Thumb Code  1138  zf_device_ips200.o(.text.ips200_init)
+    ips200_set_color                         0x08004b49   Thumb Code    42  zf_device_ips200.o(.text.ips200_set_color)
+    ips200_set_dir                           0x08004b75   Thumb Code   102  zf_device_ips200.o(.text.ips200_set_dir)
+    ips200_set_font                          0x08004bdd   Thumb Code    24  zf_device_ips200.o(.text.ips200_set_font)
+    ips200_show_char                         0x08004cb9   Thumb Code   734  zf_device_ips200.o(.text.ips200_show_char)
+    ips200_show_float                        0x08004f99   Thumb Code   350  zf_device_ips200.o(.text.ips200_show_float)
+    ips200_show_gray_image                   0x080050f9   Thumb Code   532  zf_device_ips200.o(.text.ips200_show_gray_image)
+    ips200_show_int                          0x0800530d   Thumb Code   256  zf_device_ips200.o(.text.ips200_show_int)
+    ips200_show_string                       0x0800540d   Thumb Code   220  zf_device_ips200.o(.text.ips200_show_string)
+    is_straight                              0x0800575d   Thumb Code   344  vision.o(.text.is_straight)
+    key_clear_state                          0x080060b5   Thumb Code    26  zf_device_key.o(.text.key_clear_state)
+    key_get_state                            0x080060d1   Thumb Code    24  zf_device_key.o(.text.key_get_state)
+    key_init                                 0x080060e9   Thumb Code   122  zf_device_key.o(.text.key_init)
+    key_scanner                              0x08006165   Thumb Code   256  zf_device_key.o(.text.key_scanner)
+    main                                     0x08006265   Thumb Code   324  main.o(.text.main)
+    menu                                     0x080063a9   Thumb Code   368  mymenu.o(.text.menu)
+    menu_init                                0x08006519   Thumb Code  1010  mymenu.o(.text.menu_init)
+    menu_show                                0x0800690d   Thumb Code    86  mymenu.o(.text.menu_show)
+    motor_init                               0x08006965   Thumb Code    76  motor.o(.text.motor_init)
+    motor_set_both                           0x080069b1   Thumb Code    32  motor.o(.text.motor_set_both)
+    motor_set_left                           0x080069d1   Thumb Code   122  motor.o(.text.motor_set_left)
+    motor_set_right                          0x08006a4d   Thumb Code   122  motor.o(.text.motor_set_right)
+    motor_stop                               0x08006ac9   Thumb Code    22  motor.o(.text.motor_stop)
+    mpu6050_get_acc                          0x08006d35   Thumb Code    94  zf_device_mpu6050.o(.text.mpu6050_get_acc)
+    mpu6050_get_gyro                         0x08006d95   Thumb Code    94  zf_device_mpu6050.o(.text.mpu6050_get_gyro)
+    mpu6050_get_gyro_z                       0x08006df5   Thumb Code    14  mpu6050.o(.text.mpu6050_get_gyro_z)
+    mpu6050_init                             0x08006e05   Thumb Code   172  zf_device_mpu6050.o(.text.mpu6050_init)
+    mpu6050_module_init                      0x08006eb1   Thumb Code    74  mpu6050.o(.text.mpu6050_module_init)
+    mpu6050_pit_callback                     0x08006efd   Thumb Code    12  mpu6050.o(.text.mpu6050_pit_callback)
+    mt9v03x_get_version                      0x080070b9   Thumb Code   160  zf_device_mt9v03x.o(.text.mt9v03x_get_version)
+    mt9v03x_init                             0x08007159   Thumb Code   420  zf_device_mt9v03x.o(.text.mt9v03x_init)
+    mt9v03x_set_config_sccb                  0x08007431   Thumb Code  2478  zf_device_config.o(.text.mt9v03x_set_config_sccb)
+    pit_init                                 0x080085c5   Thumb Code   306  zf_driver_pit.o(.text.pit_init)
+    pwm_init                                 0x080086f9   Thumb Code   598  zf_driver_pwm.o(.text.pwm_init)
+    pwm_set_duty                             0x08008951   Thumb Code   302  zf_driver_pwm.o(.text.pwm_set_duty)
+    servo_init                               0x080096e9   Thumb Code    20  servo.o(.text.servo_init)
+    servo_set_angle                          0x080096fd   Thumb Code   102  servo.o(.text.servo_set_angle)
+    set_camera_type                          0x08009a15   Thumb Code   138  zf_device_type.o(.text.set_camera_type)
+    soft_iic_init                            0x08009c05   Thumb Code   142  zf_driver_soft_iic.o(.text.soft_iic_init)
+    soft_iic_read_8bit_register              0x08009c95   Thumb Code   114  zf_driver_soft_iic.o(.text.soft_iic_read_8bit_register)
+    soft_iic_read_8bit_registers             0x08009d09   Thumb Code   152  zf_driver_soft_iic.o(.text.soft_iic_read_8bit_registers)
+    soft_iic_sccb_read_register              0x08009f05   Thumb Code   120  zf_driver_soft_iic.o(.text.soft_iic_sccb_read_register)
+    soft_iic_sccb_write_register             0x08009f7d   Thumb Code    86  zf_driver_soft_iic.o(.text.soft_iic_sccb_write_register)
+    soft_iic_write_8bit_register             0x0800a4c9   Thumb Code    86  zf_driver_soft_iic.o(.text.soft_iic_write_8bit_register)
+    spi_init                                 0x0800a521   Thumb Code   870  zf_driver_spi.o(.text.spi_init)
+    spi_write_16bit                          0x0800a889   Thumb Code   184  zf_driver_spi.o(.text.spi_write_16bit)
+    spi_write_8bit                           0x0800a941   Thumb Code   134  zf_driver_spi.o(.text.spi_write_8bit)
+    system_delay_ms                          0x0800a9c9   Thumb Code   154  zf_driver_delay.o(.text.system_delay_ms)
+    timer_clear                              0x0800aa65   Thumb Code   178  zf_driver_timer.o(.text.timer_clear)
+    timer_clock_enable                       0x0800ab19   Thumb Code   182  zf_driver_timer.o(.text.timer_clock_enable)
+    timer_etr_init                           0x0800abd1   Thumb Code   298  zf_driver_timer.o(.text.timer_etr_init)
+    timer_funciton_check                     0x0800acfd   Thumb Code   104  zf_driver_timer.o(.text.timer_funciton_check)
+    timer_get                                0x0800ad65   Thumb Code   182  zf_driver_timer.o(.text.timer_get)
+    tsl1401_collect_pit_handler              0x0800ae1d   Thumb Code   224  zf_device_tsl1401.o(.text.tsl1401_collect_pit_handler)
+    uart_init                                0x0800af01   Thumb Code   652  zf_driver_uart.o(.text.uart_init)
+    uart_query_byte                          0x0800b18d   Thumb Code   102  zf_driver_uart.o(.text.uart_query_byte)
+    uart_rx_interrupt                        0x0800b1f5   Thumb Code   160  zf_driver_uart.o(.text.uart_rx_interrupt)
+    uart_write_buffer                        0x0800b295   Thumb Code   108  zf_driver_uart.o(.text.uart_write_buffer)
+    uart_write_byte                          0x0800b301   Thumb Code    64  zf_driver_uart.o(.text.uart_write_byte)
+    uart_write_string                        0x0800b341   Thumb Code    64  zf_driver_uart.o(.text.uart_write_string)
+    vis_bin_draw                             0x0800b8cd   Thumb Code    38  vision.o(.text.vis_bin_draw)
+    vis_deal                                 0x0800b8f5   Thumb Code  2202  vision.o(.text.vis_deal)
+    vis_draw                                 0x0800c191   Thumb Code   344  vision.o(.text.vis_draw)
+    __0sprintf                               0x0800c2e9   Thumb Code    34  printfa.o(i.__0sprintf)
+    __1sprintf                               0x0800c2e9   Thumb Code     0  printfa.o(i.__0sprintf)
+    __2sprintf                               0x0800c2e9   Thumb Code     0  printfa.o(i.__0sprintf)
+    __c89sprintf                             0x0800c2e9   Thumb Code     0  printfa.o(i.__0sprintf)
+    sprintf                                  0x0800c2e9   Thumb Code     0  printfa.o(i.__0sprintf)
+    __scatterload_copy                       0x0800c311   Thumb Code    14  handlers.o(i.__scatterload_copy)
+    __scatterload_null                       0x0800c31f   Thumb Code     2  handlers.o(i.__scatterload_null)
+    __scatterload_zeroinit                   0x0800c321   Thumb Code    14  handlers.o(i.__scatterload_zeroinit)
+    ascii_font_6x8                           0x0800ccd4   Data         552  zf_common_font.o(.rodata.ascii_font_6x8)
+    ascii_font_8x16                          0x0800cefc   Data        1520  zf_common_font.o(.rodata.ascii_font_8x16)
+    Region$$Table$$Base                      0x0800d918   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x0800d938   Number         0  anon$$obj.o(Region$$Table)
     Block_Size                               0x20000000   Data           4  vision.o(.data.Block_Size)
     Clip_Value                               0x20000004   Data           4  vision.o(.data.Clip_Value)
     camera_dma_handler                       0x20000010   Data           4  zf_device_type.o(.data.camera_dma_handler)
@@ -6729,7 +6735,7 @@ Memory Map of the image
 
   Image Entry point : 0x08000401
 
-  Load Region LR_m_text (Base: 0x08000000, Size: 0x0000d894, Max: 0x00080000, ABSOLUTE, COMPRESSED[0x0000d820])
+  Load Region LR_m_text (Base: 0x08000000, Size: 0x0000da84, Max: 0x00080000, ABSOLUTE, COMPRESSED[0x0000da14])
 
     Execution Region VECTOR_ROM (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x00000190, Max: 0x00000400, ABSOLUTE)
 
@@ -6738,53 +6744,53 @@ Memory Map of the image
     0x08000000   0x08000000   0x00000190   Data   RO         1510    RESET               startup_mm32f3277g.o
 
 
-    Execution Region ER_m_text (Exec base: 0x08000400, Load base: 0x08000400, Size: 0x0000d348, Max: 0x0007fc00, ABSOLUTE, FIXED)
+    Execution Region ER_m_text (Exec base: 0x08000400, Load base: 0x08000400, Size: 0x0000d538, Max: 0x0007fc00, ABSOLUTE, FIXED)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x08000400   0x08000400   0x00000000   Code   RO         2729  * .ARM.Collect$$$$00000000  mc_w.l(entry.o)
-    0x08000400   0x08000400   0x00000004   Code   RO         2861    .ARM.Collect$$$$00000003  mc_w.l(entry4.o)
-    0x08000404   0x08000404   0x00000004   Code   RO         2864    .ARM.Collect$$$$00000004  mc_w.l(entry5.o)
-    0x08000408   0x08000408   0x00000000   Code   RO         2866    .ARM.Collect$$$$00000008  mc_w.l(entry7b.o)
-    0x08000408   0x08000408   0x00000000   Code   RO         2868    .ARM.Collect$$$$0000000A  mc_w.l(entry8b.o)
-    0x08000408   0x08000408   0x00000008   Code   RO         2869    .ARM.Collect$$$$0000000B  mc_w.l(entry9a.o)
-    0x08000410   0x08000410   0x00000000   Code   RO         2871    .ARM.Collect$$$$0000000D  mc_w.l(entry10a.o)
-    0x08000410   0x08000410   0x00000000   Code   RO         2873    .ARM.Collect$$$$0000000F  mc_w.l(entry11a.o)
-    0x08000410   0x08000410   0x00000004   Code   RO         2862    .ARM.Collect$$$$00002714  mc_w.l(entry4.o)
+    0x08000400   0x08000400   0x00000000   Code   RO         2731  * .ARM.Collect$$$$00000000  mc_w.l(entry.o)
+    0x08000400   0x08000400   0x00000004   Code   RO         2863    .ARM.Collect$$$$00000003  mc_w.l(entry4.o)
+    0x08000404   0x08000404   0x00000004   Code   RO         2866    .ARM.Collect$$$$00000004  mc_w.l(entry5.o)
+    0x08000408   0x08000408   0x00000000   Code   RO         2868    .ARM.Collect$$$$00000008  mc_w.l(entry7b.o)
+    0x08000408   0x08000408   0x00000000   Code   RO         2870    .ARM.Collect$$$$0000000A  mc_w.l(entry8b.o)
+    0x08000408   0x08000408   0x00000008   Code   RO         2871    .ARM.Collect$$$$0000000B  mc_w.l(entry9a.o)
+    0x08000410   0x08000410   0x00000000   Code   RO         2873    .ARM.Collect$$$$0000000D  mc_w.l(entry10a.o)
+    0x08000410   0x08000410   0x00000000   Code   RO         2875    .ARM.Collect$$$$0000000F  mc_w.l(entry11a.o)
+    0x08000410   0x08000410   0x00000004   Code   RO         2864    .ARM.Collect$$$$00002714  mc_w.l(entry4.o)
     0x08000414   0x08000414   0x00000024   Code   RO         1511    .text               startup_mm32f3277g.o
-    0x08000438   0x08000438   0x00000024   Code   RO         2732    .text               mc_w.l(memcpya.o)
-    0x0800045c   0x0800045c   0x00000024   Code   RO         2734    .text               mc_w.l(memseta.o)
-    0x08000480   0x08000480   0x0000000e   Code   RO         2742    .text               mc_w.l(strlen.o)
-    0x0800048e   0x0800048e   0x0000001e   Code   RO         2746    .text               mc_w.l(strncmp.o)
-    0x080004ac   0x080004ac   0x000000b0   Code   RO         2780    .text               mf_w.l(fadd.o)
-    0x0800055c   0x0800055c   0x00000064   Code   RO         2782    .text               mf_w.l(fmul.o)
-    0x080005c0   0x080005c0   0x0000007c   Code   RO         2784    .text               mf_w.l(fdiv.o)
-    0x0800063c   0x0800063c   0x0000014e   Code   RO         2786    .text               mf_w.l(dadd.o)
-    0x0800078a   0x0800078a   0x000000e4   Code   RO         2788    .text               mf_w.l(dmul.o)
-    0x0800086e   0x0800086e   0x000000de   Code   RO         2790    .text               mf_w.l(ddiv.o)
-    0x0800094c   0x0800094c   0x0000001c   Code   RO         2792    .text               mf_w.l(fcmple.o)
-    0x08000968   0x08000968   0x0000001c   Code   RO         2794    .text               mf_w.l(fcmpge.o)
-    0x08000984   0x08000984   0x0000001c   Code   RO         2796    .text               mf_w.l(fcmpgt.o)
-    0x080009a0   0x080009a0   0x00000038   Code   RO         2804    .text               mf_w.l(dcmpeq.o)
-    0x080009d8   0x080009d8   0x00000012   Code   RO         2806    .text               mf_w.l(fflti.o)
-    0x080009ea   0x080009ea   0x0000000a   Code   RO         2808    .text               mf_w.l(ffltui.o)
-    0x080009f4   0x080009f4   0x00000032   Code   RO         2814    .text               mf_w.l(ffixi.o)
-    0x08000a26   0x08000a26   0x00000028   Code   RO         2816    .text               mf_w.l(ffixui.o)
-    0x08000a4e   0x08000a4e   0x0000003e   Code   RO         2818    .text               mf_w.l(dfixi.o)
-    0x08000a8c   0x08000a8c   0x00000026   Code   RO         2822    .text               mf_w.l(f2d.o)
-    0x08000ab2   0x08000ab2   0x0000002c   Code   RO         2885    .text               mc_w.l(uidiv.o)
-    0x08000ade   0x08000ade   0x00000062   Code   RO         2887    .text               mc_w.l(uldiv.o)
-    0x08000b40   0x08000b40   0x0000001e   Code   RO         2889    .text               mc_w.l(llshl.o)
-    0x08000b5e   0x08000b5e   0x00000020   Code   RO         2891    .text               mc_w.l(llushr.o)
-    0x08000b7e   0x08000b7e   0x00000024   Code   RO         2893    .text               mc_w.l(llsshr.o)
-    0x08000ba2   0x08000ba2   0x00000000   Code   RO         2902    .text               mc_w.l(iusefp.o)
-    0x08000ba2   0x08000ba2   0x0000006e   Code   RO         2903    .text               mf_w.l(fepilogue.o)
-    0x08000c10   0x08000c10   0x000000ba   Code   RO         2905    .text               mf_w.l(depilogue.o)
-    0x08000cca   0x08000cca   0x00000030   Code   RO         2911    .text               mf_w.l(dfixul.o)
+    0x08000438   0x08000438   0x00000024   Code   RO         2734    .text               mc_w.l(memcpya.o)
+    0x0800045c   0x0800045c   0x00000024   Code   RO         2736    .text               mc_w.l(memseta.o)
+    0x08000480   0x08000480   0x0000000e   Code   RO         2744    .text               mc_w.l(strlen.o)
+    0x0800048e   0x0800048e   0x0000001e   Code   RO         2748    .text               mc_w.l(strncmp.o)
+    0x080004ac   0x080004ac   0x000000b0   Code   RO         2782    .text               mf_w.l(fadd.o)
+    0x0800055c   0x0800055c   0x00000064   Code   RO         2784    .text               mf_w.l(fmul.o)
+    0x080005c0   0x080005c0   0x0000007c   Code   RO         2786    .text               mf_w.l(fdiv.o)
+    0x0800063c   0x0800063c   0x0000014e   Code   RO         2788    .text               mf_w.l(dadd.o)
+    0x0800078a   0x0800078a   0x000000e4   Code   RO         2790    .text               mf_w.l(dmul.o)
+    0x0800086e   0x0800086e   0x000000de   Code   RO         2792    .text               mf_w.l(ddiv.o)
+    0x0800094c   0x0800094c   0x0000001c   Code   RO         2794    .text               mf_w.l(fcmple.o)
+    0x08000968   0x08000968   0x0000001c   Code   RO         2796    .text               mf_w.l(fcmpge.o)
+    0x08000984   0x08000984   0x0000001c   Code   RO         2798    .text               mf_w.l(fcmpgt.o)
+    0x080009a0   0x080009a0   0x00000038   Code   RO         2806    .text               mf_w.l(dcmpeq.o)
+    0x080009d8   0x080009d8   0x00000012   Code   RO         2808    .text               mf_w.l(fflti.o)
+    0x080009ea   0x080009ea   0x0000000a   Code   RO         2810    .text               mf_w.l(ffltui.o)
+    0x080009f4   0x080009f4   0x00000032   Code   RO         2816    .text               mf_w.l(ffixi.o)
+    0x08000a26   0x08000a26   0x00000028   Code   RO         2818    .text               mf_w.l(ffixui.o)
+    0x08000a4e   0x08000a4e   0x0000003e   Code   RO         2820    .text               mf_w.l(dfixi.o)
+    0x08000a8c   0x08000a8c   0x00000026   Code   RO         2824    .text               mf_w.l(f2d.o)
+    0x08000ab2   0x08000ab2   0x0000002c   Code   RO         2887    .text               mc_w.l(uidiv.o)
+    0x08000ade   0x08000ade   0x00000062   Code   RO         2889    .text               mc_w.l(uldiv.o)
+    0x08000b40   0x08000b40   0x0000001e   Code   RO         2891    .text               mc_w.l(llshl.o)
+    0x08000b5e   0x08000b5e   0x00000020   Code   RO         2893    .text               mc_w.l(llushr.o)
+    0x08000b7e   0x08000b7e   0x00000024   Code   RO         2895    .text               mc_w.l(llsshr.o)
+    0x08000ba2   0x08000ba2   0x00000000   Code   RO         2904    .text               mc_w.l(iusefp.o)
+    0x08000ba2   0x08000ba2   0x0000006e   Code   RO         2905    .text               mf_w.l(fepilogue.o)
+    0x08000c10   0x08000c10   0x000000ba   Code   RO         2907    .text               mf_w.l(depilogue.o)
+    0x08000cca   0x08000cca   0x00000030   Code   RO         2913    .text               mf_w.l(dfixul.o)
     0x08000cfa   0x08000cfa   0x00000002   PAD
-    0x08000cfc   0x08000cfc   0x00000030   Code   RO         2915    .text               mf_w.l(cdrcmple.o)
-    0x08000d2c   0x08000d2c   0x00000030   Code   RO         2917    .text               mc_w.l(init.o)
-    0x08000d5c   0x08000d5c   0x00000056   Code   RO         2927    .text               mc_w.l(__dczerorl2.o)
+    0x08000cfc   0x08000cfc   0x00000030   Code   RO         2917    .text               mf_w.l(cdrcmple.o)
+    0x08000d2c   0x08000d2c   0x00000030   Code   RO         2919    .text               mc_w.l(init.o)
+    0x08000d5c   0x08000d5c   0x00000056   Code   RO         2929    .text               mc_w.l(__dczerorl2.o)
     0x08000db2   0x08000db2   0x00000002   PAD
     0x08000db4   0x08000db4   0x000000b4   Code   RO         2443    .text.Create_Menu_Item  menu.o
     0x08000e68   0x08000e68   0x00000020   Code   RO           59    .text.DMA1_Channel1_IRQHandler  isr.o
@@ -6856,21 +6862,21 @@ Memory Map of the image
     0x080016d4   0x080016d4   0x00000096   Code   RO          250    .text.adc_convert   zf_driver_adc.o
     0x0800176a   0x0800176a   0x00000002   PAD
     0x0800176c   0x0800176c   0x00000180   Code   RO          357    .text.afio_init     zf_driver_gpio.o
-    0x080018ec   0x080018ec   0x000000c0   Code   RO         2603    .text.border_smooth  vision.o
-    0x080019ac   0x080019ac   0x00000126   Code   RO         2591    .text.bottom_scan   vision.o
+    0x080018ec   0x080018ec   0x000000c0   Code   RO         2605    .text.border_smooth  vision.o
+    0x080019ac   0x080019ac   0x00000126   Code   RO         2593    .text.bottom_scan   vision.o
     0x08001ad2   0x08001ad2   0x00000002   PAD
     0x08001ad4   0x08001ad4   0x0000001c   Code   RO          739    .text.camera_fifo_init  zf_device_camera.o
     0x08001af0   0x08001af0   0x000000ca   Code   RO          741    .text.camera_init   zf_device_camera.o
     0x08001bba   0x08001bba   0x00000002   PAD
-    0x08001bbc   0x08001bbc   0x000000ae   Code   RO         2579    .text.camera_is_covered  vision.o
+    0x08001bbc   0x08001bbc   0x000000ae   Code   RO         2581    .text.camera_is_covered  vision.o
     0x08001c6a   0x08001c6a   0x00000002   PAD
     0x08001c6c   0x08001c6c   0x00000024   Code   RO           90    .text.clock_init    zf_common_clock.o
     0x08001c90   0x08001c90   0x00000098   Code   RO           92    .text.clock_reset   zf_common_clock.o
     0x08001d28   0x08001d28   0x00000260   Code   RO           94    .text.clock_set_freq  zf_common_clock.o
     0x08001f88   0x08001f88   0x000001a4   Code   RO         2577    .text.compute_otsu  vision.o
-    0x0800212c   0x0800212c   0x0000001e   Code   RO         2644    .text.control_init  control.o
+    0x0800212c   0x0800212c   0x0000001e   Code   RO         2646    .text.control_init  control.o
     0x0800214a   0x0800214a   0x00000002   PAD
-    0x0800214c   0x0800214c   0x0000000c   Code   RO         2646    .text.control_update  control.o
+    0x0800214c   0x0800214c   0x0000000c   Code   RO         2648    .text.control_update  control.o
     0x08002158   0x08002158   0x0000006c   Code   RO          112    .text.debug_assert_handler  zf_common_debug.o
     0x080021c4   0x080021c4   0x00000040   Code   RO          118    .text.debug_delay   zf_common_debug.o
     0x08002204   0x08002204   0x00000032   Code   RO          126    .text.debug_init    zf_common_debug.o
@@ -6903,7 +6909,7 @@ Memory Map of the image
     0x08002d0a   0x08002d0a   0x00000002   PAD
     0x08002d0c   0x08002d0c   0x0000003c   Code   RO         2522    .text.encoder_pit_callback  encoder.o
     0x08002d48   0x08002d48   0x000002a0   Code   RO          315    .text.exti_init     zf_driver_exti.o
-    0x08002fe8   0x08002fe8   0x00000120   Code   RO         2593    .text.fallback_scan  vision.o
+    0x08002fe8   0x08002fe8   0x00000120   Code   RO         2595    .text.fallback_scan  vision.o
     0x08003108   0x08003108   0x000000a8   Code   RO          143    .text.fifo_clear    zf_common_fifo.o
     0x080031b0   0x080031b0   0x0000002e   Code   RO          155    .text.fifo_end_offset  zf_common_fifo.o
     0x080031de   0x080031de   0x00000002   PAD
@@ -6917,229 +6923,231 @@ Memory Map of the image
     0x08003692   0x08003692   0x00000002   PAD
     0x08003694   0x08003694   0x000000be   Code   RO          147    .text.fifo_write_element  zf_common_fifo.o
     0x08003752   0x08003752   0x00000002   PAD
-    0x08003754   0x08003754   0x00000032   Code   RO         2581    .text.find_seeds    vision.o
-    0x08003786   0x08003786   0x00000002   PAD
-    0x08003788   0x08003788   0x00000328   Code   RO         2583    .text.find_seeds_at  vision.o
-    0x08003ab0   0x08003ab0   0x0000024c   Code   RO          197    .text.func_float_to_str  zf_common_function.o
-    0x08003cfc   0x08003cfc   0x00000042   Code   RO          183    .text.func_get_greatest_common_divisor  zf_common_function.o
-    0x08003d3e   0x08003d3e   0x00000002   PAD
-    0x08003d40   0x08003d40   0x000000f2   Code   RO          189    .text.func_int_to_str  zf_common_function.o
-    0x08003e32   0x08003e32   0x00000002   PAD
-    0x08003e34   0x08003e34   0x0000002e   Code   RO          349    .text.gpio_get_level  zf_driver_gpio.o
-    0x08003e62   0x08003e62   0x00000002   PAD
-    0x08003e64   0x08003e64   0x000001e8   Code   RO          355    .text.gpio_init     zf_driver_gpio.o
-    0x0800404c   0x0800404c   0x00000062   Code   RO          347    .text.gpio_set_level  zf_driver_gpio.o
-    0x080040ae   0x080040ae   0x00000002   PAD
-    0x080040b0   0x080040b0   0x0000013a   Code   RO          826    .text.gps_uart_callback  zf_device_gps_tau1201.o
-    0x080041ea   0x080041ea   0x00000002   PAD
-    0x080041ec   0x080041ec   0x00000014   Code   RO          230    .text.interrupt_disable  zf_common_interrupt.o
-    0x08004200   0x08004200   0x00000014   Code   RO          226    .text.interrupt_enable  zf_common_interrupt.o
-    0x08004214   0x08004214   0x00000024   Code   RO          224    .text.interrupt_global_disable  zf_common_interrupt.o
-    0x08004238   0x08004238   0x0000000a   Code   RO          238    .text.interrupt_init  zf_common_interrupt.o
-    0x08004242   0x08004242   0x00000002   PAD
-    0x08004244   0x08004244   0x0000001c   Code   RO          234    .text.interrupt_set_priority  zf_common_interrupt.o
-    0x08004260   0x08004260   0x0000010e   Code   RO         1028    .text.ips200_clear  zf_device_ips200.o
-    0x0800436e   0x0800436e   0x00000002   PAD
-    0x08004370   0x08004370   0x0000008a   Code   RO         1072    .text.ips200_debug_init  zf_device_ips200.o
-    0x080043fa   0x080043fa   0x00000002   PAD
-    0x080043fc   0x080043fc   0x000000ea   Code   RO         1042    .text.ips200_draw_point  zf_device_ips200.o
-    0x080044e6   0x080044e6   0x00000002   PAD
-    0x080044e8   0x080044e8   0x00000472   Code   RO         1066    .text.ips200_init   zf_device_ips200.o
-    0x0800495a   0x0800495a   0x00000002   PAD
-    0x0800495c   0x0800495c   0x0000002a   Code   RO         1040    .text.ips200_set_color  zf_device_ips200.o
-    0x08004986   0x08004986   0x00000002   PAD
-    0x08004988   0x08004988   0x00000066   Code   RO         1036    .text.ips200_set_dir  zf_device_ips200.o
-    0x080049ee   0x080049ee   0x00000002   PAD
-    0x080049f0   0x080049f0   0x00000018   Code   RO         1038    .text.ips200_set_font  zf_device_ips200.o
-    0x08004a08   0x08004a08   0x000000c4   Code   RO         1030    .text.ips200_set_region  zf_device_ips200.o
-    0x08004acc   0x08004acc   0x000002de   Code   RO         1046    .text.ips200_show_char  zf_device_ips200.o
-    0x08004daa   0x08004daa   0x00000002   PAD
-    0x08004dac   0x08004dac   0x0000015e   Code   RO         1054    .text.ips200_show_float  zf_device_ips200.o
-    0x08004f0a   0x08004f0a   0x00000002   PAD
-    0x08004f0c   0x08004f0c   0x00000214   Code   RO         1058    .text.ips200_show_gray_image  zf_device_ips200.o
-    0x08005120   0x08005120   0x00000100   Code   RO         1050    .text.ips200_show_int  zf_device_ips200.o
-    0x08005220   0x08005220   0x000000dc   Code   RO         1048    .text.ips200_show_string  zf_device_ips200.o
-    0x080052fc   0x080052fc   0x000000d6   Code   RO         1032    .text.ips200_write_16bit_data  zf_device_ips200.o
-    0x080053d2   0x080053d2   0x00000002   PAD
-    0x080053d4   0x080053d4   0x000000ae   Code   RO         1070    .text.ips200_write_8bit_data  zf_device_ips200.o
-    0x08005482   0x08005482   0x00000002   PAD
-    0x08005484   0x08005484   0x000000ea   Code   RO         1068    .text.ips200_write_command  zf_device_ips200.o
-    0x0800556e   0x0800556e   0x00000002   PAD
-    0x08005570   0x08005570   0x00000158   Code   RO         2573    .text.is_straight   vision.o
-    0x080056c8   0x080056c8   0x0000036a   Code   RO         2474    .text.k1_handle     mymenu.o
-    0x08005a32   0x08005a32   0x00000002   PAD
-    0x08005a34   0x08005a34   0x00000358   Code   RO         2476    .text.k2_handle     mymenu.o
-    0x08005d8c   0x08005d8c   0x0000001a   Code   RO         2478    .text.k3_handle     mymenu.o
-    0x08005da6   0x08005da6   0x00000002   PAD
-    0x08005da8   0x08005da8   0x000000e4   Code   RO         2472    .text.k3_long_handle  mymenu.o
-    0x08005e8c   0x08005e8c   0x0000003a   Code   RO         2480    .text.k4_handle     mymenu.o
-    0x08005ec6   0x08005ec6   0x00000002   PAD
-    0x08005ec8   0x08005ec8   0x0000001a   Code   RO         1096    .text.key_clear_state  zf_device_key.o
-    0x08005ee2   0x08005ee2   0x00000002   PAD
-    0x08005ee4   0x08005ee4   0x00000018   Code   RO         1094    .text.key_get_state  zf_device_key.o
-    0x08005efc   0x08005efc   0x0000007a   Code   RO         1100    .text.key_init      zf_device_key.o
-    0x08005f76   0x08005f76   0x00000002   PAD
-    0x08005f78   0x08005f78   0x00000100   Code   RO         1092    .text.key_scanner   zf_device_key.o
-    0x08006078   0x08006078   0x00000144   Code   RO            4    .text.main          main.o
-    0x080061bc   0x080061bc   0x00000170   Code   RO         2470    .text.menu          mymenu.o
-    0x0800632c   0x0800632c   0x000003f2   Code   RO         2462    .text.menu_init     mymenu.o
-    0x0800671e   0x0800671e   0x00000002   PAD
-    0x08006720   0x08006720   0x00000056   Code   RO         2464    .text.menu_show     mymenu.o
-    0x08006776   0x08006776   0x00000002   PAD
-    0x08006778   0x08006778   0x0000004c   Code   RO         2499    .text.motor_init    motor.o
-    0x080067c4   0x080067c4   0x00000020   Code   RO         2505    .text.motor_set_both  motor.o
-    0x080067e4   0x080067e4   0x0000007a   Code   RO         2503    .text.motor_set_left  motor.o
-    0x0800685e   0x0800685e   0x00000002   PAD
-    0x08006860   0x08006860   0x0000007a   Code   RO         2501    .text.motor_set_right  motor.o
-    0x080068da   0x080068da   0x00000002   PAD
-    0x080068dc   0x080068dc   0x00000016   Code   RO         2507    .text.motor_stop    motor.o
-    0x080068f2   0x080068f2   0x00000002   PAD
-    0x080068f4   0x080068f4   0x00000254   Code   RO         2650    .text.motor_update  control.o
-    0x08006b48   0x08006b48   0x0000005e   Code   RO         1114    .text.mpu6050_get_acc  zf_device_mpu6050.o
-    0x08006ba6   0x08006ba6   0x00000002   PAD
-    0x08006ba8   0x08006ba8   0x0000005e   Code   RO         1116    .text.mpu6050_get_gyro  zf_device_mpu6050.o
-    0x08006c06   0x08006c06   0x00000002   PAD
-    0x08006c08   0x08006c08   0x0000000e   Code   RO         2547    .text.mpu6050_get_gyro_z  mpu6050.o
-    0x08006c16   0x08006c16   0x00000002   PAD
-    0x08006c18   0x08006c18   0x000000ac   Code   RO         1122    .text.mpu6050_init  zf_device_mpu6050.o
-    0x08006cc4   0x08006cc4   0x0000004a   Code   RO         2533    .text.mpu6050_module_init  mpu6050.o
-    0x08006d0e   0x08006d0e   0x00000002   PAD
-    0x08006d10   0x08006d10   0x0000000c   Code   RO         2535    .text.mpu6050_pit_callback  mpu6050.o
-    0x08006d1c   0x08006d1c   0x00000074   Code   RO         1124    .text.mpu6050_self1_check  zf_device_mpu6050.o
-    0x08006d90   0x08006d90   0x00000016   Code   RO         1147    .text.mt9v03x_dma_handler  zf_device_mt9v03x.o
-    0x08006da6   0x08006da6   0x00000002   PAD
-    0x08006da8   0x08006da8   0x00000122   Code   RO         1157    .text.mt9v03x_get_config  zf_device_mt9v03x.o
-    0x08006eca   0x08006eca   0x00000002   PAD
-    0x08006ecc   0x08006ecc   0x000000a0   Code   RO         1141    .text.mt9v03x_get_version  zf_device_mt9v03x.o
-    0x08006f6c   0x08006f6c   0x000001a4   Code   RO         1153    .text.mt9v03x_init  zf_device_mt9v03x.o
-    0x08007110   0x08007110   0x0000003c   Code   RO         2684    .text.mt9v03x_read_word_sccb  zf_device_config.lib(zf_device_config.o)
-    0x0800714c   0x0800714c   0x000000f8   Code   RO         1155    .text.mt9v03x_set_config  zf_device_mt9v03x.o
-    0x08007244   0x08007244   0x000009ae   Code   RO         2680    .text.mt9v03x_set_config_sccb  zf_device_config.lib(zf_device_config.o)
-    0x08007bf2   0x08007bf2   0x00000002   PAD
-    0x08007bf4   0x08007bf4   0x00000040   Code   RO         1149    .text.mt9v03x_uart_handler  zf_device_mt9v03x.o
-    0x08007c34   0x08007c34   0x00000036   Code   RO         1145    .text.mt9v03x_vsync_handler  zf_device_mt9v03x.o
-    0x08007c6a   0x08007c6a   0x00000002   PAD
-    0x08007c6c   0x08007c6c   0x00000032   Code   RO         2682    .text.mt9v03x_write_word_sccb  zf_device_config.lib(zf_device_config.o)
-    0x08007c9e   0x08007c9e   0x00000002   PAD
-    0x08007ca0   0x08007ca0   0x00000218   Code   RO         2587    .text.pho_border    vision.o
-    0x08007eb8   0x08007eb8   0x0000051e   Code   RO         2595    .text.pho_center    vision.o
-    0x080083d6   0x080083d6   0x00000002   PAD
-    0x080083d8   0x080083d8   0x00000132   Code   RO          425    .text.pit_init      zf_driver_pit.o
-    0x0800850a   0x0800850a   0x00000002   PAD
-    0x0800850c   0x0800850c   0x00000256   Code   RO          438    .text.pwm_init      zf_driver_pwm.o
-    0x08008762   0x08008762   0x00000002   PAD
-    0x08008764   0x08008764   0x0000012e   Code   RO          436    .text.pwm_set_duty  zf_driver_pwm.o
-    0x08008892   0x08008892   0x00000002   PAD
-    0x08008894   0x08008894   0x00000634   Code   RO         2585    .text.seed_grow_left  vision.o
-    0x08008ec8   0x08008ec8   0x00000632   Code   RO         2589    .text.seed_grow_right  vision.o
-    0x080094fa   0x080094fa   0x00000002   PAD
-    0x080094fc   0x080094fc   0x00000014   Code   RO         2556    .text.servo_init    servo.o
-    0x08009510   0x08009510   0x00000066   Code   RO         2558    .text.servo_set_angle  servo.o
-    0x08009576   0x08009576   0x00000002   PAD
-    0x08009578   0x08009578   0x000002ae   Code   RO         2648    .text.servo_update  control.o
-    0x08009826   0x08009826   0x00000002   PAD
-    0x08009828   0x08009828   0x0000008a   Code   RO         1375    .text.set_camera_type  zf_device_type.o
-    0x080098b2   0x080098b2   0x00000002   PAD
-    0x080098b4   0x080098b4   0x0000009e   Code   RO         2468    .text.show_key      mymenu.o
-    0x08009952   0x08009952   0x00000002   PAD
-    0x08009954   0x08009954   0x000000c2   Code   RO         2466    .text.show_number   mymenu.o
-    0x08009a16   0x08009a16   0x00000002   PAD
-    0x08009a18   0x08009a18   0x0000008e   Code   RO          521    .text.soft_iic_init  zf_driver_soft_iic.o
-    0x08009aa6   0x08009aa6   0x00000002   PAD
-    0x08009aa8   0x08009aa8   0x00000072   Code   RO          505    .text.soft_iic_read_8bit_register  zf_driver_soft_iic.o
-    0x08009b1a   0x08009b1a   0x00000002   PAD
-    0x08009b1c   0x08009b1c   0x00000098   Code   RO          507    .text.soft_iic_read_8bit_registers  zf_driver_soft_iic.o
-    0x08009bb4   0x08009bb4   0x00000164   Code   RO          497    .text.soft_iic_read_data  zf_driver_soft_iic.o
-    0x08009d18   0x08009d18   0x00000078   Code   RO          519    .text.soft_iic_sccb_read_register  zf_driver_soft_iic.o
-    0x08009d90   0x08009d90   0x00000056   Code   RO          517    .text.soft_iic_sccb_write_register  zf_driver_soft_iic.o
-    0x08009de6   0x08009de6   0x00000002   PAD
-    0x08009de8   0x08009de8   0x0000011a   Code   RO          525    .text.soft_iic_send_ack  zf_driver_soft_iic.o
-    0x08009f02   0x08009f02   0x00000002   PAD
-    0x08009f04   0x08009f04   0x00000128   Code   RO          477    .text.soft_iic_send_data  zf_driver_soft_iic.o
-    0x0800a02c   0x0800a02c   0x000000da   Code   RO          475    .text.soft_iic_start  zf_driver_soft_iic.o
-    0x0800a106   0x0800a106   0x00000002   PAD
-    0x0800a108   0x0800a108   0x000000da   Code   RO          479    .text.soft_iic_stop  zf_driver_soft_iic.o
-    0x0800a1e2   0x0800a1e2   0x00000002   PAD
-    0x0800a1e4   0x0800a1e4   0x000000f8   Code   RO          523    .text.soft_iic_wait_ack  zf_driver_soft_iic.o
-    0x0800a2dc   0x0800a2dc   0x00000056   Code   RO          487    .text.soft_iic_write_8bit_register  zf_driver_soft_iic.o
-    0x0800a332   0x0800a332   0x00000002   PAD
-    0x0800a334   0x0800a334   0x00000366   Code   RO          621    .text.spi_init      zf_driver_spi.o
-    0x0800a69a   0x0800a69a   0x00000002   PAD
-    0x0800a69c   0x0800a69c   0x000000b8   Code   RO          589    .text.spi_write_16bit  zf_driver_spi.o
-    0x0800a754   0x0800a754   0x00000086   Code   RO          585    .text.spi_write_8bit  zf_driver_spi.o
-    0x0800a7da   0x0800a7da   0x00000002   PAD
-    0x0800a7dc   0x0800a7dc   0x0000009a   Code   RO          266    .text.system_delay_ms  zf_driver_delay.o
-    0x0800a876   0x0800a876   0x00000002   PAD
-    0x0800a878   0x0800a878   0x000000b2   Code   RO          642    .text.timer_clear   zf_driver_timer.o
-    0x0800a92a   0x0800a92a   0x00000002   PAD
-    0x0800a92c   0x0800a92c   0x000000b6   Code   RO          634    .text.timer_clock_enable  zf_driver_timer.o
-    0x0800a9e2   0x0800a9e2   0x00000002   PAD
-    0x0800a9e4   0x0800a9e4   0x0000012a   Code   RO          646    .text.timer_etr_init  zf_driver_timer.o
-    0x0800ab0e   0x0800ab0e   0x00000002   PAD
-    0x0800ab10   0x0800ab10   0x00000068   Code   RO          632    .text.timer_funciton_check  zf_driver_timer.o
-    0x0800ab78   0x0800ab78   0x000000b6   Code   RO          640    .text.timer_get     zf_driver_timer.o
-    0x0800ac2e   0x0800ac2e   0x00000002   PAD
-    0x0800ac30   0x0800ac30   0x000000e0   Code   RO         1357    .text.tsl1401_collect_pit_handler  zf_device_tsl1401.o
-    0x0800ad10   0x0800ad10   0x00000002   Code   RO         1373    .text.type_default_callback  zf_device_type.o
-    0x0800ad12   0x0800ad12   0x00000002   PAD
-    0x0800ad14   0x0800ad14   0x0000028c   Code   RO          672    .text.uart_init     zf_driver_uart.o
-    0x0800afa0   0x0800afa0   0x00000066   Code   RO          666    .text.uart_query_byte  zf_driver_uart.o
-    0x0800b006   0x0800b006   0x00000002   PAD
-    0x0800b008   0x0800b008   0x000000a0   Code   RO          670    .text.uart_rx_interrupt  zf_driver_uart.o
-    0x0800b0a8   0x0800b0a8   0x0000006c   Code   RO          660    .text.uart_write_buffer  zf_driver_uart.o
-    0x0800b114   0x0800b114   0x00000040   Code   RO          658    .text.uart_write_byte  zf_driver_uart.o
-    0x0800b154   0x0800b154   0x00000040   Code   RO          662    .text.uart_write_string  zf_driver_uart.o
-    0x0800b194   0x0800b194   0x0000054a   Code   RO         2601    .text.updata_sum    vision.o
-    0x0800b6de   0x0800b6de   0x00000002   PAD
-    0x0800b6e0   0x0800b6e0   0x00000026   Code   RO         2599    .text.vis_bin_draw  vision.o
-    0x0800b706   0x0800b706   0x00000002   PAD
-    0x0800b708   0x0800b708   0x00000896   Code   RO         2575    .text.vis_deal      vision.o
-    0x0800bf9e   0x0800bf9e   0x00000002   PAD
-    0x0800bfa0   0x0800bfa0   0x00000158   Code   RO         2597    .text.vis_draw      vision.o
-    0x0800c0f8   0x0800c0f8   0x00000028   Code   RO         2755    i.__0sprintf        mc_w.l(printfa.o)
-    0x0800c120   0x0800c120   0x0000000e   Code   RO         2921    i.__scatterload_copy  mc_w.l(handlers.o)
-    0x0800c12e   0x0800c12e   0x00000002   Code   RO         2922    i.__scatterload_null  mc_w.l(handlers.o)
-    0x0800c130   0x0800c130   0x0000000e   Code   RO         2923    i.__scatterload_zeroinit  mc_w.l(handlers.o)
-    0x0800c13e   0x0800c13e   0x00000002   PAD
-    0x0800c140   0x0800c140   0x00000184   Code   RO         2760    i._fp_digits        mc_w.l(printfa.o)
-    0x0800c2c4   0x0800c2c4   0x000006dc   Code   RO         2761    i._printf_core      mc_w.l(printfa.o)
-    0x0800c9a0   0x0800c9a0   0x00000024   Code   RO         2762    i._printf_post_padding  mc_w.l(printfa.o)
-    0x0800c9c4   0x0800c9c4   0x0000002e   Code   RO         2763    i._printf_pre_padding  mc_w.l(printfa.o)
-    0x0800c9f2   0x0800c9f2   0x0000000a   Code   RO         2765    i._sputc            mc_w.l(printfa.o)
-    0x0800c9fc   0x0800c9fc   0x000000ac   Data   RO          135    .rodata..L__const.debug_protective_handler.pin_list  zf_common_debug.o
-    0x0800caa8   0x0800caa8   0x0000003c   Data   RO         2622    .rodata..L__const.vis_deal.alt_rows  vision.o
-    0x0800cae4   0x0800cae4   0x00000228   Data   RO          172    .rodata.ascii_font_6x8  zf_common_font.o
-    0x0800cd0c   0x0800cd0c   0x000005f0   Data   RO          171    .rodata.ascii_font_8x16  zf_common_font.o
-    0x0800d2fc   0x0800d2fc   0x00000020   Data   RO         2629    .rodata.dir_front   vision.o
-    0x0800d31c   0x0800d31c   0x00000020   Data   RO         2630    .rodata.dir_frontleft  vision.o
-    0x0800d33c   0x0800d33c   0x00000020   Data   RO         2632    .rodata.dir_frontright  vision.o
-    0x0800d35c   0x0800d35c   0x00000004   Data   RO         1102    .rodata.key_index   zf_device_key.o
-    0x0800d360   0x0800d360   0x00000066   Data   RO          133    .rodata.str1.1      zf_common_debug.o
-    0x0800d3c6   0x0800d3c6   0x0000002b   Data   RO          163    .rodata.str1.1      zf_common_fifo.o
-    0x0800d3f1   0x0800d3f1   0x0000002f   Data   RO          213    .rodata.str1.1      zf_common_function.o
-    0x0800d420   0x0800d420   0x0000002c   Data   RO          270    .rodata.str1.1      zf_driver_delay.o
-    0x0800d44c   0x0800d44c   0x0000002a   Data   RO          427    .rodata.str1.1      zf_driver_pit.o
-    0x0800d476   0x0800d476   0x0000002a   Data   RO          440    .rodata.str1.1      zf_driver_pwm.o
-    0x0800d4a0   0x0800d4a0   0x0000002f   Data   RO          527    .rodata.str1.1      zf_driver_soft_iic.o
-    0x0800d4cf   0x0800d4cf   0x0000002a   Data   RO          624    .rodata.str1.1      zf_driver_spi.o
-    0x0800d4f9   0x0800d4f9   0x0000002c   Data   RO          650    .rodata.str1.1      zf_driver_timer.o
-    0x0800d525   0x0800d525   0x0000002b   Data   RO          675    .rodata.str1.1      zf_driver_uart.o
-    0x0800d550   0x0800d550   0x00000008   Data   RO          849    .rodata.str1.1      zf_device_gps_tau1201.o
-    0x0800d558   0x0800d558   0x0000002d   Data   RO         1082    .rodata.str1.1      zf_device_ips200.o
-    0x0800d585   0x0800d585   0x0000002a   Data   RO         1106    .rodata.str1.1      zf_device_key.o
-    0x0800d5af   0x0800d5af   0x00000048   Data   RO         1133    .rodata.str1.1      zf_device_mpu6050.o
-    0x0800d5f7   0x0800d5f7   0x00000062   Data   RO         1163    .rodata.str1.1      zf_device_mt9v03x.o
-    0x0800d659   0x0800d659   0x000000ce   Data   RO         2485    .rodata.str1.1      mymenu.o
-    0x0800d727   0x0800d727   0x00000001   PAD
-    0x0800d728   0x0800d728   0x00000020   Data   RO         2920    Region$$Table       anon$$obj.o
+    0x08003754   0x08003754   0x000001ea   Code   RO         2579    .text.filter_bottom_connected  vision.o
+    0x0800393e   0x0800393e   0x00000002   PAD
+    0x08003940   0x08003940   0x00000032   Code   RO         2583    .text.find_seeds    vision.o
+    0x08003972   0x08003972   0x00000002   PAD
+    0x08003974   0x08003974   0x00000328   Code   RO         2585    .text.find_seeds_at  vision.o
+    0x08003c9c   0x08003c9c   0x0000024c   Code   RO          197    .text.func_float_to_str  zf_common_function.o
+    0x08003ee8   0x08003ee8   0x00000042   Code   RO          183    .text.func_get_greatest_common_divisor  zf_common_function.o
+    0x08003f2a   0x08003f2a   0x00000002   PAD
+    0x08003f2c   0x08003f2c   0x000000f2   Code   RO          189    .text.func_int_to_str  zf_common_function.o
+    0x0800401e   0x0800401e   0x00000002   PAD
+    0x08004020   0x08004020   0x0000002e   Code   RO          349    .text.gpio_get_level  zf_driver_gpio.o
+    0x0800404e   0x0800404e   0x00000002   PAD
+    0x08004050   0x08004050   0x000001e8   Code   RO          355    .text.gpio_init     zf_driver_gpio.o
+    0x08004238   0x08004238   0x00000062   Code   RO          347    .text.gpio_set_level  zf_driver_gpio.o
+    0x0800429a   0x0800429a   0x00000002   PAD
+    0x0800429c   0x0800429c   0x0000013a   Code   RO          826    .text.gps_uart_callback  zf_device_gps_tau1201.o
+    0x080043d6   0x080043d6   0x00000002   PAD
+    0x080043d8   0x080043d8   0x00000014   Code   RO          230    .text.interrupt_disable  zf_common_interrupt.o
+    0x080043ec   0x080043ec   0x00000014   Code   RO          226    .text.interrupt_enable  zf_common_interrupt.o
+    0x08004400   0x08004400   0x00000024   Code   RO          224    .text.interrupt_global_disable  zf_common_interrupt.o
+    0x08004424   0x08004424   0x0000000a   Code   RO          238    .text.interrupt_init  zf_common_interrupt.o
+    0x0800442e   0x0800442e   0x00000002   PAD
+    0x08004430   0x08004430   0x0000001c   Code   RO          234    .text.interrupt_set_priority  zf_common_interrupt.o
+    0x0800444c   0x0800444c   0x0000010e   Code   RO         1028    .text.ips200_clear  zf_device_ips200.o
+    0x0800455a   0x0800455a   0x00000002   PAD
+    0x0800455c   0x0800455c   0x0000008a   Code   RO         1072    .text.ips200_debug_init  zf_device_ips200.o
+    0x080045e6   0x080045e6   0x00000002   PAD
+    0x080045e8   0x080045e8   0x000000ea   Code   RO         1042    .text.ips200_draw_point  zf_device_ips200.o
+    0x080046d2   0x080046d2   0x00000002   PAD
+    0x080046d4   0x080046d4   0x00000472   Code   RO         1066    .text.ips200_init   zf_device_ips200.o
+    0x08004b46   0x08004b46   0x00000002   PAD
+    0x08004b48   0x08004b48   0x0000002a   Code   RO         1040    .text.ips200_set_color  zf_device_ips200.o
+    0x08004b72   0x08004b72   0x00000002   PAD
+    0x08004b74   0x08004b74   0x00000066   Code   RO         1036    .text.ips200_set_dir  zf_device_ips200.o
+    0x08004bda   0x08004bda   0x00000002   PAD
+    0x08004bdc   0x08004bdc   0x00000018   Code   RO         1038    .text.ips200_set_font  zf_device_ips200.o
+    0x08004bf4   0x08004bf4   0x000000c4   Code   RO         1030    .text.ips200_set_region  zf_device_ips200.o
+    0x08004cb8   0x08004cb8   0x000002de   Code   RO         1046    .text.ips200_show_char  zf_device_ips200.o
+    0x08004f96   0x08004f96   0x00000002   PAD
+    0x08004f98   0x08004f98   0x0000015e   Code   RO         1054    .text.ips200_show_float  zf_device_ips200.o
+    0x080050f6   0x080050f6   0x00000002   PAD
+    0x080050f8   0x080050f8   0x00000214   Code   RO         1058    .text.ips200_show_gray_image  zf_device_ips200.o
+    0x0800530c   0x0800530c   0x00000100   Code   RO         1050    .text.ips200_show_int  zf_device_ips200.o
+    0x0800540c   0x0800540c   0x000000dc   Code   RO         1048    .text.ips200_show_string  zf_device_ips200.o
+    0x080054e8   0x080054e8   0x000000d6   Code   RO         1032    .text.ips200_write_16bit_data  zf_device_ips200.o
+    0x080055be   0x080055be   0x00000002   PAD
+    0x080055c0   0x080055c0   0x000000ae   Code   RO         1070    .text.ips200_write_8bit_data  zf_device_ips200.o
+    0x0800566e   0x0800566e   0x00000002   PAD
+    0x08005670   0x08005670   0x000000ea   Code   RO         1068    .text.ips200_write_command  zf_device_ips200.o
+    0x0800575a   0x0800575a   0x00000002   PAD
+    0x0800575c   0x0800575c   0x00000158   Code   RO         2573    .text.is_straight   vision.o
+    0x080058b4   0x080058b4   0x0000036a   Code   RO         2474    .text.k1_handle     mymenu.o
+    0x08005c1e   0x08005c1e   0x00000002   PAD
+    0x08005c20   0x08005c20   0x00000358   Code   RO         2476    .text.k2_handle     mymenu.o
+    0x08005f78   0x08005f78   0x0000001a   Code   RO         2478    .text.k3_handle     mymenu.o
+    0x08005f92   0x08005f92   0x00000002   PAD
+    0x08005f94   0x08005f94   0x000000e4   Code   RO         2472    .text.k3_long_handle  mymenu.o
+    0x08006078   0x08006078   0x0000003a   Code   RO         2480    .text.k4_handle     mymenu.o
+    0x080060b2   0x080060b2   0x00000002   PAD
+    0x080060b4   0x080060b4   0x0000001a   Code   RO         1096    .text.key_clear_state  zf_device_key.o
+    0x080060ce   0x080060ce   0x00000002   PAD
+    0x080060d0   0x080060d0   0x00000018   Code   RO         1094    .text.key_get_state  zf_device_key.o
+    0x080060e8   0x080060e8   0x0000007a   Code   RO         1100    .text.key_init      zf_device_key.o
+    0x08006162   0x08006162   0x00000002   PAD
+    0x08006164   0x08006164   0x00000100   Code   RO         1092    .text.key_scanner   zf_device_key.o
+    0x08006264   0x08006264   0x00000144   Code   RO            4    .text.main          main.o
+    0x080063a8   0x080063a8   0x00000170   Code   RO         2470    .text.menu          mymenu.o
+    0x08006518   0x08006518   0x000003f2   Code   RO         2462    .text.menu_init     mymenu.o
+    0x0800690a   0x0800690a   0x00000002   PAD
+    0x0800690c   0x0800690c   0x00000056   Code   RO         2464    .text.menu_show     mymenu.o
+    0x08006962   0x08006962   0x00000002   PAD
+    0x08006964   0x08006964   0x0000004c   Code   RO         2499    .text.motor_init    motor.o
+    0x080069b0   0x080069b0   0x00000020   Code   RO         2505    .text.motor_set_both  motor.o
+    0x080069d0   0x080069d0   0x0000007a   Code   RO         2503    .text.motor_set_left  motor.o
+    0x08006a4a   0x08006a4a   0x00000002   PAD
+    0x08006a4c   0x08006a4c   0x0000007a   Code   RO         2501    .text.motor_set_right  motor.o
+    0x08006ac6   0x08006ac6   0x00000002   PAD
+    0x08006ac8   0x08006ac8   0x00000016   Code   RO         2507    .text.motor_stop    motor.o
+    0x08006ade   0x08006ade   0x00000002   PAD
+    0x08006ae0   0x08006ae0   0x00000254   Code   RO         2652    .text.motor_update  control.o
+    0x08006d34   0x08006d34   0x0000005e   Code   RO         1114    .text.mpu6050_get_acc  zf_device_mpu6050.o
+    0x08006d92   0x08006d92   0x00000002   PAD
+    0x08006d94   0x08006d94   0x0000005e   Code   RO         1116    .text.mpu6050_get_gyro  zf_device_mpu6050.o
+    0x08006df2   0x08006df2   0x00000002   PAD
+    0x08006df4   0x08006df4   0x0000000e   Code   RO         2547    .text.mpu6050_get_gyro_z  mpu6050.o
+    0x08006e02   0x08006e02   0x00000002   PAD
+    0x08006e04   0x08006e04   0x000000ac   Code   RO         1122    .text.mpu6050_init  zf_device_mpu6050.o
+    0x08006eb0   0x08006eb0   0x0000004a   Code   RO         2533    .text.mpu6050_module_init  mpu6050.o
+    0x08006efa   0x08006efa   0x00000002   PAD
+    0x08006efc   0x08006efc   0x0000000c   Code   RO         2535    .text.mpu6050_pit_callback  mpu6050.o
+    0x08006f08   0x08006f08   0x00000074   Code   RO         1124    .text.mpu6050_self1_check  zf_device_mpu6050.o
+    0x08006f7c   0x08006f7c   0x00000016   Code   RO         1147    .text.mt9v03x_dma_handler  zf_device_mt9v03x.o
+    0x08006f92   0x08006f92   0x00000002   PAD
+    0x08006f94   0x08006f94   0x00000122   Code   RO         1157    .text.mt9v03x_get_config  zf_device_mt9v03x.o
+    0x080070b6   0x080070b6   0x00000002   PAD
+    0x080070b8   0x080070b8   0x000000a0   Code   RO         1141    .text.mt9v03x_get_version  zf_device_mt9v03x.o
+    0x08007158   0x08007158   0x000001a4   Code   RO         1153    .text.mt9v03x_init  zf_device_mt9v03x.o
+    0x080072fc   0x080072fc   0x0000003c   Code   RO         2686    .text.mt9v03x_read_word_sccb  zf_device_config.lib(zf_device_config.o)
+    0x08007338   0x08007338   0x000000f8   Code   RO         1155    .text.mt9v03x_set_config  zf_device_mt9v03x.o
+    0x08007430   0x08007430   0x000009ae   Code   RO         2682    .text.mt9v03x_set_config_sccb  zf_device_config.lib(zf_device_config.o)
+    0x08007dde   0x08007dde   0x00000002   PAD
+    0x08007de0   0x08007de0   0x00000040   Code   RO         1149    .text.mt9v03x_uart_handler  zf_device_mt9v03x.o
+    0x08007e20   0x08007e20   0x00000036   Code   RO         1145    .text.mt9v03x_vsync_handler  zf_device_mt9v03x.o
+    0x08007e56   0x08007e56   0x00000002   PAD
+    0x08007e58   0x08007e58   0x00000032   Code   RO         2684    .text.mt9v03x_write_word_sccb  zf_device_config.lib(zf_device_config.o)
+    0x08007e8a   0x08007e8a   0x00000002   PAD
+    0x08007e8c   0x08007e8c   0x00000218   Code   RO         2589    .text.pho_border    vision.o
+    0x080080a4   0x080080a4   0x0000051e   Code   RO         2597    .text.pho_center    vision.o
+    0x080085c2   0x080085c2   0x00000002   PAD
+    0x080085c4   0x080085c4   0x00000132   Code   RO          425    .text.pit_init      zf_driver_pit.o
+    0x080086f6   0x080086f6   0x00000002   PAD
+    0x080086f8   0x080086f8   0x00000256   Code   RO          438    .text.pwm_init      zf_driver_pwm.o
+    0x0800894e   0x0800894e   0x00000002   PAD
+    0x08008950   0x08008950   0x0000012e   Code   RO          436    .text.pwm_set_duty  zf_driver_pwm.o
+    0x08008a7e   0x08008a7e   0x00000002   PAD
+    0x08008a80   0x08008a80   0x00000634   Code   RO         2587    .text.seed_grow_left  vision.o
+    0x080090b4   0x080090b4   0x00000632   Code   RO         2591    .text.seed_grow_right  vision.o
+    0x080096e6   0x080096e6   0x00000002   PAD
+    0x080096e8   0x080096e8   0x00000014   Code   RO         2556    .text.servo_init    servo.o
+    0x080096fc   0x080096fc   0x00000066   Code   RO         2558    .text.servo_set_angle  servo.o
+    0x08009762   0x08009762   0x00000002   PAD
+    0x08009764   0x08009764   0x000002ae   Code   RO         2650    .text.servo_update  control.o
+    0x08009a12   0x08009a12   0x00000002   PAD
+    0x08009a14   0x08009a14   0x0000008a   Code   RO         1375    .text.set_camera_type  zf_device_type.o
+    0x08009a9e   0x08009a9e   0x00000002   PAD
+    0x08009aa0   0x08009aa0   0x0000009e   Code   RO         2468    .text.show_key      mymenu.o
+    0x08009b3e   0x08009b3e   0x00000002   PAD
+    0x08009b40   0x08009b40   0x000000c2   Code   RO         2466    .text.show_number   mymenu.o
+    0x08009c02   0x08009c02   0x00000002   PAD
+    0x08009c04   0x08009c04   0x0000008e   Code   RO          521    .text.soft_iic_init  zf_driver_soft_iic.o
+    0x08009c92   0x08009c92   0x00000002   PAD
+    0x08009c94   0x08009c94   0x00000072   Code   RO          505    .text.soft_iic_read_8bit_register  zf_driver_soft_iic.o
+    0x08009d06   0x08009d06   0x00000002   PAD
+    0x08009d08   0x08009d08   0x00000098   Code   RO          507    .text.soft_iic_read_8bit_registers  zf_driver_soft_iic.o
+    0x08009da0   0x08009da0   0x00000164   Code   RO          497    .text.soft_iic_read_data  zf_driver_soft_iic.o
+    0x08009f04   0x08009f04   0x00000078   Code   RO          519    .text.soft_iic_sccb_read_register  zf_driver_soft_iic.o
+    0x08009f7c   0x08009f7c   0x00000056   Code   RO          517    .text.soft_iic_sccb_write_register  zf_driver_soft_iic.o
+    0x08009fd2   0x08009fd2   0x00000002   PAD
+    0x08009fd4   0x08009fd4   0x0000011a   Code   RO          525    .text.soft_iic_send_ack  zf_driver_soft_iic.o
+    0x0800a0ee   0x0800a0ee   0x00000002   PAD
+    0x0800a0f0   0x0800a0f0   0x00000128   Code   RO          477    .text.soft_iic_send_data  zf_driver_soft_iic.o
+    0x0800a218   0x0800a218   0x000000da   Code   RO          475    .text.soft_iic_start  zf_driver_soft_iic.o
+    0x0800a2f2   0x0800a2f2   0x00000002   PAD
+    0x0800a2f4   0x0800a2f4   0x000000da   Code   RO          479    .text.soft_iic_stop  zf_driver_soft_iic.o
+    0x0800a3ce   0x0800a3ce   0x00000002   PAD
+    0x0800a3d0   0x0800a3d0   0x000000f8   Code   RO          523    .text.soft_iic_wait_ack  zf_driver_soft_iic.o
+    0x0800a4c8   0x0800a4c8   0x00000056   Code   RO          487    .text.soft_iic_write_8bit_register  zf_driver_soft_iic.o
+    0x0800a51e   0x0800a51e   0x00000002   PAD
+    0x0800a520   0x0800a520   0x00000366   Code   RO          621    .text.spi_init      zf_driver_spi.o
+    0x0800a886   0x0800a886   0x00000002   PAD
+    0x0800a888   0x0800a888   0x000000b8   Code   RO          589    .text.spi_write_16bit  zf_driver_spi.o
+    0x0800a940   0x0800a940   0x00000086   Code   RO          585    .text.spi_write_8bit  zf_driver_spi.o
+    0x0800a9c6   0x0800a9c6   0x00000002   PAD
+    0x0800a9c8   0x0800a9c8   0x0000009a   Code   RO          266    .text.system_delay_ms  zf_driver_delay.o
+    0x0800aa62   0x0800aa62   0x00000002   PAD
+    0x0800aa64   0x0800aa64   0x000000b2   Code   RO          642    .text.timer_clear   zf_driver_timer.o
+    0x0800ab16   0x0800ab16   0x00000002   PAD
+    0x0800ab18   0x0800ab18   0x000000b6   Code   RO          634    .text.timer_clock_enable  zf_driver_timer.o
+    0x0800abce   0x0800abce   0x00000002   PAD
+    0x0800abd0   0x0800abd0   0x0000012a   Code   RO          646    .text.timer_etr_init  zf_driver_timer.o
+    0x0800acfa   0x0800acfa   0x00000002   PAD
+    0x0800acfc   0x0800acfc   0x00000068   Code   RO          632    .text.timer_funciton_check  zf_driver_timer.o
+    0x0800ad64   0x0800ad64   0x000000b6   Code   RO          640    .text.timer_get     zf_driver_timer.o
+    0x0800ae1a   0x0800ae1a   0x00000002   PAD
+    0x0800ae1c   0x0800ae1c   0x000000e0   Code   RO         1357    .text.tsl1401_collect_pit_handler  zf_device_tsl1401.o
+    0x0800aefc   0x0800aefc   0x00000002   Code   RO         1373    .text.type_default_callback  zf_device_type.o
+    0x0800aefe   0x0800aefe   0x00000002   PAD
+    0x0800af00   0x0800af00   0x0000028c   Code   RO          672    .text.uart_init     zf_driver_uart.o
+    0x0800b18c   0x0800b18c   0x00000066   Code   RO          666    .text.uart_query_byte  zf_driver_uart.o
+    0x0800b1f2   0x0800b1f2   0x00000002   PAD
+    0x0800b1f4   0x0800b1f4   0x000000a0   Code   RO          670    .text.uart_rx_interrupt  zf_driver_uart.o
+    0x0800b294   0x0800b294   0x0000006c   Code   RO          660    .text.uart_write_buffer  zf_driver_uart.o
+    0x0800b300   0x0800b300   0x00000040   Code   RO          658    .text.uart_write_byte  zf_driver_uart.o
+    0x0800b340   0x0800b340   0x00000040   Code   RO          662    .text.uart_write_string  zf_driver_uart.o
+    0x0800b380   0x0800b380   0x0000054a   Code   RO         2603    .text.updata_sum    vision.o
+    0x0800b8ca   0x0800b8ca   0x00000002   PAD
+    0x0800b8cc   0x0800b8cc   0x00000026   Code   RO         2601    .text.vis_bin_draw  vision.o
+    0x0800b8f2   0x0800b8f2   0x00000002   PAD
+    0x0800b8f4   0x0800b8f4   0x0000089a   Code   RO         2575    .text.vis_deal      vision.o
+    0x0800c18e   0x0800c18e   0x00000002   PAD
+    0x0800c190   0x0800c190   0x00000158   Code   RO         2599    .text.vis_draw      vision.o
+    0x0800c2e8   0x0800c2e8   0x00000028   Code   RO         2757    i.__0sprintf        mc_w.l(printfa.o)
+    0x0800c310   0x0800c310   0x0000000e   Code   RO         2923    i.__scatterload_copy  mc_w.l(handlers.o)
+    0x0800c31e   0x0800c31e   0x00000002   Code   RO         2924    i.__scatterload_null  mc_w.l(handlers.o)
+    0x0800c320   0x0800c320   0x0000000e   Code   RO         2925    i.__scatterload_zeroinit  mc_w.l(handlers.o)
+    0x0800c32e   0x0800c32e   0x00000002   PAD
+    0x0800c330   0x0800c330   0x00000184   Code   RO         2762    i._fp_digits        mc_w.l(printfa.o)
+    0x0800c4b4   0x0800c4b4   0x000006dc   Code   RO         2763    i._printf_core      mc_w.l(printfa.o)
+    0x0800cb90   0x0800cb90   0x00000024   Code   RO         2764    i._printf_post_padding  mc_w.l(printfa.o)
+    0x0800cbb4   0x0800cbb4   0x0000002e   Code   RO         2765    i._printf_pre_padding  mc_w.l(printfa.o)
+    0x0800cbe2   0x0800cbe2   0x0000000a   Code   RO         2767    i._sputc            mc_w.l(printfa.o)
+    0x0800cbec   0x0800cbec   0x000000ac   Data   RO          135    .rodata..L__const.debug_protective_handler.pin_list  zf_common_debug.o
+    0x0800cc98   0x0800cc98   0x0000003c   Data   RO         2624    .rodata..L__const.vis_deal.alt_rows  vision.o
+    0x0800ccd4   0x0800ccd4   0x00000228   Data   RO          172    .rodata.ascii_font_6x8  zf_common_font.o
+    0x0800cefc   0x0800cefc   0x000005f0   Data   RO          171    .rodata.ascii_font_8x16  zf_common_font.o
+    0x0800d4ec   0x0800d4ec   0x00000020   Data   RO         2631    .rodata.dir_front   vision.o
+    0x0800d50c   0x0800d50c   0x00000020   Data   RO         2632    .rodata.dir_frontleft  vision.o
+    0x0800d52c   0x0800d52c   0x00000020   Data   RO         2634    .rodata.dir_frontright  vision.o
+    0x0800d54c   0x0800d54c   0x00000004   Data   RO         1102    .rodata.key_index   zf_device_key.o
+    0x0800d550   0x0800d550   0x00000066   Data   RO          133    .rodata.str1.1      zf_common_debug.o
+    0x0800d5b6   0x0800d5b6   0x0000002b   Data   RO          163    .rodata.str1.1      zf_common_fifo.o
+    0x0800d5e1   0x0800d5e1   0x0000002f   Data   RO          213    .rodata.str1.1      zf_common_function.o
+    0x0800d610   0x0800d610   0x0000002c   Data   RO          270    .rodata.str1.1      zf_driver_delay.o
+    0x0800d63c   0x0800d63c   0x0000002a   Data   RO          427    .rodata.str1.1      zf_driver_pit.o
+    0x0800d666   0x0800d666   0x0000002a   Data   RO          440    .rodata.str1.1      zf_driver_pwm.o
+    0x0800d690   0x0800d690   0x0000002f   Data   RO          527    .rodata.str1.1      zf_driver_soft_iic.o
+    0x0800d6bf   0x0800d6bf   0x0000002a   Data   RO          624    .rodata.str1.1      zf_driver_spi.o
+    0x0800d6e9   0x0800d6e9   0x0000002c   Data   RO          650    .rodata.str1.1      zf_driver_timer.o
+    0x0800d715   0x0800d715   0x0000002b   Data   RO          675    .rodata.str1.1      zf_driver_uart.o
+    0x0800d740   0x0800d740   0x00000008   Data   RO          849    .rodata.str1.1      zf_device_gps_tau1201.o
+    0x0800d748   0x0800d748   0x0000002d   Data   RO         1082    .rodata.str1.1      zf_device_ips200.o
+    0x0800d775   0x0800d775   0x0000002a   Data   RO         1106    .rodata.str1.1      zf_device_key.o
+    0x0800d79f   0x0800d79f   0x00000048   Data   RO         1133    .rodata.str1.1      zf_device_mpu6050.o
+    0x0800d7e7   0x0800d7e7   0x00000062   Data   RO         1163    .rodata.str1.1      zf_device_mt9v03x.o
+    0x0800d849   0x0800d849   0x000000ce   Data   RO         2485    .rodata.str1.1      mymenu.o
+    0x0800d917   0x0800d917   0x00000001   PAD
+    0x0800d918   0x0800d918   0x00000020   Data   RO         2922    Region$$Table       anon$$obj.o
 
 
-    Execution Region RW_m_data (Exec base: 0x20000000, Load base: 0x0800d748, Size: 0x0000d0e4, Max: 0x0001dc00, ABSOLUTE, COMPRESSED[0x000000d8])
+    Execution Region RW_m_data (Exec base: 0x20000000, Load base: 0x0800d938, Size: 0x0000d0e4, Max: 0x0001dc00, ABSOLUTE, COMPRESSED[0x000000dc])
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000000   COMPRESSED   0x00000004   Data   RW         2606    .data.Block_Size    vision.o
-    0x20000004   COMPRESSED   0x00000004   Data   RW         2607    .data.Clip_Value    vision.o
+    0x20000000   COMPRESSED   0x00000004   Data   RW         2608    .data.Block_Size    vision.o
+    0x20000004   COMPRESSED   0x00000004   Data   RW         2609    .data.Clip_Value    vision.o
     0x20000008   COMPRESSED   0x00000008   Data   RW          256    .data.adc_index     zf_driver_adc.o
     0x20000010   COMPRESSED   0x00000004   Data   RW         1382    .data.camera_dma_handler  zf_device_type.o
     0x20000014   COMPRESSED   0x00000004   Data   RW         1380    .data.camera_uart_handler  zf_device_type.o
@@ -7148,10 +7156,10 @@ Memory Map of the image
     0x2000001e   COMPRESSED   0x00000002   PAD
     0x20000020   COMPRESSED   0x00000008   Data   RW          286    .data.dma_index     zf_driver_dma.o
     0x20000028   COMPRESSED   0x00000008   Data   RW          302    .data.encoder_dir_pin  zf_driver_encoder.o
-    0x20000030   COMPRESSED   0x00000004   Data   RW         2608    .data.err_alpha     vision.o
+    0x20000030   COMPRESSED   0x00000004   Data   RW         2610    .data.err_alpha     vision.o
     0x20000034   COMPRESSED   0x00000020   Data   RW          359    .data.gpio_group    zf_driver_gpio.o
-    0x20000054   COMPRESSED   0x00000004   Data   RW         2662    .data.gyro_kd       control.o
-    0x20000058   COMPRESSED   0x00000004   Data   RW         2663    .data.gyro_kd_curve  control.o
+    0x20000054   COMPRESSED   0x00000004   Data   RW         2664    .data.gyro_kd       control.o
+    0x20000058   COMPRESSED   0x00000004   Data   RW         2665    .data.gyro_kd_curve  control.o
     0x2000005c   COMPRESSED   0x00000002   Data   RW         1078    .data.ips200_bgcolor  zf_device_ips200.o
     0x2000005e   COMPRESSED   0x00000001   Data   RW         1080    .data.ips200_display_font  zf_device_ips200.o
     0x2000005f   COMPRESSED   0x00000001   PAD
@@ -7161,25 +7169,25 @@ Memory Map of the image
     0x20000066   COMPRESSED   0x00000001   Data   RW         1084    .data.ips_bl_pin    zf_device_ips200.o
     0x20000067   COMPRESSED   0x00000001   Data   RW         1075    .data.ips_cs_pin    zf_device_ips200.o
     0x20000068   COMPRESSED   0x00000001   Data   RW         1083    .data.ips_rst_pin   zf_device_ips200.o
-    0x20000069   COMPRESSED   0x00000001   Data   RW         2605    .data.lookahead     vision.o
+    0x20000069   COMPRESSED   0x00000001   Data   RW         2607    .data.lookahead     vision.o
     0x2000006a   COMPRESSED   0x00000002   PAD
-    0x2000006c   COMPRESSED   0x00000004   Data   RW         2660    .data.motor_base_duty  control.o
-    0x20000070   COMPRESSED   0x00000004   Data   RW         2664    .data.motor_bend_cut  control.o
-    0x20000074   COMPRESSED   0x00000004   Data   RW         2667    .data.motor_diff_max  control.o
-    0x20000078   COMPRESSED   0x00000004   Data   RW         2665    .data.motor_kp      control.o
-    0x2000007c   COMPRESSED   0x00000004   Data   RW         2661    .data.motor_max_duty  control.o
+    0x2000006c   COMPRESSED   0x00000004   Data   RW         2662    .data.motor_base_duty  control.o
+    0x20000070   COMPRESSED   0x00000004   Data   RW         2666    .data.motor_bend_cut  control.o
+    0x20000074   COMPRESSED   0x00000004   Data   RW         2669    .data.motor_diff_max  control.o
+    0x20000078   COMPRESSED   0x00000004   Data   RW         2667    .data.motor_kp      control.o
+    0x2000007c   COMPRESSED   0x00000004   Data   RW         2663    .data.motor_max_duty  control.o
     0x20000080   COMPRESSED   0x00000024   Data   RW         1164    .data.mt9v03x_get_confing_buffer  zf_device_mt9v03x.o
     0x200000a4   COMPRESSED   0x00000028   Data   RW         1161    .data.mt9v03x_set_confing_buffer  zf_device_mt9v03x.o
     0x200000cc   COMPRESSED   0x00000001   Data   RW         1160    .data.mt9v03x_type  zf_device_mt9v03x.o
     0x200000cd   COMPRESSED   0x00000003   PAD
-    0x200000d0   COMPRESSED   0x00000004   Data   RW         2655    .data.servo_center  control.o
-    0x200000d4   COMPRESSED   0x00000004   Data   RW         2657    .data.servo_dead    control.o
-    0x200000d8   COMPRESSED   0x00000004   Data   RW         2659    .data.servo_dir     control.o
-    0x200000dc   COMPRESSED   0x00000004   Data   RW         2654    .data.servo_kd      control.o
-    0x200000e0   COMPRESSED   0x00000004   Data   RW         2652    .data.servo_kp1     control.o
-    0x200000e4   COMPRESSED   0x00000004   Data   RW         2653    .data.servo_kp2     control.o
-    0x200000e8   COMPRESSED   0x00000004   Data   RW         2658    .data.servo_max_add  control.o
-    0x200000ec   COMPRESSED   0x00000004   Data   RW         2656    .data.servo_max_cha  control.o
+    0x200000d0   COMPRESSED   0x00000004   Data   RW         2657    .data.servo_center  control.o
+    0x200000d4   COMPRESSED   0x00000004   Data   RW         2659    .data.servo_dead    control.o
+    0x200000d8   COMPRESSED   0x00000004   Data   RW         2661    .data.servo_dir     control.o
+    0x200000dc   COMPRESSED   0x00000004   Data   RW         2656    .data.servo_kd      control.o
+    0x200000e0   COMPRESSED   0x00000004   Data   RW         2654    .data.servo_kp1     control.o
+    0x200000e4   COMPRESSED   0x00000004   Data   RW         2655    .data.servo_kp2     control.o
+    0x200000e8   COMPRESSED   0x00000004   Data   RW         2660    .data.servo_max_add  control.o
+    0x200000ec   COMPRESSED   0x00000004   Data   RW         2658    .data.servo_max_cha  control.o
     0x200000f0   COMPRESSED   0x00000008   Data   RW          623    .data.spi_index     zf_driver_spi.o
     0x200000f8   COMPRESSED   0x00000004   Data   RW           96    .data.system_clock  zf_common_clock.o
     0x200000fc   COMPRESSED   0x00000004   Data   RW         2486    .data.test          mymenu.o
@@ -7188,27 +7196,27 @@ Memory Map of the image
     0x20000105   COMPRESSED   0x00000003   PAD
     0x20000108   COMPRESSED   0x00000020   Data   RW          674    .data.uart_index    zf_driver_uart.o
     0x20000128   COMPRESSED   0x00000008   Data   RW          677    .data.uart_irq      zf_driver_uart.o
-    0x20000130   COMPRESSED   0x00000004   Data   RW         2614    .data.vis_deal.cached_th  vision.o
-    0x20000134   COMPRESSED   0x00000004   Data   RW         2617    .data.vis_deal.prev_llx  vision.o
-    0x20000138   COMPRESSED   0x00000004   Data   RW         2618    .data.vis_deal.prev_lly  vision.o
-    0x2000013c   COMPRESSED   0x00000004   Data   RW         2619    .data.vis_deal.prev_rrx  vision.o
-    0x20000140   COMPRESSED   0x00000004   Data   RW         2620    .data.vis_deal.prev_rry  vision.o
+    0x20000130   COMPRESSED   0x00000004   Data   RW         2616    .data.vis_deal.cached_th  vision.o
+    0x20000134   COMPRESSED   0x00000004   Data   RW         2619    .data.vis_deal.prev_llx  vision.o
+    0x20000138   COMPRESSED   0x00000004   Data   RW         2620    .data.vis_deal.prev_lly  vision.o
+    0x2000013c   COMPRESSED   0x00000004   Data   RW         2621    .data.vis_deal.prev_rrx  vision.o
+    0x20000140   COMPRESSED   0x00000004   Data   RW         2622    .data.vis_deal.prev_rry  vision.o
     0x20000144   COMPRESSED   0x00000004   Data   RW         1384    .data.wireless_module_uart_handler  zf_device_type.o
     0x20000148   COMPRESSED   0x00000001   Data   RW          131    .data.zf_debug_assert_enable  zf_common_debug.o
     0x20000149   COMPRESSED   0x00000003   PAD
-    0x2000014c        -       0x00005820   Zero   RW         2616    .bss.Image_Used     vision.o
+    0x2000014c        -       0x00005820   Zero   RW         2618    .bss.Image_Used     vision.o
     0x2000596c        -       0x00000002   Zero   RW          257    .bss.adc_resolution  zf_driver_adc.o
     0x2000596e        -       0x00000008   Zero   RW          746    .bss.camera_receiver_buffer  zf_device_camera.o
     0x20005976   COMPRESSED   0x00000002   PAD
     0x20005978        -       0x00000018   Zero   RW          745    .bss.camera_receiver_fifo  zf_device_camera.o
     0x20005990        -       0x00000001   Zero   RW         1379    .bss.camera_type    zf_device_type.o
     0x20005991   COMPRESSED   0x00000003   PAD
-    0x20005994        -       0x000001e0   Zero   RW         2633    .bss.candidates     vision.o
-    0x20005b74        -       0x00000001   Zero   RW         2668    .bss.car_run        control.o
-    0x20005b75        -       0x00000078   Zero   RW         2611    .bss.center_line    vision.o
+    0x20005994        -       0x000001e0   Zero   RW         2635    .bss.candidates     vision.o
+    0x20005b74        -       0x00000001   Zero   RW         2670    .bss.car_run        control.o
+    0x20005b75        -       0x00000078   Zero   RW         2613    .bss.center_line    vision.o
     0x20005bed   COMPRESSED   0x00000001   PAD
-    0x20005bee        -       0x00000002   Zero   RW         2612    .bss.data_l         vision.o
-    0x20005bf0        -       0x00000002   Zero   RW         2613    .bss.data_r         vision.o
+    0x20005bee        -       0x00000002   Zero   RW         2614    .bss.data_l         vision.o
+    0x20005bf0        -       0x00000002   Zero   RW         2615    .bss.data_r         vision.o
     0x20005bf2        -       0x00000001   Zero   RW          132    .bss.debug_assert_handler.assert_nest_index  zf_common_debug.o
     0x20005bf3   COMPRESSED   0x00000001   PAD
     0x20005bf4        -       0x00000014   Zero   RW          134    .bss.debug_output_info  zf_common_debug.o
@@ -7220,7 +7228,7 @@ Memory Map of the image
     0x20005c12        -       0x00000002   Zero   RW         2524    .bss.encoder_left_speed  encoder.o
     0x20005c14        -       0x00000002   Zero   RW         2525    .bss.encoder_right_speed  encoder.o
     0x20005c16   COMPRESSED   0x00000002   PAD
-    0x20005c18        -       0x00000004   Zero   RW         2627    .bss.err            vision.o
+    0x20005c18        -       0x00000004   Zero   RW         2629    .bss.err            vision.o
     0x20005c1c        -       0x00000080   Zero   RW          846    .bss.gps_gga_buffer  zf_device_gps_tau1201.o
     0x20005c9c        -       0x00000001   Zero   RW          841    .bss.gps_gga_state  zf_device_gps_tau1201.o
     0x20005c9d        -       0x00000080   Zero   RW          844    .bss.gps_rmc_buffer  zf_device_gps_tau1201.o
@@ -7239,12 +7247,12 @@ Memory Map of the image
     0x20005d70        -       0x00000004   Zero   RW         2489    .bss.key            mymenu.o
     0x20005d74        -       0x00000010   Zero   RW         1103    .bss.key_press_time  zf_device_key.o
     0x20005d84        -       0x00000004   Zero   RW         1105    .bss.key_state      zf_device_key.o
-    0x20005d88        -       0x00000078   Zero   RW         2609    .bss.l_border       vision.o
+    0x20005d88        -       0x00000078   Zero   RW         2611    .bss.l_border       vision.o
     0x20005e00        -       0x00000001   Zero   RW         2453    .bss.menu_arr_index  menu.o
     0x20005e01   COMPRESSED   0x00000003   PAD
     0x20005e04        -       0x00000b00   Zero   RW         2454    .bss.menu_item_arr  menu.o
-    0x20006904        -       0x00000004   Zero   RW         2666    .bss.motor_kd       control.o
-    0x20006908        -       0x00000004   Zero   RW         2672    .bss.motor_last_err  control.o
+    0x20006904        -       0x00000004   Zero   RW         2668    .bss.motor_kd       control.o
+    0x20006908        -       0x00000004   Zero   RW         2674    .bss.motor_last_err  control.o
     0x2000690c        -       0x00000002   Zero   RW         1129    .bss.mpu6050_acc_x  zf_device_mpu6050.o
     0x2000690e        -       0x00000002   Zero   RW         1130    .bss.mpu6050_acc_y  zf_device_mpu6050.o
     0x20006910        -       0x00000002   Zero   RW         1131    .bss.mpu6050_acc_z  zf_device_mpu6050.o
@@ -7254,24 +7262,24 @@ Memory Map of the image
     0x20006918        -       0x00000010   Zero   RW         1132    .bss.mpu6050_iic_struct  zf_device_mpu6050.o
     0x20006928        -       0x00000001   Zero   RW         1159    .bss.mt9v03x_finish_flag  zf_device_mt9v03x.o
     0x20006929   COMPRESSED   0x00000003   PAD
-    0x2000692c        -       0x00000004   Zero   RW         2694    .bss.mt9v03x_h_blank  zf_device_config.lib(zf_device_config.o)
-    0x20006930        -       0x00000010   Zero   RW         2692    .bss.mt9v03x_iic_inf_struct  zf_device_config.lib(zf_device_config.o)
+    0x2000692c        -       0x00000004   Zero   RW         2696    .bss.mt9v03x_h_blank  zf_device_config.lib(zf_device_config.o)
+    0x20006930        -       0x00000010   Zero   RW         2694    .bss.mt9v03x_iic_inf_struct  zf_device_config.lib(zf_device_config.o)
     0x20006940        -       0x00005820   Zero   RW         1165    .bss.mt9v03x_image  zf_device_mt9v03x.o
-    0x2000c160        -       0x00000014   Zero   RW         2693    .bss.mt9v03x_init_config  zf_device_config.lib(zf_device_config.o)
-    0x2000c174        -       0x00000004   Zero   RW         2695    .bss.mt9v03x_v_blank  zf_device_config.lib(zf_device_config.o)
+    0x2000c160        -       0x00000014   Zero   RW         2695    .bss.mt9v03x_init_config  zf_device_config.lib(zf_device_config.o)
+    0x2000c174        -       0x00000004   Zero   RW         2697    .bss.mt9v03x_v_blank  zf_device_config.lib(zf_device_config.o)
     0x2000c178        -       0x00000002   Zero   RW         1162    .bss.mt9v03x_version  zf_device_mt9v03x.o
     0x2000c17a   COMPRESSED   0x00000002   PAD
-    0x2000c17c        -       0x00000004   Zero   RW         2635    .bss.pho_center.err_init  vision.o
-    0x2000c180        -       0x00000004   Zero   RW         2634    .bss.pho_center.err_prev  vision.o
-    0x2000c184        -       0x00000004   Zero   RW         2636    .bss.pho_center.hold_cnt  vision.o
-    0x2000c188        -       0x000005a0   Zero   RW         2623    .bss.points_l       vision.o
-    0x2000c728        -       0x000005a0   Zero   RW         2624    .bss.points_r       vision.o
-    0x2000ccc8        -       0x00000078   Zero   RW         2610    .bss.r_border       vision.o
-    0x2000cd40        -       0x00000168   Zero   RW         2631    .bss.row_xs         vision.o
+    0x2000c17c        -       0x00000004   Zero   RW         2637    .bss.pho_center.err_init  vision.o
+    0x2000c180        -       0x00000004   Zero   RW         2636    .bss.pho_center.err_prev  vision.o
+    0x2000c184        -       0x00000004   Zero   RW         2638    .bss.pho_center.hold_cnt  vision.o
+    0x2000c188        -       0x000005a0   Zero   RW         2625    .bss.points_l       vision.o
+    0x2000c728        -       0x000005a0   Zero   RW         2626    .bss.points_r       vision.o
+    0x2000ccc8        -       0x00000078   Zero   RW         2612    .bss.r_border       vision.o
+    0x2000cd40        -       0x00000168   Zero   RW         2633    .bss.row_xs         vision.o
     0x2000cea8        -       0x00000004   Zero   RW         1104    .bss.scanner_period  zf_device_key.o
-    0x2000ceac        -       0x00000004   Zero   RW         2669    .bss.servo_last_angle  control.o
-    0x2000ceb0        -       0x00000004   Zero   RW         2670    .bss.servo_last_err  control.o
-    0x2000ceb4        -       0x00000004   Zero   RW         2671    .bss.servo_update.gyro_prev  control.o
+    0x2000ceac        -       0x00000004   Zero   RW         2671    .bss.servo_last_angle  control.o
+    0x2000ceb0        -       0x00000004   Zero   RW         2672    .bss.servo_last_err  control.o
+    0x2000ceb4        -       0x00000004   Zero   RW         2673    .bss.servo_update.gyro_prev  control.o
     0x2000ceb8        -       0x00000008   Zero   RW          648    .bss.timer_function_state  zf_driver_timer.o
     0x2000cec0        -       0x00000008   Zero   RW          649    .bss.timer_mode_state  zf_driver_timer.o
     0x2000cec8        -       0x00000200   Zero   RW         1364    .bss.tsl1401_data   zf_device_tsl1401.o
@@ -7279,21 +7287,21 @@ Memory Map of the image
     0x2000d0c9        -       0x00000001   Zero   RW         1363    .bss.tsl1401_init_state  zf_device_tsl1401.o
     0x2000d0ca        -       0x00000008   Zero   RW          676    .bss.uart_interrupt_state  zf_driver_uart.o
     0x2000d0d2   COMPRESSED   0x00000002   PAD
-    0x2000d0d4        -       0x00000004   Zero   RW         2625    .bss.vis_deal.both_lost  vision.o
-    0x2000d0d8        -       0x00000004   Zero   RW         2615    .bss.vis_deal.frame_since_otsu  vision.o
-    0x2000d0dc        -       0x00000004   Zero   RW         2621    .bss.vis_deal.prev_both_ok  vision.o
-    0x2000d0e0        -       0x00000001   Zero   RW         2626    .bss.vis_frame_ready  vision.o
+    0x2000d0d4        -       0x00000004   Zero   RW         2627    .bss.vis_deal.both_lost  vision.o
+    0x2000d0d8        -       0x00000004   Zero   RW         2617    .bss.vis_deal.frame_since_otsu  vision.o
+    0x2000d0dc        -       0x00000004   Zero   RW         2623    .bss.vis_deal.prev_both_ok  vision.o
+    0x2000d0e0        -       0x00000001   Zero   RW         2628    .bss.vis_frame_ready  vision.o
     0x2000d0e1        -       0x00000001   Zero   RW          130    .bss.zf_debug_init_flag  zf_common_debug.o
 
 
-    Execution Region ARM_LIB_HEAP (Exec base: 0x2000d0e4, Load base: 0x0800d820, Size: 0x00000400, Max: 0x00000400, ABSOLUTE)
+    Execution Region ARM_LIB_HEAP (Exec base: 0x2000d0e4, Load base: 0x0800da14, Size: 0x00000400, Max: 0x00000400, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
     0x2000d0e4        -       0x00000400   Zero   RW            1    ARM_LIB_HEAP.bss    anon$$obj.o
 
 
-    Execution Region ARM_LIB_STACK (Exec base: 0x2001e000, Load base: 0x0800d820, Size: 0x00002000, Max: 0x00002000, ABSOLUTE)
+    Execution Region ARM_LIB_STACK (Exec base: 0x2001e000, Load base: 0x0800da14, Size: 0x00002000, Max: 0x00002000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -7318,7 +7326,7 @@ Image component sizes
        122          0          0          0          0       1940   servo.o
         36          8        400          0          0        876   startup_mm32f3277g.o
         16          0          0          0          0        425   system_mm32f3277g.o
-     11524          0        156         33      26673      17841   vision.o
+     12018          0        156         33      26673      18619   vision.o
        796          0          0          4          0       2940   zf_common_clock.o
       1614          0        274          1         22       8242   zf_common_debug.o
       1602          0         43          0          0       5432   zf_common_fifo.o
@@ -7348,9 +7356,9 @@ Image component sizes
       1150          8         43         40          8       7502   zf_driver_uart.o
 
     ----------------------------------------------------------------------
-     43336        194       3804        332      62316     194784   Object Totals
+     43832        194       3804        332      62316     195562   Object Totals
          0          0         32          0       9216          0   (incl. Generated)
-       218          0          1         14         29          0   (incl. Padding)
+       220          0          1         14         29          0   (incl. Padding)
 
     ----------------------------------------------------------------------
 
@@ -7422,15 +7430,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     50684        298       3804        332      62360     199529   Grand Totals
-     50684        298       3804        216      62360     199529   ELF Image Totals (compressed)
-     50684        298       3804        216          0          0   ROM Totals
+     51180        298       3804        332      62360     200307   Grand Totals
+     51180        298       3804        220      62360     200307   ELF Image Totals (compressed)
+     51180        298       3804        220          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                54488 (  53.21kB)
+    Total RO  Size (Code + RO Data)                54984 (  53.70kB)
     Total RW  Size (RW Data + ZI Data)             62692 (  61.22kB)
-    Total ROM Size (Code + RO Data + RW Data)      54704 (  53.42kB)
+    Total ROM Size (Code + RO Data + RW Data)      55204 (  53.91kB)
 
 ==============================================================================
 

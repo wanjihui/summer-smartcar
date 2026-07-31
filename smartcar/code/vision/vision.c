@@ -80,11 +80,12 @@ static int updata_sum(int sum, int x, int y, int half, int dirx, int diry)
 static int compute_otsu(void)
 {
     unsigned long hist[256] = {0};
-    for (int y = 0; y < pho_h; y += 2)
+    /* 只统计下半屏（行60~119），避免上半屏背景白色干扰阈值 */
+    for (int y = pho_h / 2; y < pho_h; y += 2)
         for (int x = 0; x < pho_w; x += 2)
             hist[mt9v03x_image[y][x]]++;
 
-    unsigned long total = (unsigned long)((pho_h + 1) / 2) * ((pho_w + 1) / 2);
+    unsigned long total = (unsigned long)((pho_h - pho_h / 2 + 1) / 2) * ((pho_w + 1) / 2);
     if (total == 0) return -1;
 
     unsigned long sum_all = 0;
@@ -110,6 +111,59 @@ static int compute_otsu(void)
     if (best_th < 20)  best_th = 20;
     if (best_th > 235) best_th = 235;
     return best_th;
+}
+
+/* ================================================================
+ * 底部连通滤波：只保留接触图像底部的白色区域
+ *
+ * 原理：赛道一定连着图像底部（最近处路面）。
+ *       任何不接触底部的白色都是环境噪声（墙壁/灯光等），直接清零。
+ *
+ * 算法：从底部向上逐行传播连通标记，带 1 像素膨胀容忍斜向连接。
+ * ================================================================ */
+static void filter_bottom_connected(void)
+{
+    uint8 connected[pho_w];       // 上一行连通标记
+    uint8 dilated[pho_w];         // 膨胀后的标记
+
+    /* 底部行：所有白像素初始标记为连通 */
+    for (int x = 0; x < pho_w; x++)
+        connected[x] = (Image_Used[pho_h - 1][x] == 255);
+
+    /* 向上逐行传播 */
+    for (int y = pho_h - 2; y >= 0; y--)
+    {
+        /* 膨胀上一行连通标记：±2 列（5像素宽），
+         * 确保赛道透视变宽和车身偏移时另一侧不被截断。 */
+        for (int x = 0; x < pho_w; x++)
+        {
+            dilated[x] = connected[x];
+            if (x > 0        && connected[x - 1]) dilated[x] = 1;
+            if (x > 1        && connected[x - 2]) dilated[x] = 1;
+            if (x < pho_w - 1 && connected[x + 1]) dilated[x] = 1;
+            if (x < pho_w - 2 && connected[x + 2]) dilated[x] = 1;
+        }
+
+        /* 当前行：只保留与膨胀标记重叠的白像素 */
+        for (int x = 0; x < pho_w; x++)
+        {
+            if (Image_Used[y][x] == 255 && dilated[x])
+                connected[x] = 1;
+            else
+            {
+                connected[x] = 0;
+                Image_Used[y][x] = 0;   // 不连通 → 清零
+            }
+        }
+
+        /* 水平填充：同一行内，与连通像素相邻的白像素也保留 */
+        for (int x = 1; x < pho_w; x++)
+            if (Image_Used[y][x] == 255 && connected[x - 1])
+                connected[x] = 1;
+        for (int x = pho_w - 2; x >= 0; x--)
+            if (Image_Used[y][x] == 255 && connected[x + 1])
+                connected[x] = 1;
+    }
 }
 
 /* ================================================================
@@ -905,6 +959,9 @@ int vis_deal(void)
     for (int y = 0; y < pho_h; y++)
         for (int x = 0; x < pho_w; x++)
             Image_Used[y][x] = (mt9v03x_image[y][x] > th) ? 255 : 0;
+
+    /* ---- 底部连通滤波：清除不接触底部的环境白色 ---- */
+    filter_bottom_connected();
 
     /* ---- 手遮摄像头 → 停车 ---- */
     if (camera_is_covered())
