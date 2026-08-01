@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\MM32F327X_G8P.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\MM32F327X_G8P.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6240002: Last Updated: Sat Aug  1 19:04:39 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6240002: Last Updated: Sat Aug  1 19:57:10 2026
 <BR><P>
 <H3>Maximum Stack Usage =       1212 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1313,7 +1313,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> zf_device_ips200.o(.text.ips200_debug_init)
 </UL>
-<P><STRONG><a name="[8c]"></a>is_straight</STRONG> (Thumb, 380 bytes, Stack size 72 bytes, vision.o(.text.is_straight))
+<P><STRONG><a name="[8c]"></a>is_straight</STRONG> (Thumb, 392 bytes, Stack size 72 bytes, vision.o(.text.is_straight))
 <BR><BR>[Stack]<UL><LI>Max Depth = 92<LI>Call Chain = is_straight &rArr; __aeabi_fsub &rArr; __aeabi_fadd &rArr; _float_epilogue
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
@@ -1327,6 +1327,7 @@ Global Symbols
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmple
 </UL>
 <BR>[Called By]<UL><LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update
+<LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vis_deal
 </UL>
 
 <P><STRONG><a name="[e0]"></a>key_clear_state</STRONG> (Thumb, 26 bytes, Stack size 4 bytes, zf_device_key.o(.text.key_clear_state))
@@ -1881,6 +1882,7 @@ Global Symbols
 <LI><a href="#[88]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
 <LI><a href="#[67]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2f
 <LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_stop
+<LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_straight
 <LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pho_center
 <LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sweep_boundaries
 <LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;filter_bottom_connected
@@ -2197,7 +2199,7 @@ Local Symbols
 <LI><a href="#[a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dynamicCreate_Menu_Folder
 </UL>
 
-<P><STRONG><a name="[e4]"></a>show_number</STRONG> (Thumb, 194 bytes, Stack size 32 bytes, mymenu.o(.text.show_number))
+<P><STRONG><a name="[e4]"></a>show_number</STRONG> (Thumb, 288 bytes, Stack size 32 bytes, mymenu.o(.text.show_number))
 <BR><BR>[Stack]<UL><LI>Max Depth = 896<LI>Call Chain = show_number &rArr; ips200_show_float &rArr; func_float_to_str &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ips200_show_float
@@ -2302,14 +2304,14 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vis_deal
 </UL>
 
-<P><STRONG><a name="[112]"></a>sweep_boundaries</STRONG> (Thumb, 1784 bytes, Stack size 164 bytes, vision.o(.text.sweep_boundaries))
-<BR><BR>[Stack]<UL><LI>Max Depth = 164<LI>Call Chain = sweep_boundaries
+<P><STRONG><a name="[112]"></a>sweep_boundaries</STRONG> (Thumb, 1742 bytes, Stack size 156 bytes, vision.o(.text.sweep_boundaries))
+<BR><BR>[Stack]<UL><LI>Max Depth = 156<LI>Call Chain = sweep_boundaries
 </UL>
 <BR>[Called By]<UL><LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vis_deal
 </UL>
 
-<P><STRONG><a name="[102]"></a>pho_center</STRONG> (Thumb, 856 bytes, Stack size 96 bytes, vision.o(.text.pho_center))
-<BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = pho_center &rArr; calc_adaptive_far
+<P><STRONG><a name="[102]"></a>pho_center</STRONG> (Thumb, 726 bytes, Stack size 72 bytes, vision.o(.text.pho_center))
+<BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = pho_center &rArr; calc_adaptive_far
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fdiv
 <LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fadd

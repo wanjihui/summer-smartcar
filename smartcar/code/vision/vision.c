@@ -9,8 +9,8 @@
 
  volatile float err;                        // 中线偏离图像中心的像素均值，>0偏右
  volatile uint8_t vis_frame_ready;          // 新帧处理完成，显示层可刷新
- volatile int16  asc_valid_dbg = 0;          // 诊断：ASC窗口有效行数（vis_draw显示用）
- volatile uint8  hold_dbg = 0;               // 诊断：锁存激活标志（vis_draw显示用）
+ volatile uint8  straight_dbg  = 0;          // 诊断：当前帧直线判定结果
+ volatile int16  asc_range_dbg = 0;          // 诊断：ASC窗口行数（100-y_far）
 
  uint8 asc_far = DEFAULT_ASC_FAR;             // ASC采样远行（顶部行），菜单可调，默认10
 uint8 straight_far = DEFAULT_STRAIGHT_FAR;    // 直线判定采样远行（顶部行），菜单可调，默认30
@@ -141,7 +141,8 @@ int is_straight(void)
         ok++;
     }
 
-    return (ok >= 8) ? 1 : 0;
+    straight_dbg = (ok >= 8) ? 1 : 0;
+    return (int)straight_dbg;
 }
 
 /* ================================================================
@@ -322,23 +323,25 @@ static int sweep_boundaries(void)
         }
         else
         {
-            /* 双边丢: 检测中心区域白像素 → 十字路口 vs 真丢线 */
-            int center_w = 0;
-            int cs = pho_center_x - 20; if (cs < 0) cs = 0;
-            int ce = pho_center_x + 20; if (ce >= pho_w) ce = pho_w_max;
-            for (int x = cs; x <= ce; x++)
-                if (Image_Used[y][x] == 255) center_w++;
+            /* 双边搜不到 → 统计全行白像素总量。
+             * 旧逻辑只看中心±20列(74~114)，赛道平移至边缘时中心为空
+             * → 误判为"真丢线"→both_lost=1→err被锁。
+             * 改为全行统计：全行有白=赛道在边缘(锚点漂移但赛道未丢)
+             * → 沿用上一行边界，不计consec_lost。全行也无白=真丢线。 */
+            int all_w = 0;
+            for (int x = 0; x < pho_w; x++)
+                if (Image_Used[y][x] == 255) all_w++;
 
-            if (center_w > 10)
+            if (all_w > 10)
             {
-                /* 十字路口 / 大弯: 沿用上一行边界 */
+                /* 赛道在画面内(可能偏边缘) → 沿用上一行边界 */
                 new_l = prev_l; new_r = prev_r;
                 l_real = 0; r_real = 0;
                 consec_lost = 0;
             }
             else
             {
-                /* 真丢线 */
+                /* 全行无白 → 真丢线 */
                 consec_lost++;
                 if (consec_lost >= 5)
                 {
@@ -373,7 +376,7 @@ static int sweep_boundaries(void)
     return 0;
 }
 
-static void pho_center(int both_lost)
+static void pho_center(void)
 {
     // ---- 平滑边界 ----
     border_smooth(l_border);
@@ -441,9 +444,9 @@ static void pho_center(int both_lost)
     // 范围 100→自适应far（直道看远/弯道看近），权重 2.0→2.5 线性递增，远行权重大=预瞄靠前
     int y_near = 100;
     int y_far  = calc_adaptive_far();
+    asc_range_dbg = y_near - y_far;
 
     float total_dev = 0.0f, total_w = 0.0f;
-    int   asc_valid = 0;                             // ASC范围内有效行数（替代both_lost判断）
     float w = 2.0f;
     float w_step = 0.5f / (float)(y_near - y_far);   // 2.0 → 2.5 均匀递增
 
@@ -454,32 +457,15 @@ static void pho_center(int both_lost)
         {
             total_dev += ((float)c - (float)pho_center_x) * w;
             total_w   += w;
-            asc_valid++;
         }
         w += w_step;   // 每行都递增，无效行也消耗权重，保证远行必定到2.5
     }
 
     if (total_w > 0.0f)
     {
-        float new_err = total_dev / total_w;
-
-        /* 弯道丢线安全钳：both_lost=1且|上一帧err|>15 → 锁住err。
-         * sweep_boundaries已改为扫描到行20即停，顶部透视压缩不再触发both_lost。
-         * 退出条件：both_lost=0（赛道回到ASC窗口内），锁存无帧数上限。 */
-        static float last_err = 0;
-        if (both_lost)
-        {
-            float prev_abs = (last_err > 0) ? last_err : -last_err;
-            if (prev_abs > 15.0f)
-                new_err = last_err;
-        }
-
-        err = new_err;
-        last_err = err;
-        hold_dbg = both_lost;
+        err = total_dev / total_w;
     }
     // else: 总权重为0 → err保留上帧不变
-    asc_valid_dbg = asc_valid;
 }
 
 /* ---- 旧 fallback_scan 已删除，sweep_boundaries() 内置兜底处理 ---- */
@@ -611,10 +597,14 @@ void vis_deal(void)
     }
 
     /* ---- 逐行扫描边界（替代种子生长 + pho_border + 补全）---- */
-    int both_lost = sweep_boundaries();
+    sweep_boundaries();
 
     /* ---- 中线 + 偏差 ---- */
-    pho_center(both_lost);
+    pho_center();
+
+    /* 调试：每帧更新直线判定（不受car_run限制） */
+    is_straight();
+
     vis_frame_ready = 1;
 }
 

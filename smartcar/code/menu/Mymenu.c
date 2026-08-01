@@ -81,9 +81,9 @@ void menu_init(void)
         Menu_Item *dbg = dynamicCreate_Menu_Folder(&head, "Debug");
         Menu_Item *v;
 
-        v = dynamicCreate_Menu_Number(dbg, "err",     (float*)&err, float_Box);
-        v = dynamicCreate_Menu_Number(dbg, "valid",   (int16*)&asc_valid_dbg, int16_Box);
-        v = dynamicCreate_Menu_Number(dbg, "hold",    (uint8*)&hold_dbg, uint8_Box);
+        v = dynamicCreate_Menu_Number(dbg, "err",      (float*)&err, float_Box);
+        v = dynamicCreate_Menu_Number(dbg, "straight", (uint8*)&straight_dbg, uint8_Box);
+        v = dynamicCreate_Menu_Number(dbg, "range",    (int16*)&asc_range_dbg, int16_Box);
     }
 
     key = head.first_son;
@@ -121,14 +121,26 @@ static void show_number(void)
         case int32_Box:
             ips200_show_int(90, i*16, *(int32_t *)s->data, 5);
             break;
+        case uint32_Box:
+            ips200_show_int(90, i*16, (int32_t)*(uint32_t *)s->data, 5);
+            break;
+        case int16_Box:
+            ips200_show_int(90, i*16, *(int16_t *)s->data, 5);
+            break;
+        case uint16_Box:
+            ips200_show_int(90, i*16, (int32_t)*(uint16_t *)s->data, 5);
+            break;
+        case int8_Box:
+            ips200_show_int(90, i*16, *(int8_t *)s->data, 3);
+            break;
+        case uint8_Box:
+            ips200_show_int(90, i*16, *(uint8_t *)s->data, 3);
+            break;
         case float_Box:
             ips200_show_float(90, i*16, *(float *)s->data, 6, 4);
             break;
         case bool_Box:
             ips200_show_char(90, i*16, *(bool *)s->data ? 'Y' : 'N');
-            break;
-        case uint8_Box:
-            ips200_show_int(90, i*16, *(uint8_t *)s->data, 3);
             break;
         default:
             break;

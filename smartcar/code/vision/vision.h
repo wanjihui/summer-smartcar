@@ -11,7 +11,7 @@
 #define pho_w_min    0                     // 最左列
 #define pho_w_max    (pho_w - 1)           // 187，最右列
 #define BORDER_INVALID 255                 // 边界无效标记（不与0~187合法列号冲突）
-#define BIN_PARAM_H  48                    // 阈值参数区高度(3行)
+#define BIN_PARAM_H  200                    // 阈值参数区高度(3行)
 
 extern uint8 asc_far;                       // ASC采样远行（顶部行），菜单可调，默认10
 extern uint8 straight_far;                  // 直线判定采样远行（顶部行），菜单可调，默认30
@@ -27,8 +27,8 @@ extern uint8 r_border_exist[pho_h];  // 右边界该行是否真实存在
 
 extern volatile float err;     // 赛道中线-图像中心=偏差,>0偏右,右转;<0偏左,左转
 extern volatile uint8_t vis_frame_ready; // 新帧已搜线完成，显示层可刷新
-extern volatile int16  asc_valid_dbg;    // 诊断：ASC窗口有效行数
-extern volatile uint8  hold_dbg;         // 诊断：锁存激活标志
+extern volatile uint8  straight_dbg;     // 诊断：当前帧直线判定
+extern volatile int16  asc_range_dbg;    // 诊断：ASC窗口行数(100-y_far)
 
 
 // ========== 二值化图像缓存 ==========
