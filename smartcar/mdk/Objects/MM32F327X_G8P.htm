@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\MM32F327X_G8P.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\MM32F327X_G8P.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6240002: Last Updated: Sun Aug  2 00:30:18 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6240002: Last Updated: Sun Aug  2 01:55:25 2026
 <BR><P>
 <H3>Maximum Stack Usage =       1220 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -322,8 +322,8 @@ Global Symbols
 <LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_output
 </UL>
 
-<P><STRONG><a name="[92]"></a>__aeabi_memclr4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;compute_otsu
+<P><STRONG><a name="[93]"></a>__aeabi_memclr4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;compute_otsu
 </UL>
 
 <P><STRONG><a name="[130]"></a>__aeabi_memclr8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
@@ -350,6 +350,7 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atti_update
+<LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update
 <LI><a href="#[e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vis_deal
 <LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_fusion
 <LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;angle_pid_set
@@ -357,11 +358,11 @@ Global Symbols
 <LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_update
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_straight
 <LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pho_center
-<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
+<LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
 <LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k1_handle
 <LI><a href="#[11d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__mathlib_flt_infnan2
 <LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_frsub
-<LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
+<LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
 </UL>
 
 <P><STRONG><a name="[5b]"></a>__aeabi_fsub</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, fadd.o(.text))
@@ -371,15 +372,16 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;func_float_to_str
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atti_update
+<LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update
 <LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ips200_show_float
 <LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_fusion
 <LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;angle_pid_set
 <LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_update
 <LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_update
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_straight
-<LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;compute_otsu
+<LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;compute_otsu
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k2_handle
-<LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
+<LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
 </UL>
 
 <P><STRONG><a name="[5c]"></a>__aeabi_frsub</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, fadd.o(.text))
@@ -387,7 +389,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fadd
 </UL>
-<BR>[Called By]<UL><LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
+<BR>[Called By]<UL><LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
 </UL>
 
 <P><STRONG><a name="[7d]"></a>__aeabi_fmul</STRONG> (Thumb, 100 bytes, Stack size 8 bytes, fmul.o(.text))
@@ -397,8 +399,9 @@ Global Symbols
 <LI><a href="#[f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pwm_set_duty
 <LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;func_float_to_str
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atti_update
+<LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update
 <LI><a href="#[e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vis_deal
-<LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_acc_transition
+<LI><a href="#[81]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_acc_transition
 <LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ips200_show_float
 <LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_fusion
 <LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;angle_pid_set
@@ -406,9 +409,9 @@ Global Symbols
 <LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_update
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_straight
 <LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pho_center
-<LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;compute_otsu
-<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
-<LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
+<LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;compute_otsu
+<LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
+<LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
 </UL>
 
 <P><STRONG><a name="[5d]"></a>__aeabi_fdiv</STRONG> (Thumb, 124 bytes, Stack size 8 bytes, fdiv.o(.text))
@@ -419,13 +422,13 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pwm_init
 <LI><a href="#[f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pwm_set_duty
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atti_update
-<LI><a href="#[81]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_gyro_transition
+<LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_gyro_transition
 <LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_update
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_straight
 <LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pho_center
-<LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;compute_otsu
-<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
-<LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
+<LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;compute_otsu
+<LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
+<LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
 </UL>
 
 <P><STRONG><a name="[5e]"></a>__aeabi_dadd</STRONG> (Thumb, 322 bytes, Stack size 48 bytes, dadd.o(.text), UNUSED)
@@ -468,14 +471,18 @@ Global Symbols
 <LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_update
 <LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_update
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_straight
-<LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calc_adaptive_far
+<LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calc_adaptive_far
 <LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pho_center
-<LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;compute_otsu
-<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
+<LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;compute_otsu
+<LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
 <LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k1_handle
 </UL>
 
-<P><STRONG><a name="[7f]"></a>__aeabi_fcmpge</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, fcmpge.o(.text))
+<P><STRONG><a name="[7f]"></a>__aeabi_fcmplt</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, fcmplt.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;angle_pid_set
+</UL>
+
+<P><STRONG><a name="[80]"></a>__aeabi_fcmpge</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, fcmpge.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;func_float_to_str
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atti_update
 <LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_fusion
@@ -483,13 +490,14 @@ Global Symbols
 <LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_update
 <LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_update
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_straight
-<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
+<LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k2_handle
 </UL>
 
-<P><STRONG><a name="[85]"></a>__aeabi_fcmpgt</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, fcmpgt.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_straight
-<LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calc_adaptive_far
+<P><STRONG><a name="[86]"></a>__aeabi_fcmpgt</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, fcmpgt.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update
+<LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_straight
+<LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calc_adaptive_far
 </UL>
 
 <P><STRONG><a name="[bd]"></a>__aeabi_dcmpeq</STRONG> (Thumb, 56 bytes, Stack size 12 bytes, dcmpeq.o(.text))
@@ -507,8 +515,8 @@ Global Symbols
 <LI><a href="#[f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pwm_set_duty
 <LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;func_float_to_str
 <LI><a href="#[e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vis_deal
-<LI><a href="#[81]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_gyro_transition
-<LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_acc_transition
+<LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_gyro_transition
+<LI><a href="#[81]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_acc_transition
 <LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ips200_show_float
 <LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_update
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_straight
@@ -525,7 +533,7 @@ Global Symbols
 <LI><a href="#[70]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dm1xa_sound_callback
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_straight
 <LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pho_center
-<LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;compute_otsu
+<LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;compute_otsu
 </UL>
 
 <P><STRONG><a name="[bc]"></a>__aeabi_f2iz</STRONG> (Thumb, 50 bytes, Stack size 0 bytes, ffixi.o(.text))
@@ -541,7 +549,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[d9]"></a>__aeabi_f2uiz</STRONG> (Thumb, 40 bytes, Stack size 0 bytes, ffixui.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
+<BR><BR>[Called By]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k2_handle
 <LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k1_handle
 </UL>
@@ -618,7 +626,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_float_round
 </UL>
-<BR>[Called By]<UL><LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sqrtf
+<BR>[Called By]<UL><LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sqrtf
 </UL>
 
 <P><STRONG><a name="[62]"></a>_double_round</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, depilogue.o(.text))
@@ -829,19 +837,20 @@ Global Symbols
 <P><STRONG><a name="[10d]"></a>afio_init</STRONG> (Thumb, 384 bytes, Stack size 12 bytes, zf_driver_gpio.o(.text.afio_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = afio_init
 </UL>
-<BR>[Called By]<UL><LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;timer_etr_init
+<BR>[Called By]<UL><LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;timer_etr_init
 <LI><a href="#[cc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;spi_init
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pwm_init
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_init
 </UL>
 
-<P><STRONG><a name="[7c]"></a>angle_pid_set</STRONG> (Thumb, 458 bytes, Stack size 88 bytes, attitude.o(.text.angle_pid_set))
+<P><STRONG><a name="[7c]"></a>angle_pid_set</STRONG> (Thumb, 470 bytes, Stack size 88 bytes, attitude.o(.text.angle_pid_set))
 <BR><BR>[Stack]<UL><LI>Max Depth = 108<LI>Call Chain = angle_pid_set &rArr; __aeabi_fsub &rArr; __aeabi_fadd &rArr; _float_epilogue
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
-<LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
+<LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
 <LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fadd
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
+<LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmplt
 <LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmple
 </UL>
 <BR>[Called By]<UL><LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_update
@@ -855,37 +864,33 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 460<LI>Call Chain = atti_update &rArr; atan2f &rArr; __aeabi_fsub &rArr; __aeabi_fadd &rArr; _float_epilogue
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
-<LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
+<LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
 <LI><a href="#[5d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fdiv
 <LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fadd
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
-<LI><a href="#[81]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_gyro_transition
-<LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_acc_transition
-<LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sqrtf
-<LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
+<LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_gyro_transition
+<LI><a href="#[81]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_acc_transition
+<LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sqrtf
+<LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
 </UL>
 <BR>[Called By]<UL><LI><a href="#[3c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM6_IRQHandler
 </UL>
 
-<P><STRONG><a name="[96]"></a>atti_yaw_reset_ref</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, attitude.o(.text.atti_yaw_reset_ref))
-<BR><BR>[Called By]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update
-</UL>
-
-<P><STRONG><a name="[86]"></a>camera_fifo_init</STRONG> (Thumb, 28 bytes, Stack size 8 bytes, zf_device_camera.o(.text.camera_fifo_init))
+<P><STRONG><a name="[87]"></a>camera_fifo_init</STRONG> (Thumb, 28 bytes, Stack size 8 bytes, zf_device_camera.o(.text.camera_fifo_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 728<LI>Call Chain = camera_fifo_init &rArr; fifo_init &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
 </UL>
-<BR>[Calls]<UL><LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fifo_init
+<BR>[Calls]<UL><LI><a href="#[88]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fifo_init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mt9v03x_init
 </UL>
 
-<P><STRONG><a name="[88]"></a>camera_init</STRONG> (Thumb, 202 bytes, Stack size 40 bytes, zf_device_camera.o(.text.camera_init))
+<P><STRONG><a name="[89]"></a>camera_init</STRONG> (Thumb, 202 bytes, Stack size 40 bytes, zf_device_camera.o(.text.camera_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 760<LI>Call Chain = camera_init &rArr; timer_etr_init &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
 </UL>
-<BR>[Calls]<UL><LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;timer_etr_init
-<LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exti_init
-<LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dma_camera_init
-<LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;interrupt_set_priority
+<BR>[Calls]<UL><LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;timer_etr_init
+<LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exti_init
+<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dma_camera_init
+<LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;interrupt_set_priority
 </UL>
 <BR>[Called By]<UL><LI><a href="#[e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mt9v03x_init
 </UL>
@@ -893,28 +898,31 @@ Global Symbols
 <P><STRONG><a name="[73]"></a>clock_init</STRONG> (Thumb, 36 bytes, Stack size 16 bytes, zf_common_clock.o(.text.clock_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = clock_init &rArr; clock_set_freq &rArr; func_get_greatest_common_divisor
 </UL>
-<BR>[Calls]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;interrupt_init
-<LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clock_set_freq
-<LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clock_reset
+<BR>[Calls]<UL><LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;interrupt_init
+<LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clock_set_freq
+<LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clock_reset
 </UL>
 <BR>[Called By]<UL><LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 <LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SystemInit
 </UL>
 
-<P><STRONG><a name="[93]"></a>control_init</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, control.o(.text.control_init))
+<P><STRONG><a name="[94]"></a>control_init</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, control.o(.text.control_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 752<LI>Call Chain = control_init &rArr; servo_set_angle &rArr; pwm_set_duty &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
 </UL>
-<BR>[Calls]<UL><LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
+<BR>[Calls]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
 </UL>
 <BR>[Called By]<UL><LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[95]"></a>control_update</STRONG> (Thumb, 88 bytes, Stack size 16 bytes, control.o(.text.control_update))
-<BR><BR>[Stack]<UL><LI>Max Depth = 872<LI>Call Chain = control_update &rArr; servo_update &rArr; servo_set_angle &rArr; pwm_set_duty &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
+<P><STRONG><a name="[96]"></a>control_update</STRONG> (Thumb, 94 bytes, Stack size 24 bytes, control.o(.text.control_update))
+<BR><BR>[Stack]<UL><LI>Max Depth = 912<LI>Call Chain = control_update &rArr; servo_update &rArr; servo_set_angle &rArr; pwm_set_duty &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
 </UL>
-<BR>[Calls]<UL><LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atti_yaw_reset_ref
+<BR>[Calls]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
+<LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fadd
+<LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
 <LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_update
 <LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_update
+<LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpgt
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_straight
 </UL>
 <BR>[Called By]<UL><LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -930,7 +938,7 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_query_byte
 <LI><a href="#[fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_write_buffer
-<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;timer_etr_init
+<LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;timer_etr_init
 <LI><a href="#[cc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;spi_init
 <LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;soft_iic_init
 <LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;soft_iic_sccb_read_register
@@ -948,7 +956,7 @@ Global Symbols
 <LI><a href="#[f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pwm_set_duty
 <LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;func_float_to_str
 <LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;func_int_to_str
-<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fifo_init
+<LI><a href="#[88]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fifo_init
 <LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fifo_read_buffer
 <LI><a href="#[b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fifo_write_buffer
 <LI><a href="#[ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fifo_write_element
@@ -1023,12 +1031,12 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[2f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EXTI15_10_IRQHandler
 </UL>
 
-<P><STRONG><a name="[8a]"></a>dma_camera_init</STRONG> (Thumb, 338 bytes, Stack size 32 bytes, zf_driver_dma.o(.text.dma_camera_init))
+<P><STRONG><a name="[8b]"></a>dma_camera_init</STRONG> (Thumb, 338 bytes, Stack size 32 bytes, zf_driver_dma.o(.text.dma_camera_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 52<LI>Call Chain = dma_camera_init &rArr; interrupt_enable &rArr; __NVIC_EnableIRQ
 </UL>
 <BR>[Calls]<UL><LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;interrupt_enable
 </UL>
-<BR>[Called By]<UL><LI><a href="#[88]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;camera_init
+<BR>[Called By]<UL><LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;camera_init
 </UL>
 
 <P><STRONG><a name="[fb]"></a>dma_disable</STRONG> (Thumb, 50 bytes, Stack size 4 bytes, zf_driver_dma.o(.text.dma_disable))
@@ -1089,13 +1097,13 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[3c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM6_IRQHandler
 </UL>
 
-<P><STRONG><a name="[8c]"></a>exti_init</STRONG> (Thumb, 672 bytes, Stack size 40 bytes, zf_driver_exti.o(.text.exti_init))
+<P><STRONG><a name="[8d]"></a>exti_init</STRONG> (Thumb, 672 bytes, Stack size 40 bytes, zf_driver_exti.o(.text.exti_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 68<LI>Call Chain = exti_init &rArr; gpio_init &rArr; gpio_set_level
 </UL>
 <BR>[Calls]<UL><LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;interrupt_enable
 <LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;gpio_init
 </UL>
-<BR>[Called By]<UL><LI><a href="#[88]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;camera_init
+<BR>[Called By]<UL><LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;camera_init
 </UL>
 
 <P><STRONG><a name="[b3]"></a>fifo_clear</STRONG> (Thumb, 168 bytes, Stack size 24 bytes, zf_common_fifo.o(.text.fifo_clear))
@@ -1108,12 +1116,12 @@ Global Symbols
 <LI><a href="#[51]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mt9v03x_uart_handler
 </UL>
 
-<P><STRONG><a name="[87]"></a>fifo_init</STRONG> (Thumb, 110 bytes, Stack size 32 bytes, zf_common_fifo.o(.text.fifo_init))
+<P><STRONG><a name="[88]"></a>fifo_init</STRONG> (Thumb, 110 bytes, Stack size 32 bytes, zf_common_fifo.o(.text.fifo_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 720<LI>Call Chain = fifo_init &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_assert_handler
 </UL>
-<BR>[Called By]<UL><LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;camera_fifo_init
+<BR>[Called By]<UL><LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;camera_fifo_init
 </UL>
 
 <P><STRONG><a name="[b4]"></a>fifo_read_buffer</STRONG> (Thumb, 496 bytes, Stack size 48 bytes, zf_common_fifo.o(.text.fifo_read_buffer))
@@ -1167,7 +1175,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
 <LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dcmpeq
-<LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
+<LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
 <LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2iz
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
 <LI><a href="#[67]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2f
@@ -1177,10 +1185,10 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ips200_show_float
 </UL>
 
-<P><STRONG><a name="[90]"></a>func_get_greatest_common_divisor</STRONG> (Thumb, 66 bytes, Stack size 8 bytes, zf_common_function.o(.text.func_get_greatest_common_divisor))
+<P><STRONG><a name="[91]"></a>func_get_greatest_common_divisor</STRONG> (Thumb, 66 bytes, Stack size 8 bytes, zf_common_function.o(.text.func_get_greatest_common_divisor))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = func_get_greatest_common_divisor
 </UL>
-<BR>[Called By]<UL><LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clock_set_freq
+<BR>[Called By]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clock_set_freq
 </UL>
 
 <P><STRONG><a name="[be]"></a>func_int_to_str</STRONG> (Thumb, 242 bytes, Stack size 48 bytes, zf_common_function.o(.text.func_int_to_str))
@@ -1207,7 +1215,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;gpio_set_level
 </UL>
 <BR>[Called By]<UL><LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;soft_iic_init
-<LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exti_init
+<LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exti_init
 <LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_protective_handler
 <LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_init
 <LI><a href="#[df]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_init
@@ -1250,8 +1258,8 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__NVIC_EnableIRQ
 </UL>
 <BR>[Called By]<UL><LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_rx_interrupt
-<LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exti_init
-<LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dma_camera_init
+<LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exti_init
+<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dma_camera_init
 <LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pit_init
 </UL>
 
@@ -1259,7 +1267,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_assert_handler
 </UL>
 
-<P><STRONG><a name="[8f]"></a>interrupt_init</STRONG> (Thumb, 10 bytes, Stack size 8 bytes, zf_common_interrupt.o(.text.interrupt_init))
+<P><STRONG><a name="[90]"></a>interrupt_init</STRONG> (Thumb, 10 bytes, Stack size 8 bytes, zf_common_interrupt.o(.text.interrupt_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = interrupt_init &rArr; __NVIC_SetPriorityGrouping
 </UL>
 <BR>[Calls]<UL><LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__NVIC_SetPriorityGrouping
@@ -1267,12 +1275,12 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[73]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clock_init
 </UL>
 
-<P><STRONG><a name="[89]"></a>interrupt_set_priority</STRONG> (Thumb, 28 bytes, Stack size 16 bytes, zf_common_interrupt.o(.text.interrupt_set_priority))
+<P><STRONG><a name="[8a]"></a>interrupt_set_priority</STRONG> (Thumb, 28 bytes, Stack size 16 bytes, zf_common_interrupt.o(.text.interrupt_set_priority))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = interrupt_set_priority &rArr; __NVIC_SetPriority
 </UL>
 <BR>[Calls]<UL><LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__NVIC_SetPriority
 </UL>
-<BR>[Called By]<UL><LI><a href="#[88]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;camera_init
+<BR>[Called By]<UL><LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;camera_init
 <LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
@@ -1403,16 +1411,16 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 92<LI>Call Chain = is_straight &rArr; __aeabi_fsub &rArr; __aeabi_fadd &rArr; _float_epilogue
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
-<LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
+<LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
 <LI><a href="#[5d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fdiv
 <LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fadd
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
 <LI><a href="#[67]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2f
 <LI><a href="#[68]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ui2f
-<LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpgt
+<LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpgt
 <LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmple
 </UL>
-<BR>[Called By]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update
+<BR>[Called By]<UL><LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update
 <LI><a href="#[e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vis_deal
 </UL>
 
@@ -1451,12 +1459,12 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu
 <LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_stop
-<LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update
+<LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update
 <LI><a href="#[e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vis_deal
 <LI><a href="#[72]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_show
-<LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_init
+<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_init
 <LI><a href="#[e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_init
-<LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;interrupt_set_priority
+<LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;interrupt_set_priority
 <LI><a href="#[e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atti_init
 <LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_module_init
 <LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_init
@@ -1569,7 +1577,7 @@ Global Symbols
 <LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k4_handle
 </UL>
 
-<P><STRONG><a name="[80]"></a>mpu6050_acc_transition</STRONG> (Thumb, 36 bytes, Stack size 16 bytes, zf_device_mpu6050.o(.text.mpu6050_acc_transition))
+<P><STRONG><a name="[81]"></a>mpu6050_acc_transition</STRONG> (Thumb, 36 bytes, Stack size 16 bytes, zf_device_mpu6050.o(.text.mpu6050_acc_transition))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = mpu6050_acc_transition &rArr; __aeabi_fmul
 </UL>
 <BR>[Calls]<UL><LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
@@ -1599,7 +1607,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_update
 </UL>
 
-<P><STRONG><a name="[81]"></a>mpu6050_gyro_transition</STRONG> (Thumb, 40 bytes, Stack size 16 bytes, zf_device_mpu6050.o(.text.mpu6050_gyro_transition))
+<P><STRONG><a name="[82]"></a>mpu6050_gyro_transition</STRONG> (Thumb, 40 bytes, Stack size 16 bytes, zf_device_mpu6050.o(.text.mpu6050_gyro_transition))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = mpu6050_gyro_transition &rArr; __aeabi_fdiv
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fdiv
@@ -1645,8 +1653,8 @@ Global Symbols
 <P><STRONG><a name="[e1]"></a>mt9v03x_init</STRONG> (Thumb, 420 bytes, Stack size 56 bytes, zf_device_mt9v03x.o(.text.mt9v03x_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 968<LI>Call Chain = mt9v03x_init &rArr; mt9v03x_set_config_sccb &rArr; mt9v03x_read_word_sccb &rArr; soft_iic_sccb_read_register &rArr; soft_iic_read_data &rArr; soft_iic_send_ack &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
 </UL>
-<BR>[Calls]<UL><LI><a href="#[88]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;camera_init
-<LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;camera_fifo_init
+<BR>[Calls]<UL><LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;camera_init
+<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;camera_fifo_init
 <LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_rx_interrupt
 <LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;soft_iic_init
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_init
@@ -1710,7 +1718,7 @@ Global Symbols
 <LI><a href="#[68]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ui2f
 <LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_assert_handler
 </UL>
-<BR>[Called By]<UL><LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
+<BR>[Called By]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
 <LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_set_left
 <LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_set_right
 </UL>
@@ -1719,7 +1727,7 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 52<LI>Call Chain = servo_fusion &rArr; __aeabi_fsub &rArr; __aeabi_fadd &rArr; _float_epilogue
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
-<LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
+<LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
 <LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fadd
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
 <LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmple
@@ -1735,18 +1743,18 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[94]"></a>servo_set_angle</STRONG> (Thumb, 102 bytes, Stack size 16 bytes, servo.o(.text.servo_set_angle))
+<P><STRONG><a name="[95]"></a>servo_set_angle</STRONG> (Thumb, 102 bytes, Stack size 16 bytes, servo.o(.text.servo_set_angle))
 <BR><BR>[Stack]<UL><LI>Max Depth = 744<LI>Call Chain = servo_set_angle &rArr; pwm_set_duty &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pwm_set_duty
-<LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
+<LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
 <LI><a href="#[5d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fdiv
 <LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fadd
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
 <LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmple
 <LI><a href="#[d9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2uiz
 </UL>
-<BR>[Called By]<UL><LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_init
+<BR>[Called By]<UL><LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_init
 <LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_update
 </UL>
 
@@ -1875,12 +1883,12 @@ Global Symbols
 <P><STRONG><a name="[10c]"></a>timer_clock_enable</STRONG> (Thumb, 182 bytes, Stack size 8 bytes, zf_driver_timer.o(.text.timer_clock_enable))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = timer_clock_enable
 </UL>
-<BR>[Called By]<UL><LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;timer_etr_init
+<BR>[Called By]<UL><LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;timer_etr_init
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pwm_init
 <LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pit_init
 </UL>
 
-<P><STRONG><a name="[8b]"></a>timer_etr_init</STRONG> (Thumb, 298 bytes, Stack size 32 bytes, zf_driver_timer.o(.text.timer_etr_init))
+<P><STRONG><a name="[8c]"></a>timer_etr_init</STRONG> (Thumb, 298 bytes, Stack size 32 bytes, zf_driver_timer.o(.text.timer_etr_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 720<LI>Call Chain = timer_etr_init &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;afio_init
@@ -1888,13 +1896,13 @@ Global Symbols
 <LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;timer_funciton_check
 <LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_assert_handler
 </UL>
-<BR>[Called By]<UL><LI><a href="#[88]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;camera_init
+<BR>[Called By]<UL><LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;camera_init
 </UL>
 
 <P><STRONG><a name="[10b]"></a>timer_funciton_check</STRONG> (Thumb, 104 bytes, Stack size 4 bytes, zf_driver_timer.o(.text.timer_funciton_check))
 <BR><BR>[Stack]<UL><LI>Max Depth = 4<LI>Call Chain = timer_funciton_check
 </UL>
-<BR>[Called By]<UL><LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;timer_etr_init
+<BR>[Called By]<UL><LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;timer_etr_init
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pwm_init
 <LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pit_init
 </UL>
@@ -1987,7 +1995,7 @@ Global Symbols
 <LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sweep_boundaries
 <LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;filter_bottom_connected
 <LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;camera_is_covered
-<LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;compute_otsu
+<LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;compute_otsu
 </UL>
 <BR>[Called By]<UL><LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
@@ -2019,7 +2027,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[125]"></a>__ARM_fpclassifyf</STRONG> (Thumb, 38 bytes, Stack size 0 bytes, fpclassifyf.o(i.__ARM_fpclassifyf))
-<BR><BR>[Called By]<UL><LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
+<BR><BR>[Called By]<UL><LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
 </UL>
 
 <P><STRONG><a name="[11d]"></a>__mathlib_flt_infnan2</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, funder.o(i.__mathlib_flt_infnan2))
@@ -2027,13 +2035,13 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fadd
 </UL>
-<BR>[Called By]<UL><LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
+<BR>[Called By]<UL><LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
 </UL>
 
 <P><STRONG><a name="[11e]"></a>__mathlib_flt_underflow</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, funder.o(i.__mathlib_flt_underflow))
 <BR><BR>[Calls]<UL><LI><a href="#[11f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__ARM_scalbnf
 </UL>
-<BR>[Called By]<UL><LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
+<BR>[Called By]<UL><LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
 </UL>
 
 <P><STRONG><a name="[13d]"></a>__scatterload_copy</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_copy), UNUSED)
@@ -2043,11 +2051,11 @@ Global Symbols
 <P><STRONG><a name="[13f]"></a>__scatterload_zeroinit</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_zeroinit), UNUSED)
 
 <P><STRONG><a name="[126]"></a>__set_errno</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, errno.o(i.__set_errno))
-<BR><BR>[Called By]<UL><LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sqrtf
-<LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
+<BR><BR>[Called By]<UL><LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sqrtf
+<LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atan2f
 </UL>
 
-<P><STRONG><a name="[83]"></a>atan2f</STRONG> (Thumb, 598 bytes, Stack size 32 bytes, atan2f.o(i.atan2f))
+<P><STRONG><a name="[84]"></a>atan2f</STRONG> (Thumb, 598 bytes, Stack size 32 bytes, atan2f.o(i.atan2f))
 <BR><BR>[Stack]<UL><LI>Max Depth = 52<LI>Call Chain = atan2f &rArr; __aeabi_fsub &rArr; __aeabi_fadd &rArr; _float_epilogue
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
@@ -2063,7 +2071,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atti_update
 </UL>
 
-<P><STRONG><a name="[82]"></a>sqrtf</STRONG> (Thumb, 44 bytes, Stack size 16 bytes, sqrtf.o(i.sqrtf))
+<P><STRONG><a name="[83]"></a>sqrtf</STRONG> (Thumb, 44 bytes, Stack size 16 bytes, sqrtf.o(i.sqrtf))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = sqrtf &rArr; _fsqrt
 </UL>
 <BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__set_errno
@@ -2075,16 +2083,16 @@ Global Symbols
 <H3>
 Local Symbols
 </H3>
-<P><STRONG><a name="[8d]"></a>clock_reset</STRONG> (Thumb, 152 bytes, Stack size 4 bytes, zf_common_clock.o(.text.clock_reset))
+<P><STRONG><a name="[8e]"></a>clock_reset</STRONG> (Thumb, 152 bytes, Stack size 4 bytes, zf_common_clock.o(.text.clock_reset))
 <BR><BR>[Stack]<UL><LI>Max Depth = 4<LI>Call Chain = clock_reset
 </UL>
 <BR>[Called By]<UL><LI><a href="#[73]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clock_init
 </UL>
 
-<P><STRONG><a name="[8e]"></a>clock_set_freq</STRONG> (Thumb, 608 bytes, Stack size 32 bytes, zf_common_clock.o(.text.clock_set_freq))
+<P><STRONG><a name="[8f]"></a>clock_set_freq</STRONG> (Thumb, 608 bytes, Stack size 32 bytes, zf_common_clock.o(.text.clock_set_freq))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = clock_set_freq &rArr; func_get_greatest_common_divisor
 </UL>
-<BR>[Calls]<UL><LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;func_get_greatest_common_divisor
+<BR>[Calls]<UL><LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;func_get_greatest_common_divisor
 </UL>
 <BR>[Called By]<UL><LI><a href="#[73]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clock_init
 </UL>
@@ -2150,13 +2158,13 @@ Local Symbols
 <P><STRONG><a name="[c6]"></a>__NVIC_SetPriority</STRONG> (Thumb, 66 bytes, Stack size 8 bytes, zf_common_interrupt.o(.text.__NVIC_SetPriority))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = __NVIC_SetPriority
 </UL>
-<BR>[Called By]<UL><LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;interrupt_set_priority
+<BR>[Called By]<UL><LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;interrupt_set_priority
 </UL>
 
 <P><STRONG><a name="[c5]"></a>__NVIC_SetPriorityGrouping</STRONG> (Thumb, 60 bytes, Stack size 12 bytes, zf_common_interrupt.o(.text.__NVIC_SetPriorityGrouping))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = __NVIC_SetPriorityGrouping
 </UL>
-<BR>[Called By]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;interrupt_init
+<BR>[Called By]<UL><LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;interrupt_init
 </UL>
 
 <P><STRONG><a name="[110]"></a>soft_iic_start</STRONG> (Thumb, 218 bytes, Stack size 24 bytes, zf_driver_soft_iic.o(.text.soft_iic_start))
@@ -2391,7 +2399,7 @@ Local Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 1040<LI>Call Chain = k2_handle &rArr; menu_show &rArr; show_number &rArr; ips200_show_float &rArr; func_float_to_str &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
-<LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
+<LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
 <LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2iz
 <LI><a href="#[72]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_show
 <LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ips200_clear
@@ -2427,7 +2435,7 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu
 </UL>
 
-<P><STRONG><a name="[91]"></a>compute_otsu</STRONG> (Thumb, 420 bytes, Stack size 1112 bytes, vision.o(.text.compute_otsu))
+<P><STRONG><a name="[92]"></a>compute_otsu</STRONG> (Thumb, 420 bytes, Stack size 1112 bytes, vision.o(.text.compute_otsu))
 <BR><BR>[Stack]<UL><LI>Max Depth = 1132<LI>Call Chain = compute_otsu &rArr; __aeabi_fsub &rArr; __aeabi_fadd &rArr; _float_epilogue
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
@@ -2435,7 +2443,7 @@ Local Symbols
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
 <LI><a href="#[68]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ui2f
 <LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmple
-<LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
+<LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 </UL>
 <BR>[Called By]<UL><LI><a href="#[e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vis_deal
 </UL>
@@ -2466,7 +2474,7 @@ Local Symbols
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
 <LI><a href="#[67]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2f
 <LI><a href="#[68]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ui2f
-<LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calc_adaptive_far
+<LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calc_adaptive_far
 <LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;border_smooth
 <LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmple
 </UL>
@@ -2479,47 +2487,47 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pho_center
 </UL>
 
-<P><STRONG><a name="[84]"></a>calc_adaptive_far</STRONG> (Thumb, 164 bytes, Stack size 24 bytes, vision.o(.text.calc_adaptive_far))
+<P><STRONG><a name="[85]"></a>calc_adaptive_far</STRONG> (Thumb, 164 bytes, Stack size 24 bytes, vision.o(.text.calc_adaptive_far))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = calc_adaptive_far
 </UL>
-<BR>[Calls]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpgt
+<BR>[Calls]<UL><LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpgt
 <LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmple
 </UL>
 <BR>[Called By]<UL><LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pho_center
 </UL>
 
-<P><STRONG><a name="[98]"></a>servo_update</STRONG> (Thumb, 726 bytes, Stack size 112 bytes, control.o(.text.servo_update))
-<BR><BR>[Stack]<UL><LI>Max Depth = 856<LI>Call Chain = servo_update &rArr; servo_set_angle &rArr; pwm_set_duty &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
+<P><STRONG><a name="[98]"></a>servo_update</STRONG> (Thumb, 878 bytes, Stack size 144 bytes, control.o(.text.servo_update))
+<BR><BR>[Stack]<UL><LI>Max Depth = 888<LI>Call Chain = servo_update &rArr; servo_set_angle &rArr; pwm_set_duty &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
-<LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
+<LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
 <LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2iz
 <LI><a href="#[5d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fdiv
 <LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fadd
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
 <LI><a href="#[67]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2f
-<LI><a href="#[81]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_gyro_transition
+<LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_gyro_transition
 <LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_fusion
 <LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;angle_pid_set
-<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
+<LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_set_angle
 <LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_get_gyro_z
 <LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmple
 </UL>
-<BR>[Called By]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update
+<BR>[Called By]<UL><LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update
 </UL>
 
 <P><STRONG><a name="[99]"></a>motor_update</STRONG> (Thumb, 562 bytes, Stack size 56 bytes, control.o(.text.motor_update))
 <BR><BR>[Stack]<UL><LI>Max Depth = 816<LI>Call Chain = motor_update &rArr; motor_set_both &rArr; motor_set_left &rArr; pwm_set_duty &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
-<LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
+<LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
 <LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2iz
 <LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fadd
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
 <LI><a href="#[f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_set_both
 <LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmple
 </UL>
-<BR>[Called By]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update
+<BR>[Called By]<UL><LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update
 </UL>
 
 <P><STRONG><a name="[105]"></a>mt9v03x_write_word_sccb</STRONG> (Thumb, 50 bytes, Stack size 16 bytes, zf_device_config.o(.text.mt9v03x_write_word_sccb))

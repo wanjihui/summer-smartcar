@@ -155,10 +155,10 @@ float angle_pid_set(float target, float actual)
     // 非线性增益：kp = kp_a + err² × kp_b
     float kp = angle_kp_a + (error * error) * angle_kp_b;
 
-    // 视觉置信度自适应：err 小（视觉跟踪好）→ 压低 Angle PID 介入
+    // 视觉置信度自适应：弯道（|err|大）→ 压低 Angle PID，不拖转向
     {
         float abs_img_err = (err > 0.0f) ? err : -err;
-        if (abs_img_err < 12.0f) kp = angle_kp_a;
+        if (abs_img_err >= 12.0f) kp = angle_kp_a * 0.1f;
     }
 
     // 位置式 PD

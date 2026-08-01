@@ -31,44 +31,43 @@ void control_init(void)
 }
 
 //舵机控制
-static void servo_update(int straight)
+static void servo_update(float blend)
 {
     // ----死区处理----
     float e = err;                //err由vision算法计算
     if (e > -servo_dead && e < servo_dead) e = 0;
     if (servo_dir)             e = -e;
 
-    // ----根据赛道形状切换参数（straight由control_update统一判定）----
-    float kp, kd;
-    if (straight)
-    {
-        /* 直道：小 P 稳速 + 大 D 抑抖 */
-        kp = servo_kp1;
-        kd = servo_kd * 1.5f;
-    }
+    // ----直/弯参数插值：blend 0=弯道 1=直道 ----
+    float e_abs = (e > 0) ? e : -e;
+    float kp_curve = servo_kp1 + servo_kp2 * e_abs;
+    float kd_curve = servo_kd;
+    // 直道P随err渐降: err=8→0.85, err=15→0.51, 之间线性插值
+    float kp_straight;
+    if (e_abs < 8.0f)
+        kp_straight = servo_kp1;
+    else if (e_abs > 15.0f)
+        kp_straight = servo_kp1 * 0.6f;
     else
-    {
-        /* 弯道：大 P 快响应 + 小 D 不拖转向 */
-        float e_abs = (e > 0) ? e : -e;
-        kp = servo_kp1 + servo_kp2 * e_abs;   // kp2×|e| 随偏差增大
-        kd = servo_kd;
-    }
+        kp_straight = servo_kp1 * (1.0f - 0.4f * (e_abs - 8.0f) / 7.0f);
+    float kd_straight = servo_kd * 3.0f;  // 直道D系数×3，强阻尼抑抖
+
+    float kp = kp_curve + (kp_straight - kp_curve) * blend;
+    float kd = kd_curve + (kd_straight - kd_curve) * blend;
 
     // ----位置式 PD ----
     float pd = kp * e + kd * (e - servo_last_err);
 
     // 陀螺仪前馈（ASC风格）：pd -= gyro × gyro_z
-    //   "车已经在转了，视觉少打点"
     //   量化去噪 /20*20，系数可以安全开到 0.01-0.03 不抖
     {
         int gz = (int)mpu6050_gyro_transition(mpu6050_get_gyro_z() - mpu6050_gyro_z_offset);
         gz = (gz / 20) * 20;                       // ASC风格量化，±10°/s以下不触发
         float gyro_z = (float)gz;
 
-        if (straight)
-            pd -= gyro_kd * gyro_z;
-        else
-            pd -= gyro_kd_curve * gyro_z;
+        // gyro 系数也插值过渡
+        float gyro_coef = gyro_kd_curve + (gyro_kd - gyro_kd_curve) * blend;
+        pd -= gyro_coef * gyro_z;
     }
 
     servo_last_err = e;
@@ -149,17 +148,14 @@ static void motor_update(int straight)
 //控制总调用接口
 void control_update(void)
 {
-    static bool was_running = false;
-    if (!was_running && car_run)
-    {
-        // 停车后重新出发：同步偏航基准，避免 prev_yaw 跳变
-        atti_yaw_reset_ref();
-    }
-    was_running = car_run;
+    //---- 直/弯参数插值：入弯快(0.8)出弯慢(0.3)，不对称防入弯滞后 ----
+    static float straight_blend = 0.0f;  // 0=弯道, 1=直道
+    float target = is_straight() ? 1.0f : 0.0f;
+    float rate = (target < straight_blend) ? 0.8f : 0.3f;  // 入弯快出弯慢
+    straight_blend += (target - straight_blend) * rate;
 
-    int straight = is_straight();   // 一帧只判定一次，舵机/电机共用同一结果
-    servo_update(straight);         //先更新舵机
-    motor_update(straight);
+    servo_update(straight_blend);
+    motor_update(straight_blend > 0.5f);
 }
 
 
