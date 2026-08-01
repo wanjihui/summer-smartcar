@@ -32,10 +32,6 @@
 #define ADAPT_OFF_SML      5    // 小弯far偏移
 #define ADAPT_OFF_BIG     10    // 大弯far偏移
 
-// --- 双侧丢线err锁存 ---
-#define HOLD_MAX_FRAMES   5     // 弯道丢线err锁存帧数（≈0.1s@50fps），超时强制恢复实时计算
-#define ASC_MIN_VALID     10    // ASC窗口最小有效行数，低于此行数才触发err锁存（避免顶部常态丢线误锁）
-
 // --- 舵机 ---
 #define DEFAULT_SERVO_KP1      0.85f  // 基础P
 #define DEFAULT_SERVO_KP2      0.0f   // 二次P: err×|err|

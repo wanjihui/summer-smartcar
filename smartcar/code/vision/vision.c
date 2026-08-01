@@ -219,7 +219,7 @@ static int sweep_boundaries(void)
     /* ---- 向上逐行扫描 ---- */
     int consec_lost = 0;
 
-    for (int y = y_bot - 1; y >= 0; y--)
+    for (int y = y_bot - 1; y >= 20; y--)
     {
         int range = last_valid_width / 4;
         if (range < 3) range = 3;
@@ -373,7 +373,7 @@ static int sweep_boundaries(void)
     return 0;
 }
 
-static void pho_center(void)
+static void pho_center(int both_lost)
 {
     // ---- 平滑边界 ----
     border_smooth(l_border);
@@ -463,39 +463,20 @@ static void pho_center(void)
     {
         float new_err = total_dev / total_w;
 
-        /* 双侧丢线安全钳：弯道中err会错误归零→车直冲。
-         * |上一帧err|>15 说明在弯道 → 锁住err最多HOLD_MAX_FRAMES帧。
-         * 使用ASC范围内有效行数（而非全局both_lost）判定：
-         *   - 图像顶部丢线是常态（远处压缩/弯道出画），不影响ASC范围内有大量有效数据
-         *   - 只有当ASC窗口本身有效行<ASC_MIN_VALID(10行)时才触发锁存
-         * 锁存超时强制恢复实时计算（旋转车身/赛道出画等误锁场景
-         * 最长锁0.1s，不会永久卡死），且解锁后需赛道恢复
-         * （asc_valid>=ASC_MIN_VALID）才允许重新进入锁存，避免锁-放抖动 */
+        /* 弯道丢线安全钳：both_lost=1且|上一帧err|>15 → 锁住err。
+         * sweep_boundaries已改为扫描到行20即停，顶部透视压缩不再触发both_lost。
+         * 退出条件：both_lost=0（赛道回到ASC窗口内），锁存无帧数上限。 */
         static float last_err = 0;
-        static uint8 lock_active = 0;
-        static uint8 hold_cnt = 0;
-        static uint8 lock_allowed = 1;
-        if (asc_valid < ASC_MIN_VALID)
+        if (both_lost)
         {
             float prev_abs = (last_err > 0) ? last_err : -last_err;
-            if (prev_abs > 15.0f && lock_allowed)
-            { lock_active = 1; hold_cnt = 0; }   // 进入锁存
-            if (lock_active)
-            {
-                new_err = last_err;              // 锁住err, 舵机/差速保持过弯状态
-                if (++hold_cnt >= HOLD_MAX_FRAMES)
-                { lock_active = 0; lock_allowed = 0; }  // 超时强制解锁，等赛道恢复
-            }
-        }
-        else
-        {
-            lock_active = 0;
-            lock_allowed = 1;                    // ASC窗口恢复 → 解除并允许再锁
+            if (prev_abs > 15.0f)
+                new_err = last_err;
         }
 
         err = new_err;
         last_err = err;
-        hold_dbg = lock_active;
+        hold_dbg = both_lost;
     }
     // else: 总权重为0 → err保留上帧不变
     asc_valid_dbg = asc_valid;
@@ -630,10 +611,10 @@ void vis_deal(void)
     }
 
     /* ---- 逐行扫描边界（替代种子生长 + pho_border + 补全）---- */
-    sweep_boundaries();
+    int both_lost = sweep_boundaries();
 
     /* ---- 中线 + 偏差 ---- */
-    pho_center();
+    pho_center(both_lost);
     vis_frame_ready = 1;
 }
 

@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\MM32F327X_G8P.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\MM32F327X_G8P.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6240002: Last Updated: Sat Aug  1 18:36:28 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6240002: Last Updated: Sat Aug  1 19:04:39 2026
 <BR><P>
 <H3>Maximum Stack Usage =       1212 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1495,6 +1495,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;soft_iic_read_8bit_registers
 </UL>
 <BR>[Called By]<UL><LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_update
+<LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_init
 </UL>
 
 <P><STRONG><a name="[107]"></a>mpu6050_get_gyro_z</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, mpu6050.o(.text.mpu6050_get_gyro_z))
@@ -1510,20 +1511,21 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_update
 </UL>
 
-<P><STRONG><a name="[ef]"></a>mpu6050_init</STRONG> (Thumb, 172 bytes, Stack size 24 bytes, zf_device_mpu6050.o(.text.mpu6050_init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 808<LI>Call Chain = mpu6050_init &rArr; mpu6050_self1_check &rArr; soft_iic_read_8bit_register &rArr; soft_iic_read_data &rArr; soft_iic_send_ack &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
+<P><STRONG><a name="[ef]"></a>mpu6050_init</STRONG> (Thumb, 306 bytes, Stack size 32 bytes, zf_device_mpu6050.o(.text.mpu6050_init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 832<LI>Call Chain = mpu6050_init &rArr; mpu6050_get_gyro &rArr; soft_iic_read_8bit_registers &rArr; soft_iic_read_data &rArr; soft_iic_send_ack &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;soft_iic_init
 <LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;soft_iic_write_8bit_register
 <LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_log_handler
 <LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_delay_ms
+<LI><a href="#[ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_get_gyro
 <LI><a href="#[f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_self1_check
 </UL>
 <BR>[Called By]<UL><LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_module_init
 </UL>
 
 <P><STRONG><a name="[db]"></a>mpu6050_module_init</STRONG> (Thumb, 74 bytes, Stack size 16 bytes, mpu6050.o(.text.mpu6050_module_init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 824<LI>Call Chain = mpu6050_module_init &rArr; mpu6050_init &rArr; mpu6050_self1_check &rArr; soft_iic_read_8bit_register &rArr; soft_iic_read_data &rArr; soft_iic_send_ack &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
+<BR><BR>[Stack]<UL><LI>Max Depth = 848<LI>Call Chain = mpu6050_module_init &rArr; mpu6050_init &rArr; mpu6050_get_gyro &rArr; soft_iic_read_8bit_registers &rArr; soft_iic_read_data &rArr; soft_iic_send_ack &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_delay_ms
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_init
@@ -1871,7 +1873,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[df]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu
 </UL>
 
-<P><STRONG><a name="[dd]"></a>vis_deal</STRONG> (Thumb, 426 bytes, Stack size 48 bytes, vision.o(.text.vis_deal))
+<P><STRONG><a name="[dd]"></a>vis_deal</STRONG> (Thumb, 430 bytes, Stack size 48 bytes, vision.o(.text.vis_deal))
 <BR><BR>[Stack]<UL><LI>Max Depth = 1180<LI>Call Chain = vis_deal &rArr; compute_otsu &rArr; __aeabi_fsub &rArr; __aeabi_fadd &rArr; _float_epilogue
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2iz
@@ -2306,8 +2308,8 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vis_deal
 </UL>
 
-<P><STRONG><a name="[102]"></a>pho_center</STRONG> (Thumb, 864 bytes, Stack size 88 bytes, vision.o(.text.pho_center))
-<BR><BR>[Stack]<UL><LI>Max Depth = 112<LI>Call Chain = pho_center &rArr; calc_adaptive_far
+<P><STRONG><a name="[102]"></a>pho_center</STRONG> (Thumb, 856 bytes, Stack size 96 bytes, vision.o(.text.pho_center))
+<BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = pho_center &rArr; calc_adaptive_far
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fdiv
 <LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fadd
@@ -2336,7 +2338,7 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pho_center
 </UL>
 
-<P><STRONG><a name="[8d]"></a>servo_update</STRONG> (Thumb, 662 bytes, Stack size 96 bytes, control.o(.text.servo_update))
+<P><STRONG><a name="[8d]"></a>servo_update</STRONG> (Thumb, 676 bytes, Stack size 96 bytes, control.o(.text.servo_update))
 <BR><BR>[Stack]<UL><LI>Max Depth = 840<LI>Call Chain = servo_update &rArr; servo_set_angle &rArr; pwm_set_duty &rArr; debug_assert_handler &rArr; debug_output &rArr; sprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
