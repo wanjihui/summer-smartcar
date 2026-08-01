@@ -62,6 +62,7 @@
 
 int16 mpu6050_gyro_x = 0, mpu6050_gyro_y = 0, mpu6050_gyro_z = 0;               // 三轴陀螺仪数据      gyro (陀螺仪)
 int16 mpu6050_acc_x = 0, mpu6050_acc_y = 0, mpu6050_acc_z = 0;                  // 三轴加速度计数据    acc (accelerometer 加速度计)
+int16 mpu6050_gyro_z_offset = 0;                                                // Z轴陀螺仪零偏（上电自动校准）
 
 #if MPU6050_USE_SOFT_IIC
 static soft_iic_info_struct mpu6050_iic_struct;
@@ -226,6 +227,25 @@ uint8 mpu6050_init (void)
 
         mpu6050_write_register(MPU6050_USER_CONTROL, 0x00);
         mpu6050_write_register(MPU6050_INT_PIN_CFG, 0x02);
+
+        // ---- Z轴陀螺仪零偏校准（上电静止）----
+        // 丢弃前 N 帧等待数据稳定，再采 100 帧求均值
+        {
+            int32 sum = 0;
+            uint8 i;
+            for (i = 0; i < MPU6050_BIAS_DISCARD; i++)
+            {
+                mpu6050_get_gyro();
+                system_delay_ms(2);
+            }
+            for (i = 0; i < MPU6050_BIAS_CALIB_SAMPLES; i++)
+            {
+                mpu6050_get_gyro();
+                sum += mpu6050_gyro_z;
+                system_delay_ms(2);
+            }
+            mpu6050_gyro_z_offset = (int16)(sum / MPU6050_BIAS_CALIB_SAMPLES);
+        }
     }while(0);
     return return_state;
 }

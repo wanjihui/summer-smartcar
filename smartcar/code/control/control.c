@@ -61,7 +61,7 @@ static void servo_update(int straight)
     //   "车已经在转了，视觉少打点"
     //   量化去噪 /20*20，系数可以安全开到 0.01-0.03 不抖
     {
-        int gz = (int)mpu6050_gyro_transition(mpu6050_get_gyro_z());
+        int gz = (int)mpu6050_gyro_transition(mpu6050_get_gyro_z() - mpu6050_gyro_z_offset);
         gz = (gz / 20) * 20;                       // ASC风格量化，±10°/s以下不触发
         float gyro_z = (float)gz;
 

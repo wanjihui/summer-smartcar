@@ -106,6 +106,9 @@
 // 设置为:0x18 加速度计量程为:±16g    获取到的加速度计数据 除以 2048       可以转化为带物理单位的数据 (g 代表重力加速度 物理学名词 一般情况下 g 取 9.8 m/s^2 为标准值)
 
 #define MPU6050_GYR_SAMPLE          ( 0x18 )                                    // 陀螺仪量程
+
+#define MPU6050_BIAS_CALIB_SAMPLES  ( 100  )                                    // 上电零偏校准采样次数
+#define MPU6050_BIAS_DISCARD        ( 10   )                                    // 校准前丢弃帧数（等待数据稳定）
 // 设置为:0x00 陀螺仪量程为:±250 dps     获取到的陀螺仪数据除以131.2         可以转化为带物理单位的数据，单位为：°/s
 // 设置为:0x08 陀螺仪量程为:±500 dps     获取到的陀螺仪数据除以65.6          可以转化为带物理单位的数据，单位为：°/s
 // 设置为:0x10 陀螺仪量程为:±1000dps     获取到的陀螺仪数据除以32.8          可以转化为带物理单位的数据，单位为：°/s
@@ -115,6 +118,7 @@
 
 extern int16 mpu6050_gyro_x, mpu6050_gyro_y, mpu6050_gyro_z;                    // 三轴陀螺仪数据      gyro (陀螺仪)
 extern int16 mpu6050_acc_x, mpu6050_acc_y, mpu6050_acc_z;                       // 三轴加速度计数据    acc (accelerometer 加速度计)
+extern int16 mpu6050_gyro_z_offset;                                             // Z轴陀螺仪零偏（上电自动校准，原始ADC域）
 
 void    mpu6050_get_acc             (void);
 void    mpu6050_get_gyro            (void);
