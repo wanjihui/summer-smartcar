@@ -113,6 +113,8 @@ static void border_smooth(border_line border)
  * ================================================================ */
 int is_straight(void)
 {
+    straight_dbg = 0;  // 默认非直道，确保每帧更新
+
     int y_start = 100, step = 5;
     int y_end = (int)straight_far;
     if (y_end < 5)  y_end = 5;
@@ -141,7 +143,7 @@ int is_straight(void)
         ok++;
     }
 
-    straight_dbg = (ok >= 8) ? 1 : 0;
+    if (ok >= 8) straight_dbg = 1;
     return (int)straight_dbg;
 }
 
