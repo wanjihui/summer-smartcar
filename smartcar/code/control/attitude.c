@@ -33,6 +33,14 @@ float servo_fusion_alpha = 0.0f;           // 0=纯视觉, 1=纯角度PID
 // ==================== 诊断输出 ====================
 float angle_pid_out = 0.0f;                // Angle PID 当前输出（Debug 只读）
 
+// ==================== 内部：Angle PID 复位标志 ====================
+static uint8_t angle_pid_need_reset = 1;   // 首帧/停车重启后复位内部状态
+
+void atti_yaw_reset_ref(void)
+{
+    angle_pid_need_reset = 1;
+}
+
 // ---- 姿态解算初始化 ----
 void atti_init(void)
 {
@@ -69,13 +77,15 @@ void atti_update(void)
         acc_fz = ATTI_ACC_ALPHA * az + (1.0f - ATTI_ACC_ALPHA) * acc_fz;
     }
 
-    // 2. 读取陀螺仪原始值并转换为 rad/s
+    // 2. 读取陀螺仪原始值并转换为 rad/s（Z轴减零偏）
     gx = mpu6050_gyro_transition(mpu6050_gyro_x) * 3.1415926f / 180.0f;
     gy = mpu6050_gyro_transition(mpu6050_gyro_y) * 3.1415926f / 180.0f;
-    gz = mpu6050_gyro_transition(mpu6050_gyro_z) * 3.1415926f / 180.0f;
+    gz = mpu6050_gyro_transition(mpu6050_gyro_z - mpu6050_gyro_z_offset) * 3.1415926f / 180.0f;
 
-    // 3. 归一化加速度计（MM32 有硬件 FPU，直接用 sqrtf）
-    norm = 1.0f / sqrtf(acc_fx * acc_fx + acc_fy * acc_fy + acc_fz * acc_fz);
+    // 3. 归一化加速度计（零向量守卫：I2C 故障时跳过本周期）
+    float a2 = acc_fx * acc_fx + acc_fy * acc_fy + acc_fz * acc_fz;
+    if (a2 < 1e-6f) return;   // 无有效加速度数据，保持四元数不变
+    norm = 1.0f / sqrtf(a2);
     ax = acc_fx * norm;
     ay = acc_fy * norm;
     az = acc_fz * norm;
@@ -126,10 +136,12 @@ float angle_pid_set(float target, float actual)
 
     float error = target - actual;
 
-    if (first)
+    if (first || angle_pid_need_reset)
     {
         angle_pid_outp = error;
+        angle_pid_outd = 0.0f;
         first = 0;
+        angle_pid_need_reset = 0;
         angle_pid_out = 0.0f;
         return 0.0f;
     }
@@ -164,7 +176,8 @@ float angle_pid_set(float target, float actual)
 float servo_fusion(float angle_out, float IMU_out)
 {
     float out = servo_fusion_alpha * angle_out + (1.0f - servo_fusion_alpha) * IMU_out;
-    if (out > 12.0f)  out = 12.0f;
-    if (out < -12.0f) out = -12.0f;
+    if (out != out) out = 0.0f;      // NaN 兜底（IMU 故障时安全回退）
+    if (out > 13.0f)  out = 13.0f;
+    if (out < -13.0f) out = -13.0f;
     return out;
 }

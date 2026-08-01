@@ -76,7 +76,7 @@ void menu_init(void)
 
         // 姿态角融合
         v = dynamicCreate_Menu_Number(pid, "fusion_a",  &servo_fusion_alpha, float_Box);
-        Menu_Set_Limit(v, 0.0f, 1.0f, 0.05f);
+        Menu_Set_Limit(v, 0.0f, 0.5f, 0.05f);  // 上限 0.5（Angle PID 是偏航速率阻尼器，α=1 会丢失视觉跟踪）
         v = dynamicCreate_Menu_Number(pid, "ang_kpa",   &angle_kp_a, float_Box);
         Menu_Set_Limit(v, 0.0f, 5.0f, 0.01f);
         v = dynamicCreate_Menu_Number(pid, "ang_kd",    &angle_kd, float_Box);

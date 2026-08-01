@@ -80,15 +80,14 @@ static void servo_update(int straight)
     if (angle_cha >  servo_max_cha) angle_cha =  servo_max_cha;
     if (angle_cha < -servo_max_cha) angle_cha = -servo_max_cha;
 
-    float raw_angle = servo_center + angle_cha;
-
     //---- Angle PID（偏航角稳定）----
     static float prev_yaw = 0.0f;
     float angle_out = angle_pid_set(prev_yaw, atti_yaw);
     prev_yaw = atti_yaw;
 
-    //---- 舵机融合 ----
-    float target = servo_fusion(angle_out, raw_angle);
+    //---- 舵机融合（两个偏差量融合，再映射到绝对角度）----
+    float fused_cha = servo_fusion(angle_out, angle_cha);
+    float target = servo_center + fused_cha;
 
     //----步进限制----
     float add = target - servo_last_angle;
@@ -150,6 +149,14 @@ static void motor_update(int straight)
 //控制总调用接口
 void control_update(void)
 {
+    static bool was_running = false;
+    if (!was_running && car_run)
+    {
+        // 停车后重新出发：同步偏航基准，避免 prev_yaw 跳变
+        atti_yaw_reset_ref();
+    }
+    was_running = car_run;
+
     int straight = is_straight();   // 一帧只判定一次，舵机/电机共用同一结果
     servo_update(straight);         //先更新舵机
     motor_update(straight);

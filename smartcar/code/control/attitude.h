@@ -14,6 +14,7 @@ extern float atti_yaw;                     // 当前偏航角（°），左=负�
 
 void atti_init(void);                      // 四元数复位，上电调用一次
 void atti_update(void);                    // 每10ms调用（TIM6 ISR），读取 mpu6050 全局变量更新偏航角
+void atti_yaw_reset_ref(void);             // 复位 Angle PID 内部状态（停车后重新出发时调用）
 
 // ==================== 角度 PID ====================
 extern float angle_kp_a;                   // 基础P，菜单可调
@@ -32,8 +33,8 @@ float angle_pid_set(float target, float actual);
 extern float servo_fusion_alpha;           // 融合系数 0=纯视觉 1=纯角度PID
 
 float servo_fusion(float angle_out, float IMU_out);
-// angle_out: angle_pid_set() 的输出
-// IMU_out:   servo_update() 的 PD 计算结果（舵机目标角度）
-// 返回:      (1-α)×IMU_out + α×angle_out, 限幅 ±12°
+// angle_out: angle_pid_set() 的输出（偏差量，±12°）
+// IMU_out:   servo_update() 的 PD 计算结果（偏差量 angle_cha，±13°）
+// 返回:      融合后的偏差量，(1-α)×IMU_out + α×angle_out，限幅 ±13°
 
 #endif
