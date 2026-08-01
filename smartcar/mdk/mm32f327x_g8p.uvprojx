@@ -1329,6 +1329,16 @@
               <FileType>5</FileType>
               <FilePath>..\code\control\control.h</FilePath>
             </File>
+            <File>
+              <FileName>attitude.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\code\control\attitude.c</FilePath>
+            </File>
+            <File>
+              <FileName>attitude.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\code\control\attitude.h</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

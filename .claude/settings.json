@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_claude-mem_mcp-search__smart_search",
+      "Read(//c/Users/Lenovo/Desktop/summer-smartcar/**)",
+      "Read(//c/Users/Lenovo/Desktop/summer-smartcar/docs/**)",
+      "Bash(grep -v '^$')",
+      "Bash(git log *)",
+      "Bash(git ls-tree *)",
+      "Bash(git checkout *)",
+      "Bash(UV4 -b mm32f327x_g8p.uvprojx -j0 -o build_log.txt)"
+    ]
+  }
+}

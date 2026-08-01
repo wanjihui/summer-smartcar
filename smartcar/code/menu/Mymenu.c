@@ -73,6 +73,15 @@ void menu_init(void)
         Menu_Set_Limit(v, 0, 2,0.01f);
         v = dynamicCreate_Menu_Number(pid, "diff_max",  &motor_diff_max, int32_Box);
         Menu_Set_Limit(v, 2, 20,1.0f);
+
+        // 姿态角融合
+        v = dynamicCreate_Menu_Number(pid, "fusion_a",  &servo_fusion_alpha, float_Box);
+        Menu_Set_Limit(v, 0.0f, 1.0f, 0.05f);
+        v = dynamicCreate_Menu_Number(pid, "ang_kpa",   &angle_kp_a, float_Box);
+        Menu_Set_Limit(v, 0.0f, 5.0f, 0.01f);
+        v = dynamicCreate_Menu_Number(pid, "ang_kd",    &angle_kd, float_Box);
+        Menu_Set_Limit(v, 0.0f, 2.0f, 0.01f);
+
         dynamicCreate_Menu_Number(pid, "car_run",   &car_run,  bool_Box);
     }
 
@@ -84,6 +93,8 @@ void menu_init(void)
         v = dynamicCreate_Menu_Number(dbg, "err",      (float*)&err, float_Box);
         v = dynamicCreate_Menu_Number(dbg, "straight", (uint8*)&straight_dbg, uint8_Box);
         v = dynamicCreate_Menu_Number(dbg, "range",    (int16*)&asc_range_dbg, int16_Box);
+        v = dynamicCreate_Menu_Number(dbg, "yaw",       &atti_yaw, float_Box);
+        v = dynamicCreate_Menu_Number(dbg, "ang",       &angle_pid_out, float_Box);
     }
 
     key = head.first_son;

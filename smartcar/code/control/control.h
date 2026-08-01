@@ -4,6 +4,7 @@
 #include "servo.h"
 #include "motor.h"
 #include "vision.h"
+#include "attitude.h"
 
 //全局变量
 

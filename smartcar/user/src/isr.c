@@ -36,6 +36,7 @@
 #include "isr.h"
 #include "encoder.h"
 #include "mpu6050.h"
+#include "attitude.h"
 
 //-------------------------------------------------------------------------------------------------------------------
 // 函数简介     TIM1 的定时器更新中断服务函数 启动 .s 文件定义 不允许修改函数名称
@@ -109,8 +110,10 @@ void TIM5_IRQHandler (void)
 void TIM6_IRQHandler (void)
 {
     encoder_pit_callback();
-    // 此处编写用户代码
-    // MPU6050 读取已移至主循环（mpu6050_update），软IIC忙等不再占用中断
+    // MPU6050 读取 + AHRS 姿态解算（100Hz）
+    mpu6050_get_acc();
+    mpu6050_get_gyro();
+    atti_update();
 
     // 此处编写用户代码
     TIM6->SR &= ~TIM6->SR;                                                      // 清空中断状态

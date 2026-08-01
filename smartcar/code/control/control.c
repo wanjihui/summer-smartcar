@@ -80,7 +80,15 @@ static void servo_update(int straight)
     if (angle_cha >  servo_max_cha) angle_cha =  servo_max_cha;
     if (angle_cha < -servo_max_cha) angle_cha = -servo_max_cha;
 
-    float target = servo_center + angle_cha;
+    float raw_angle = servo_center + angle_cha;
+
+    //---- Angle PID（偏航角稳定）----
+    static float prev_yaw = 0.0f;
+    float angle_out = angle_pid_set(prev_yaw, atti_yaw);
+    prev_yaw = atti_yaw;
+
+    //---- 舵机融合 ----
+    float target = servo_fusion(angle_out, raw_angle);
 
     //----步进限制----
     float add = target - servo_last_angle;

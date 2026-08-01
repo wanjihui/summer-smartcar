@@ -95,7 +95,7 @@ static void border_smooth(border_line border)
  * 1. border_smooth(l_border/r_border) — 平滑左右边界
  * 2. center_line[]: 双边→中点(记录宽度), 单边→真实路宽外推, 都缺→白像素重心
  * 3. border_smooth(center_line) — 平滑中线
- * 4. ASC多行加权平均: 100→自适应far, 权重2.0→2.5线性递增(远重近轻), 均值=err
+ * 4. ASC多行加权平均: 100→自适应far, 权重2.5→2.0递减(近重远轻), 均值=err
  *
  * 调参: far(ASC远行基准,默认10)+自适应分段偏移; 单边→最新真实路宽外推; 双侧丢线→锁存
  * ================================================================ */
@@ -450,7 +450,7 @@ static void pho_center(void)
 
     float total_dev = 0.0f, total_w = 0.0f;
     float w = 2.0f;
-    float w_step = 0.5f / (float)(y_near - y_far);   // 2.0 → 2.5 均匀递增
+    float w_step = 0.5f / (float)(y_near - y_far);   // 2.0 → 2.5 远重近轻
 
     for (int y = y_near; y >= y_far; y--)
     {
@@ -460,7 +460,7 @@ static void pho_center(void)
             total_dev += ((float)c - (float)pho_center_x) * w;
             total_w   += w;
         }
-        w += w_step;   // 每行都递增，无效行也消耗权重，保证远行必定到2.5
+        w += w_step;   // 每行递增，远行权重大
     }
 
     if (total_w > 0.0f)

@@ -22,7 +22,7 @@
 // ============================================================
 
 // --- 预瞄位置 ---
-#define DEFAULT_ASC_FAR        30   // ASC采样远行（顶部行），10≈90行范围
+#define DEFAULT_ASC_FAR        20   // ASC采样远行（顶部行），10≈90行范围
 #define DEFAULT_STRAIGHT_FAR   30    // 直线判定采样远行（顶部行），默认30
 
 // --- 自适应预瞄常量（编译期，基于调好的far，按|err|分段偏移）---
@@ -34,10 +34,10 @@
 
 // --- 舵机 ---
 #define DEFAULT_SERVO_KP1      0.85f  // 基础P
-#define DEFAULT_SERVO_KP2      0.0f   // 二次P: err×|err|
+#define DEFAULT_SERVO_KP2      0.0005f   // 二次P: err×|err|
 #define DEFAULT_SERVO_KD       0.06f  // D 系数
-#define DEFAULT_GYRO_KD        0.02f // 陀螺仪前馈（直道），正=减Gyro项
-#define DEFAULT_GYRO_KD_CURVE  0.02f  // 陀螺仪前馈（弯道），正=减Gyro项
+#define DEFAULT_GYRO_KD        0.04f // 陀螺仪前馈（直道），正=减Gyro项
+#define DEFAULT_GYRO_KD_CURVE  0.035f  // 陀螺仪前馈（弯道），正=减Gyro项
 #define DEFAULT_SERVO_CENTER   95.2f // 中位角度
 #define DEFAULT_SERVO_MAX_CHA  13.0f // 最大偏角
 #define DEFAULT_SERVO_DEAD     2.0f  // 死区（像素）
@@ -51,4 +51,11 @@
 #define DEFAULT_MOTOR_KP       0.0f  // 差速 P 系数
 #define DEFAULT_MOTOR_KD       0.0f  // 差速 D 系数 
 #define DEFAULT_MOTOR_DIFF_MAX 8     // 差速上限（%）防漂
+
+// --- 姿态角融合 ---
+#define DEFAULT_ANGLE_KP_A          0.0f   // Angle PID 基础P
+#define DEFAULT_ANGLE_KP_B          0.0f   // Angle PID 二次P系数
+#define DEFAULT_ANGLE_KD            0.02f  // Angle PID D项
+#define DEFAULT_ANGLE_LOWPASS       0.8f   // Angle PID D项低通
+#define DEFAULT_SERVO_FUSION_ALPHA  0.0f   // 融合系数 0=纯视觉
 #endif
