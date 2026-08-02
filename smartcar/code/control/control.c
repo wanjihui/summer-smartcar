@@ -4,13 +4,14 @@
 float servo_kp1      = DEFAULT_SERVO_KP1;  // 基础P
 float servo_kp2      = DEFAULT_SERVO_KP2;  // 二次P: err×|err|
 float servo_kd       = DEFAULT_SERVO_KD;
+float servo_kd_str    = DEFAULT_SERVO_KD_STR;  // 直道/小err D
 float servo_center   = DEFAULT_SERVO_CENTER;
 float servo_max_cha  = DEFAULT_SERVO_MAX_CHA;
 float servo_dead     = DEFAULT_SERVO_DEAD;
 float servo_max_add  = DEFAULT_SERVO_MAX_ADD;
 int   servo_dir      = DEFAULT_SERVO_DIR;
 int   motor_base_duty= DEFAULT_MOTOR_BASE;
-int   motor_curve_duty = DEFAULT_MOTOR_CURVE_DUTY;  // 弯道占空比（is_straight判定为弯道时使用）
+int   motor_curve_duty = DEFAULT_MOTOR_CURVE_DUTY;  // 弯道占空比（|err|≥8时使用）
 int   motor_max_duty = DEFAULT_MOTOR_MAX;
 float gyro_kd        = DEFAULT_GYRO_KD;
 float gyro_kd_curve   = DEFAULT_GYRO_KD_CURVE;
@@ -18,6 +19,8 @@ float motor_kp       = DEFAULT_MOTOR_KP;
 float motor_kd       = DEFAULT_MOTOR_KD;
 int   motor_diff_max = DEFAULT_MOTOR_DIFF_MAX;
 bool  car_run        = false;    // 小车运行开关，菜单可切换
+float gyro_z_dbg     = 0.0f;     // 诊断：量化后 gyro_z
+float steer_dbg      = 0.0f;     // 诊断：舵机偏离中心角度
 
 static float servo_last_err   = 0;       // 上一帧偏差，舵机D项用
 static float servo_last_angle = 0;      // 上一帧舵机角度，步进限制用
@@ -31,50 +34,56 @@ void control_init(void)
 }
 
 //舵机控制
-static void servo_update(float blend)
+static void servo_update(void)
 {
     // ----死区处理----
-    float e = err;                //err由vision算法计算
+    float e = err;
     if (e > -servo_dead && e < servo_dead) e = 0;
-    if (servo_dir)             e = -e;
+    if (servo_dir) e = -e;
 
-    // ----直/弯参数插值：blend 0=弯道 1=直道 ----
     float e_abs = (e > 0) ? e : -e;
-    float kp_curve = servo_kp1 + servo_kp2 * e_abs;
-    float kd_curve = servo_kd;
-    // 直道P随err渐降: err=8→0.85, err=15→0.51, 之间线性插值
-    float kp_straight;
-    if (e_abs < 8.0f)
-        kp_straight = servo_kp1;
-    else if (e_abs > 15.0f)
-        kp_straight = servo_kp1 * 0.6f;
-    else
-        kp_straight = servo_kp1 * (1.0f - 0.4f * (e_abs - 8.0f) / 7.0f);
-    float kd_straight = servo_kd * 3.0f;  // 直道D系数×3，强阻尼抑抖
+    float delta = e - servo_last_err;
+    float d_abs = (delta > 0) ? delta : -delta;
 
-    float kp = kp_curve + (kp_straight - kp_curve) * blend;
-    float kd = kd_curve + (kd_straight - kd_curve) * blend;
+    // ---- kp: 正常=kp1+kp2×|err|, 回正(err缩小)时软化防过冲 ----
+    float kp = servo_kp1 + servo_kp2 * e_abs;
+
+    // 回正软化: e×Δerr<0 → 车在靠近中线, |err|大+回正快 → 软P防冲过头
+    if (e * delta < 0.0f && e_abs > 5.0f)
+    {
+        float r_err = (e_abs - 5.0f) / 10.0f;   // |err| 5→15, 软化0→1
+        if (r_err > 1.0f) r_err = 1.0f;
+        float r_spd = d_abs / 10.0f;             // |Δerr| 0→10, 因子0→1
+        if (r_spd > 1.0f) r_spd = 1.0f;
+        float soft = r_err * r_spd;               // 双因子: 大err+快速回正=强力软化
+        float kp_soft = servo_kp1 * 0.6f;
+        kp = kp + (kp_soft - kp) * soft;
+    }
+
+    // ---- kd: |err| 5→15 从直道D平滑过渡到弯道D ----
+    float e_clamp;
+    if (e_abs < 5.0f)      e_clamp = 0.0f;
+    else if (e_abs > 15.0f) e_clamp = 1.0f;
+    else                    e_clamp = (e_abs - 5.0f) / 10.0f;
+    float kd = servo_kd_str + (servo_kd - servo_kd_str) * e_clamp;
 
     // ----位置式 PD ----
-    float pd = kp * e + kd * (e - servo_last_err);
+    float pd = kp * e + kd * delta;
 
-    // 陀螺仪前馈（ASC风格）：pd -= gyro × gyro_z
-    //   量化去噪 /20*20，系数可以安全开到 0.01-0.03 不抖
+    // ---- 陀螺仪前馈: |err|→gyro系数平滑过渡 ----
     {
         int gz = (int)mpu6050_gyro_transition(mpu6050_get_gyro_z() - mpu6050_gyro_z_offset);
-        gz = (gz / 20) * 20;                       // ASC风格量化，±10°/s以下不触发
+        gz = (gz / 20) * 20;
         float gyro_z = (float)gz;
-
-        // gyro 系数也插值过渡
-        float gyro_coef = gyro_kd_curve + (gyro_kd - gyro_kd_curve) * blend;
+        gyro_z_dbg = gyro_z;
+        float gyro_coef = gyro_kd_curve + (gyro_kd - gyro_kd_curve) * (1.0f - e_clamp);
         pd -= gyro_coef * gyro_z;
     }
 
     servo_last_err = e;
 
     // ----像素err转换为角度----
-    float angle_rate = servo_max_cha / 35.0f;  // 映射斜率: max_cha/35, 入弯小err也有足够转角
-    float angle_cha = pd * angle_rate;
+    float angle_cha = pd * (servo_max_cha / 35.0f);
 
     if (angle_cha >  servo_max_cha) angle_cha =  servo_max_cha;
     if (angle_cha < -servo_max_cha) angle_cha = -servo_max_cha;
@@ -84,7 +93,7 @@ static void servo_update(float blend)
     float angle_out = angle_pid_set(prev_yaw, atti_yaw);
     prev_yaw = atti_yaw;
 
-    //---- 舵机融合（两个偏差量融合，再映射到绝对角度）----
+    //---- 舵机融合 ----
     float fused_cha = servo_fusion(angle_out, angle_cha);
     float target = servo_center + fused_cha;
 
@@ -93,13 +102,14 @@ static void servo_update(float blend)
     if (add >  servo_max_add) target = servo_last_angle + servo_max_add;
     if (add < -servo_max_add) target = servo_last_angle - servo_max_add;
 
-    servo_set_angle(target);                       //舵机调整角度函数
-    servo_last_angle = target;                     //存储当前目标角度
+    steer_dbg = target - servo_center;
+    servo_set_angle(target);
+    servo_last_angle = target;
 }
 
 
 //电机控制
-static void motor_update(int straight)
+static void motor_update(void)
 {
     // ----PD算出差速----
     float e=err;                                     // 偏差
@@ -110,16 +120,9 @@ static void motor_update(int straight)
     float Cha = motor_kp * e + motor_kd * cha;
     motor_last_err = e;
 
-    // ----直道/弯道基础占空比分开控制----
-    // err>0偏右→右转: left=base+diff(快) right=base-diff(慢)
-    // err<0偏左→左转: left=base-|diff|(慢) right=base+|diff|(快)
-    // 直道: motor_base_duty（全速）
-    // 弯道: motor_curve_duty（菜单可调，一般低于直道）
-    int base;
-    if (straight)
-        base = motor_base_duty;
-    else
-        base = motor_curve_duty;
+    // ----直道/弯道基础占空比: |err|<8→直道高速, else→弯道减速----
+    float e_abs = (e > 0) ? e : -e;
+    int base = (e_abs < 8.0f) ? motor_base_duty : motor_curve_duty;
     if (base < 5) base = 5;                         // 死区12已是最低可用duty，base保底降到5
 
     // 差速量：限幅防漂
@@ -148,14 +151,9 @@ static void motor_update(int straight)
 //控制总调用接口
 void control_update(void)
 {
-    //---- 直/弯参数插值：入弯快(0.8)出弯慢(0.3)，不对称防入弯滞后 ----
-    static float straight_blend = 0.0f;  // 0=弯道, 1=直道
-    float target = is_straight() ? 1.0f : 0.0f;
-    float rate = (target < straight_blend) ? 0.8f : 0.3f;  // 入弯快出弯慢
-    straight_blend += (target - straight_blend) * rate;
-
-    servo_update(straight_blend);
-    motor_update(straight_blend > 0.5f);
+    //---- |err|连续过渡: kp自动分离, kd/gyro平滑, motor速度跟随 ----
+    servo_update();
+    motor_update();
 }
 
 

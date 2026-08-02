@@ -128,23 +128,10 @@ int is_straight(void)
     /* 中线斜率：|k| < 0.45 → (100-y_end)行内偏移 <0.45×行数 px */
     float kc = (float)(center_line[y_end] - center_line[y_start])
              / (float)(y_end - y_start);
-    if (kc > 0.45f || kc < -0.45f) return 0;
+    if (kc > 0.25f || kc < -0.25f) return 0;
 
-    /* 中间点偏离检查：≥8个有效点（共13采样点），每点偏离 < 10px */
-    int ok = 0;
-    for (int y = y_start; y >= y_end; y -= step)
-    {
-        if (center_line[y] == BORDER_INVALID) continue;
-
-        float expected = (float)center_line[y_start] + kc * (float)(y - y_start);
-        float diff = (float)center_line[y] - expected;
-        if (diff < 0) diff = -diff;
-        if (diff > 10.0f) return 0;
-        ok++;
-    }
-
-    if (ok >= 8) straight_dbg = 1;
-    return (int)straight_dbg;
+    straight_dbg = 1;
+    return 1;
 }
 
 /* ================================================================
@@ -451,6 +438,7 @@ static void pho_center(void)
     float total_dev = 0.0f, total_w = 0.0f;
     float w = 2.0f;
     float w_step = 0.5f / (float)(y_near - y_far);   // 2.0 → 2.5 远重近轻
+    int   valid_cnt = 0;       // 实际有效行数
 
     for (int y = y_near; y >= y_far; y--)
     {
@@ -459,13 +447,22 @@ static void pho_center(void)
         {
             total_dev += ((float)c - (float)pho_center_x) * w;
             total_w   += w;
+            valid_cnt++;
         }
         w += w_step;   // 每行递增，远行权重大
     }
 
+    int theo_rows = y_near - y_far;
     if (total_w > 0.0f)
     {
         err = total_dev / total_w;
+        // 入弯时赛道行数 < 理论行数 → err偏小 → 按比例补偿
+        if (valid_cnt > 0 && valid_cnt < theo_rows)
+        {
+            float scale = (float)theo_rows / (float)valid_cnt;
+            if (scale > 2.5f) scale = 2.5f;   // 安全钳，最多放大2.5倍
+            err *= scale;
+        }
     }
     // else: 总权重为0 → err保留上帧不变
 }

@@ -12,6 +12,7 @@
 extern float servo_kp1;       // 基础P
 extern float servo_kp2;       // 二次P: err×|err|
 extern float servo_kd;
+extern float servo_kd_str;    // 直道/小err D
 extern float gyro_kd;         // 陀螺仪直道阻尼
 extern float gyro_kd_curve;   // 陀螺仪弯道阻尼
 extern float servo_center;   // 中位角度
@@ -27,6 +28,8 @@ extern float motor_kp;
 extern float motor_kd;
 extern int   motor_diff_max;  // 差速上限（%），防漂
 extern bool  car_run;        // 是否运行小车（true=搜线+控制, false=仅菜单）
+extern float gyro_z_dbg;     // 诊断：量化后 gyro_z
+extern float steer_dbg;      // 诊断：舵机偏离中心角度
 
 void control_init(void);
 void control_update(void);

@@ -41,11 +41,13 @@ void menu_init(void)
 
         // 舵机
         v = dynamicCreate_Menu_Number(pid, "servokp1",  &servo_kp1, float_Box);
-        Menu_Set_Limit(v, 0, 5,0.05f);
+        Menu_Set_Limit(v, 0, 2,0.05f);
         v = dynamicCreate_Menu_Number(pid, "servokp2",  &servo_kp2, float_Box);
-        Menu_Set_Limit(v, 0, 0.01f,0.0001f);
-        v = dynamicCreate_Menu_Number(pid, "servo_kd",  &servo_kd,  float_Box);
-        Menu_Set_Limit(v, 0, 2,0.01f);
+        Menu_Set_Limit(v, 0, 0.05f,0.001f);
+        v = dynamicCreate_Menu_Number(pid, "kd_cur",  &servo_kd,  float_Box);
+        Menu_Set_Limit(v, 0, 1,0.01f);
+        v = dynamicCreate_Menu_Number(pid, "kd_stra",  &servo_kd_str,  float_Box);
+        Menu_Set_Limit(v, 0, 1,0.01f);
         v = dynamicCreate_Menu_Number(pid, "gyro_kd",   &gyro_kd, float_Box);
         Menu_Set_Limit(v, 0.0f, 0.05f, 0.001f);
         v = dynamicCreate_Menu_Number(pid, "gyro_kdc",  &gyro_kd_curve, float_Box);
@@ -56,8 +58,6 @@ void menu_init(void)
         Menu_Set_Limit(v, 5, 60, 5.0f);
         v = dynamicCreate_Menu_Number(pid, "max_add", &servo_max_add, float_Box);
         Menu_Set_Limit(v, 0.5f, 20,0.5f);
-        v = dynamicCreate_Menu_Number(pid, "center",    &servo_center, float_Box);
-        Menu_Set_Limit(v, 75, 105,0.1f);
         v = dynamicCreate_Menu_Number(pid, "deadband",  &servo_dead, float_Box);
         Menu_Set_Limit(v, 0, 10,0.5f);
 
@@ -94,6 +94,8 @@ void menu_init(void)
         v = dynamicCreate_Menu_Number(dbg, "straight", (uint8*)&straight_dbg, uint8_Box);
         v = dynamicCreate_Menu_Number(dbg, "range",    (int16*)&asc_range_dbg, int16_Box);
         v = dynamicCreate_Menu_Number(dbg, "yaw",       &atti_yaw, float_Box);
+        v = dynamicCreate_Menu_Number(dbg, "gz",        &gyro_z_dbg, float_Box);
+        v = dynamicCreate_Menu_Number(dbg, "steer",     &steer_dbg, float_Box);
         v = dynamicCreate_Menu_Number(dbg, "ang",       &angle_pid_out, float_Box);
     }
 
