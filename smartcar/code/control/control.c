@@ -70,16 +70,6 @@ static void servo_update(void)
     // ----位置式 PD ----
     float pd = kp * e + kd * delta;
 
-    // ---- 陀螺仪前馈: |err|→gyro系数平滑过渡 ----
-    {
-        int gz = (int)mpu6050_gyro_transition(mpu6050_get_gyro_z() - mpu6050_gyro_z_offset);
-        gz = (gz / 20) * 20;
-        float gyro_z = (float)gz;
-        gyro_z_dbg = gyro_z;
-        float gyro_coef = gyro_kd_curve + (gyro_kd - gyro_kd_curve) * (1.0f - e_clamp);
-        pd -= gyro_coef * gyro_z;
-    }
-
     servo_last_err = e;
 
     // ----像素err转换为角度----
@@ -88,14 +78,7 @@ static void servo_update(void)
     if (angle_cha >  servo_max_cha) angle_cha =  servo_max_cha;
     if (angle_cha < -servo_max_cha) angle_cha = -servo_max_cha;
 
-    //---- Angle PID（偏航角稳定）----
-    static float prev_yaw = 0.0f;
-    float angle_out = angle_pid_set(prev_yaw, atti_yaw);
-    prev_yaw = atti_yaw;
-
-    //---- 舵机融合 ----
-    float fused_cha = servo_fusion(angle_out, angle_cha);
-    float target = servo_center + fused_cha;
+    float target = servo_center + angle_cha;
 
     //----步进限制----
     float add = target - servo_last_angle;

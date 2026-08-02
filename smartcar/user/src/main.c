@@ -76,7 +76,7 @@ int main (void)
     motor_init();      					// 初始化电机驱动
     //encoder_init();    					// 初始化编码器（正交解码 + PIT 中断）
     mpu6050_module_init();      // 初始化 MPU6050（必须在 TIM6 之前，防止 ISR 抢占 I2C 导致总线冲突）
-    atti_init();                // 初始化姿态解算（六轴互补滤波 AHRS）
+    // AHRS 已禁用  // atti_init();
     pit_ms_init(TIM6_PIT, 10);  // 启动 TIM6（100Hz AHRS，MPU6050 就绪后方可打开 ISR）
     interrupt_set_priority(TIM6_IRQn, 3);  // 低于摄像头 VSYNC(1)/DMA(2)，避免抢占图像采集
     servo_init();               // 初始化舵机（TIM2_CH1 PA15 50Hz PWM）

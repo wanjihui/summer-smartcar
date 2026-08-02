@@ -110,10 +110,10 @@ void TIM5_IRQHandler (void)
 void TIM6_IRQHandler (void)
 {
     encoder_pit_callback();
-    // MPU6050 读取 + AHRS 姿态解算（100Hz）
-    mpu6050_get_acc();
-    mpu6050_get_gyro();
-    atti_update();
+    // MPU6050 + AHRS 已禁用
+    //mpu6050_get_acc();
+    //mpu6050_get_gyro();
+    //atti_update();
 
     // 此处编写用户代码
     TIM6->SR &= ~TIM6->SR;                                                      // 清空中断状态

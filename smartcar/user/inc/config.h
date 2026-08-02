@@ -34,11 +34,11 @@
 
 // --- 舵机 ---
 #define DEFAULT_SERVO_KP1      0.3f  // 基础P 
-#define DEFAULT_SERVO_KP2      0.020f  // 二次P: err×|err|
+#define DEFAULT_SERVO_KP2      0.026f  // 二次P: err×|err|
 #define DEFAULT_SERVO_KD       0.0f  // D系数（弯道/大err），弯道无震荡无需阻尼
 #define DEFAULT_SERVO_KD_STR   0.35f  // D系数（直道/小err）
-#define DEFAULT_GYRO_KD        0.02f  // 陀螺仪阻尼（直道）
-#define DEFAULT_GYRO_KD_CURVE  0.02f  // 陀螺仪阻尼（弯道）
+#define DEFAULT_GYRO_KD        0.03f  // 陀螺仪阻尼（直道）
+#define DEFAULT_GYRO_KD_CURVE  0.03f  // 陀螺仪阻尼（弯道）
 #define DEFAULT_SERVO_CENTER   95.2f // 中位角度
 #define DEFAULT_SERVO_MAX_CHA  13.0f // 最大偏角
 #define DEFAULT_SERVO_DEAD     2.0f  // 死区（像素）
@@ -47,9 +47,9 @@
 
 // --- 电机 ---
 #define DEFAULT_MOTOR_BASE     25    // 基础占空比 %
-#define DEFAULT_MOTOR_CURVE_DUTY 21  // 弯道占空比 %
+#define DEFAULT_MOTOR_CURVE_DUTY 19  // 弯道占空比 %
 #define DEFAULT_MOTOR_MAX      30    // 最大占空比 %
-#define DEFAULT_MOTOR_KP       0.0f  // 差速 P 系数
+#define DEFAULT_MOTOR_KP       0.03f  // 差速 P 系数
 #define DEFAULT_MOTOR_KD       0.0f  // 差速 D 系数 
 #define DEFAULT_MOTOR_DIFF_MAX 8     // 差速上限（%）防漂
 

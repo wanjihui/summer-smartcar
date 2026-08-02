@@ -36,6 +36,9 @@ float angle_pid_out = 0.0f;                // Angle PID 当前输出（Debug 只
 // ==================== 内部：Angle PID 复位标志 ====================
 static uint8_t angle_pid_need_reset = 1;   // 首帧/停车重启后复位内部状态
 
+// ===== AHRS 姿态解算 + Angle PID + 舵机融合 已禁用 =====
+#if 0
+
 void atti_yaw_reset_ref(void)
 {
     angle_pid_need_reset = 1;
@@ -181,3 +184,5 @@ float servo_fusion(float angle_out, float IMU_out)
     if (out < -13.0f) out = -13.0f;
     return out;
 }
+
+#endif // AHRS 姿态解算 + Angle PID + 舵机融合 已禁用
