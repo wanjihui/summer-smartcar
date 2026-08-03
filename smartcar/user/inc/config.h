@@ -45,13 +45,19 @@
 #define DEFAULT_SERVO_MAX_ADD  5.5f  // 步进限制（度/帧）
 #define DEFAULT_SERVO_DIR      1     // 0=正常 1=翻转
 
-// --- 电机 ---
-#define DEFAULT_MOTOR_BASE     25    // 基础占空比 %
-#define DEFAULT_MOTOR_CURVE_DUTY 19  // 弯道占空比 %
-#define DEFAULT_MOTOR_MAX      30    // 最大占空比 %
-#define DEFAULT_MOTOR_KP       0.03f  // 差速 P 系数
-#define DEFAULT_MOTOR_KD       0.0f  // 差速 D 系数 
-#define DEFAULT_MOTOR_DIFF_MAX 8     // 差速上限（%）防漂
+// --- 电机目标速度（dm/s，如22=2.2m/s=220cm/s）---
+#define DEFAULT_MOTOR_BASE       14    // 直道目标速度(dm/s) = 1.4m/s
+#define DEFAULT_MOTOR_CURVE_DUTY 10    // 弯道目标速度(dm/s) = 1.0m/s
+#define DEFAULT_MOTOR_MAX        50    // 最大占空比（PID Out限制）
+#define DEFAULT_MOTOR_KP         0.05f // 差速 P 系数
+#define DEFAULT_MOTOR_KD         0.0f  // 差速 D 系数
+#define DEFAULT_MOTOR_DIFF_MAX   13    // 差速上限（cm/s）
+
+// --- 速度环PID（增量式，ISR 5ms，200Hz）---
+#define DEFAULT_SPEED_KP         0.5f  // 速度环 Kp
+#define DEFAULT_SPEED_KI         0.3f  // 速度环 Ki
+#define DEFAULT_SPEED_KD         0.05f // 速度环 Kd（抑制Out抖动）
+#define DEFAULT_SPEED_DELTA_MAX  4.0f  // 单次增量限幅（duty/5ms）
 
 // --- 姿态角融合 ---
 #define DEFAULT_ANGLE_KP_A          0.0f   // Angle PID 基础P

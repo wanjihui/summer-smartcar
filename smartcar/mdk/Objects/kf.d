@@ -1,4 +1,4 @@
-./objects/mymenu.o: ..\code\menu\Mymenu.c ..\user\inc\config.h \
+./objects/kf.o: ..\code\KF\KF.c ..\code\KF\KF.h \
   ..\..\libraries\zf_common\zf_common_headfile.h \
   ..\..\libraries\sdk\hal_device_registers.h \
   ..\..\libraries\sdk\mm32f3277g.h \
@@ -76,8 +76,4 @@
   ..\..\libraries\zf_device\zf_device_wifi_uart.h \
   ..\..\libraries\zf_device\zf_device_wireless_uart.h \
   ..\..\libraries\components\fatfs\source\ffconf.h \
-  ..\..\libraries\components\fatfs\source\ff.h ..\code\motor\motor.h \
-  ..\code\encoder\encoder.h ..\code\MPU6050\mpu6050.h \
-  ..\code\servo\servo.h ..\code\menu\menu.h ..\code\menu\Mymenu.h \
-  ..\code\vision\vision.h ..\code\control\control.h \
-  ..\code\control\attitude.h ..\code\pid\pid.h ..\code\KF\KF.h
+  ..\..\libraries\components\fatfs\source\ff.h

@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\user\inc;..\code;..\..\libraries\zf_common;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\..\libraries\sdk;..\..\libraries\sdk\CMSIS\Include;..\..\libraries\sdk\drivers;..\..\libraries\components\fatfs\source;..\code\menu;..\code\motor;..\code\encoder;..\code\MPU6050;..\code\servo;..\code\vision;..\code\control</IncludePath>
+              <IncludePath>..\user\inc;..\code;..\..\libraries\zf_common;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\..\libraries\sdk;..\..\libraries\sdk\CMSIS\Include;..\..\libraries\sdk\drivers;..\..\libraries\components\fatfs\source;..\code\menu;..\code\motor;..\code\encoder;..\code\MPU6050;..\code\servo;..\code\vision;..\code\control;..\code\pid;..\code\KF</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1338,6 +1338,36 @@
               <FileName>attitude.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\code\control\attitude.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>code/pid</GroupName>
+          <Files>
+            <File>
+              <FileName>pid.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\code\pid\pid.c</FilePath>
+            </File>
+            <File>
+              <FileName>pid.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\code\pid\pid.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>code/KF</GroupName>
+          <Files>
+            <File>
+              <FileName>KF.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\code\KF\KF.c</FilePath>
+            </File>
+            <File>
+              <FileName>KF.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\code\KF\KF.h</FilePath>
             </File>
           </Files>
         </Group>

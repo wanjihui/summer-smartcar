@@ -603,7 +603,7 @@ void vis_deal(void)
     {
         /* 1. 贴边检测（放宽阈值70%，后续多道验证防误判）*/
         int l_bad = 0, r_bad = 0, l_n = 0, r_n = 0;
-        for (int y = 90; y <= 110; y++)
+        for (int y = 50; y <= 110; y++)
         {
             if (l_border[y] != BORDER_INVALID)
             {
@@ -625,32 +625,36 @@ void vis_deal(void)
             border_line *bdr_away = (lost_side == -1) ? &r_border : &l_border;
             border_line *bdr_edge = (lost_side == -1) ? &l_border : &r_border;
 
-            /* 2. 白宽扩张验证 (P4核心: white_width[i+2]-white_width[i] > 7)
-             *    十字的真正物理特征：越往上赛道越宽 */
-            int hw_bot = 0, hw_bot_n = 0, hw_mid = 0, hw_mid_n = 0;
-            for (int y = 100; y <= 115; y++)
-                if (l_border[y] != BORDER_INVALID && r_border[y] != BORDER_INVALID)
-                    { hw_bot += r_border[y] - l_border[y]; hw_bot_n++; }
-            for (int y = 65; y <= 80; y++)
-                if (l_border[y] != BORDER_INVALID && r_border[y] != BORDER_INVALID)
-                    { hw_mid += r_border[y] - l_border[y]; hw_mid_n++; }
-            if (hw_bot_n >= 3) hw_bot /= hw_bot_n; else hw_bot = 0;
-            if (hw_mid_n >= 3) hw_mid /= hw_mid_n; else hw_mid = 0;
+            /* 2. 白宽扩张验证：逐行算最长白列宽，行号减小(往上)宽度增大=十字 */
+            int expansion = 0;
+            {
+                int prev_max_w = 0, inc_cnt = 0, total = 0;
+                for (int y = 110; y >= 50; y--)
+                {
+                    // 找该行最长白段宽度
+                    int run_s = -1, max_w = 0;
+                    for (int x = 0; x < pho_w; x++)
+                    {
+                        if (Image_Used[y][x] == 255)
+                        { if (run_s < 0) run_s = x; }
+                        else if (run_s >= 0)
+                        { int w = x - run_s;
+                          if (w > max_w) max_w = w; run_s = -1; }
+                    }
+                    if (run_s >= 0)
+                    { int w = pho_w - run_s; if (w > max_w) max_w = w; }
+                    if (max_w < 10) continue;
 
-            /* 二值图中部白像素量辅助验证 */
-            int white_bot = 0, white_mid = 0;
-            for (int y = 100; y <= 110; y++)
-                for (int x = 10; x < pho_w - 10; x++)
-                    if (Image_Used[y][x] == 255) white_bot++;
-            for (int y = 45; y <= 55; y++)
-                for (int x = 10; x < pho_w - 10; x++)
-                    if (Image_Used[y][x] == 255) white_mid++;
+                    total++;
+                    if (max_w > prev_max_w) inc_cnt++;
+                    prev_max_w = max_w;
+                }
+                // 60行中>55%的行宽度递增=十字扩张
+                if (total > 20 && inc_cnt > total * 55 / 100)
+                    expansion = 1;
+            }
 
-            int width_ok = (hw_bot_n >= 3 && hw_mid_n >= 3 && hw_mid > hw_bot + 12);
-            int white_ok = (white_mid > white_bot * 3 / 2);
-            int expansion = width_ok || white_ok;   /* 至少一种扩张信号 */
-
-            /* 3. 背离侧方向 + 底部参考 */
+            /* 3. 背离侧底部参考 + 斜率拐点搜索(110→30行) */
             int away_bot = 0, away_by = 0, edge_bot = 0, edge_by = 0;
             for (int y = 105; y <= 115; y++)
             {
@@ -660,68 +664,49 @@ void vis_deal(void)
                     { edge_bot = (*bdr_edge)[y]; edge_by = y; }
             }
 
-            int away_top = 0, away_ty = 0;
-            for (int y = 30; y <= 50; y++)
-                if ((*bdr_away)[y] != BORDER_INVALID)
-                    { away_top = (*bdr_away)[y]; away_ty = y; break; }
-
-            if (away_by > 0 && away_ty > 0 && hw_bot_n >= 3)
+            if (away_by > 0 && expansion)
             {
-                int dx = away_top - away_bot;
-                int dir_wrong = (lost_side == -1 && dx > 3)
-                             || (lost_side ==  1 && dx < -3);
-
-                /* 必须同时满足：方向错 + 白宽扩张 */
-                if (dir_wrong && expansion)
+                /* 斜率突变拐点检测：从110行扫到30行，找斜率阶跃 */
+                int corner_y = -1;
                 {
-                    /* 4. 斜率突变拐点检测 (P4: 边界在拐点处斜率"断崖")
-                     *    不只看累积偏移——找斜率发生阶跃的精确行 */
-                    int corner_y = -1;
+                    int   py = away_by, px = away_bot;
+                    float prev_k = 0;
+                    int   kink_cnt = 0;
+
+                    for (int y = away_by - 1; y >= 30 && corner_y < 0; y--)
                     {
-                        int   py = away_by, px = away_bot;
-                        float prev_k = 0;
-                        int   kink_cnt = 0;
+                        if ((*bdr_away)[y] == BORDER_INVALID) continue;
+                        int dy = py - y;
+                        if (dy < 2) continue;
 
-                        for (int y = away_by - 1; y >= 25 && corner_y < 0; y--)
+                        float k = (float)((*bdr_away)[y] - px) / (float)dy;
+                        float dk = (k > prev_k) ? (k - prev_k) : (prev_k - k);
+
+                        if (prev_k != 0 && dk > 0.25f)
                         {
-                            if ((*bdr_away)[y] == BORDER_INVALID) continue;
-                            int dy = py - y;
-                            if (dy < 2) continue;
-
-                            float k = (float)((*bdr_away)[y] - px) / (float)dy;
-                            float dk = (k > prev_k) ? (k - prev_k) : (prev_k - k);
-
-                            if (prev_k != 0 && dk > 0.25f)
-                            {
-                                kink_cnt++;
-                                if (kink_cnt >= 2) { corner_y = py; break; }
-                            }
-                            else { kink_cnt = 0; }
-
-                            prev_k = k; py = y; px = (*bdr_away)[y];
+                            kink_cnt++;
+                            if (kink_cnt >= 2) { corner_y = py; break; }
                         }
-                    }
-                    /* 兜底：斜率法失败 → 累积偏移法（阈值提到10px）*/
-                    if (corner_y < 0)
-                    {
-                        int accum = 0, ref = away_bot;
-                        for (int y = away_by - 1; y >= 30 && corner_y < 0; y--)
-                        {
-                            if ((*bdr_away)[y] == BORDER_INVALID) continue;
-                            accum = (*bdr_away)[y] - ref;
-                            if ((lost_side == -1 && accum > 10) || (lost_side == 1 && accum < -10))
-                                corner_y = y;
-                        }
-                    }
-                    if (corner_y < 25) corner_y = 50;
+                        else { kink_cnt = 0; }
 
+                        prev_k = k; py = y; px = (*bdr_away)[y];
+                    }
+                }
+                /* 扫到30行还没找到拐点 → 不触发，放弃 */
+
+                if (corner_y > 0)
+                {
                     /* 5. 拐点往上清空背离侧 */
                     for (int y = corner_y; y >= 20; y--)
                         { (*bdr_away)[y] = BORDER_INVALID;
                           ((lost_side == -1) ? r_border_exist : l_border_exist)[y] = 0; }
 
                     /* 6. 外推：贴边侧跟随实际斜率 (P4: 斜率补线) + 实测路宽 */
-                    int ehw = hw_bot;
+                    int ehw = 0, ehw_n = 0;
+                    for (int y = 105; y <= 115; y++)
+                        if (l_border[y] != BORDER_INVALID && r_border[y] != BORDER_INVALID)
+                            { ehw += r_border[y] - l_border[y]; ehw_n++; }
+                    if (ehw_n > 0) ehw /= ehw_n;
                     if (ehw < 20) ehw = 60;
                     if (ehw > 160) ehw = 160;
 

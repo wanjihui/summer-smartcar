@@ -30,7 +30,7 @@
 #define ENCODER_RIGHT_B         (TIM4_ENCODER_CH2_B7)   // 右编码器 B 相
 
 #define ENCODER_PIT             (TIM6_PIT)              // 编码器采集周期定时器
-#define ENCODER_PIT_PERIOD_MS   10                      // 采集周期 10ms（100Hz）
+#define ENCODER_PIT_PERIOD_MS   5                       // 采集周期 5ms（200Hz）
 
 // 全局编码器速度变量（在 PIT 中断中更新，单位：脉冲/采集周期）
 extern int16 encoder_left_speed;

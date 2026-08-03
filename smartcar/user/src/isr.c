@@ -35,8 +35,12 @@
 
 #include "isr.h"
 #include "encoder.h"
+#include "motor.h"
 #include "mpu6050.h"
 #include "attitude.h"
+#include "pid.h"
+#include "KF.h"
+#include "control.h"
 
 //-------------------------------------------------------------------------------------------------------------------
 // 函数简介     TIM1 的定时器更新中断服务函数 启动 .s 文件定义 不允许修改函数名称
@@ -80,15 +84,7 @@ void TIM3_IRQHandler (void)
 //-------------------------------------------------------------------------------------------------------------------
 void TIM4_IRQHandler (void)
 {
-    // 有短按待消费时暂停扫描，防止被下一轮 RELEASE 覆盖
-    if (key_get_state(KEY_1) != KEY_SHORT_PRESS &&
-        key_get_state(KEY_2) != KEY_SHORT_PRESS &&
-        key_get_state(KEY_3) != KEY_SHORT_PRESS &&
-        key_get_state(KEY_4) != KEY_SHORT_PRESS)
-    {
-        key_scanner();
-    }
-    TIM4->SR &= ~TIM4->SR;                                                      // 清空中断状态
+    TIM4->SR &= ~TIM4->SR;                                                      // 清空中断状态（编码器模式，无额外处理）
 }
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -110,13 +106,29 @@ void TIM5_IRQHandler (void)
 void TIM6_IRQHandler (void)
 {
     encoder_pit_callback();
+
+    /* 速度环：编码器脉冲/5ms → cm/s (PPR=4096=1024线×4x正交) */
+    #define ENC_TO_CMS 1.117f
+    Motor_L_PID.Actual = kalman_update(&Kf_L,
+                            (float)encoder_get_left_speed() * ENC_TO_CMS);
+    Motor_R_PID.Actual = kalman_update(&Kf_R,
+                            -(float)encoder_get_right_speed() * ENC_TO_CMS);
+    if (car_run)
+    {
+        Speed_PID_Crtl();
+    }
+    else
+    {
+        motor_set_left(0);
+        motor_set_right(0);
+    }
+
     // MPU6050 + AHRS 已禁用
     //mpu6050_get_acc();
     //mpu6050_get_gyro();
     //atti_update();
 
-    // 此处编写用户代码
-    TIM6->SR &= ~TIM6->SR;                                                      // 清空中断状态
+    TIM6->SR &= ~TIM6->SR;
 }
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -125,9 +137,14 @@ void TIM6_IRQHandler (void)
 //-------------------------------------------------------------------------------------------------------------------
 void TIM7_IRQHandler (void)
 {
-    // 此处编写用户代码
-
-    // 此处编写用户代码
+    // 有短按待消费时暂停扫描，防止被下一轮 RELEASE 覆盖
+    if (key_get_state(KEY_1) != KEY_SHORT_PRESS &&
+        key_get_state(KEY_2) != KEY_SHORT_PRESS &&
+        key_get_state(KEY_3) != KEY_SHORT_PRESS &&
+        key_get_state(KEY_4) != KEY_SHORT_PRESS)
+    {
+        key_scanner();
+    }
     TIM7->SR &= ~TIM7->SR;                                                      // 清空中断状态
 }
 

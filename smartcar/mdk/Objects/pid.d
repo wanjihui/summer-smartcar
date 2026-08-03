@@ -1,4 +1,4 @@
-./objects/pid.o: ..\code\control\pid.c ..\user\inc\config.h \
+./objects/pid.o: ..\code\pid\pid.c ..\code\pid\pid.h \
   ..\..\libraries\zf_common\zf_common_headfile.h \
   ..\..\libraries\sdk\hal_device_registers.h \
   ..\..\libraries\sdk\mm32f3277g.h \
@@ -76,8 +76,4 @@
   ..\..\libraries\zf_device\zf_device_wifi_uart.h \
   ..\..\libraries\zf_device\zf_device_wireless_uart.h \
   ..\..\libraries\components\fatfs\source\ffconf.h \
-  ..\..\libraries\components\fatfs\source\ff.h ..\code\motor\motor.h \
-  ..\code\encoder\encoder.h ..\code\MPU6050\mpu6050.h \
-  ..\code\servo\servo.h ..\code\menu\menu.h ..\code\menu\Mymenu.h \
-  ..\code\vision\vision.h ..\code\control\pid.h \
-  ..\code\control\control.h
+  ..\..\libraries\components\fatfs\source\ff.h ..\code\motor\motor.h

@@ -5,6 +5,8 @@
 #include "motor.h"
 #include "vision.h"
 #include "attitude.h"
+#include "pid.h"
+#include "KF.h"
 
 //全局变量
 
@@ -26,12 +28,16 @@ extern int   motor_curve_duty; // 弯道占空比（is_straight判定为弯道�
 extern int   motor_max_duty;  // 最大正转占空比
 extern float motor_kp;
 extern float motor_kd;
-extern int   motor_diff_max;  // 差速上限（%），防漂
-extern bool  car_run;        // 是否运行小车（true=搜线+控制, false=仅菜单）
-extern float gyro_z_dbg;     // 诊断：量化后 gyro_z
-extern float steer_dbg;      // 诊断：舵机偏离中心角度
+extern int   motor_diff_max;  // 差速上限（脉冲/10ms），防漂
+extern float motor_speed_kp;   // 速度环 Kp
+extern float motor_speed_ki;   // 速度环 Ki
+extern float motor_speed_kd;   // 速度环 Kd
+extern volatile bool  car_run;          // 是否运行小车
+extern float gyro_z_dbg;       // 诊断：量化后 gyro_z
+extern float steer_dbg;        // 诊断：舵机偏离中心角度
 
 void control_init(void);
 void control_update(void);
+void control_vofa_send(void);
 
 #endif

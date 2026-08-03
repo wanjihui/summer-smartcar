@@ -18,9 +18,12 @@ float gyro_kd_curve   = DEFAULT_GYRO_KD_CURVE;
 float motor_kp       = DEFAULT_MOTOR_KP;
 float motor_kd       = DEFAULT_MOTOR_KD;
 int   motor_diff_max = DEFAULT_MOTOR_DIFF_MAX;
-bool  car_run        = false;    // 小车运行开关，菜单可切换
-float gyro_z_dbg     = 0.0f;     // 诊断：量化后 gyro_z
-float steer_dbg      = 0.0f;     // 诊断：舵机偏离中心角度
+float motor_speed_kp = DEFAULT_SPEED_KP;
+float motor_speed_ki = DEFAULT_SPEED_KI;
+float motor_speed_kd = DEFAULT_SPEED_KD;
+volatile bool  car_run        = false;
+float gyro_z_dbg     = 0.0f;
+float steer_dbg      = 0.0f;
 
 static float servo_last_err   = 0;       // 上一帧偏差，舵机D项用
 static float servo_last_angle = 0;      // 上一帧舵机角度，步进限制用
@@ -29,8 +32,16 @@ static float motor_last_err   = 0;      // 上一帧偏差，电机D项用
 
 void control_init(void)
 {
-    servo_last_angle = servo_center;     // 初始化舵机角度记录
-    servo_set_angle(servo_center);       // 立即输出PWM，舵机进入工作状态
+    servo_last_angle = servo_center;
+    servo_set_angle(servo_center);
+    Speed_PID_Init();                    // 初始化速度环PID中间量
+    KF_init(&Kf_L, KF_SPEED_Q, KF_SPEED_R);  // 初始化卡尔曼滤波器
+    KF_init(&Kf_R, KF_SPEED_Q, KF_SPEED_R);
+    /* 用菜单可调的 motor_max_duty 覆盖静态初始值 */
+    Motor_L_PID.OutMax =  (float)motor_max_duty;
+    Motor_L_PID.OutMin = -(float)motor_max_duty;
+    Motor_R_PID.OutMax =  (float)motor_max_duty;
+    Motor_R_PID.OutMin = -(float)motor_max_duty;
 }
 
 //舵机控制
@@ -91,52 +102,63 @@ static void servo_update(void)
 }
 
 
-//电机控制
+//电机控制 — 速度闭环（PID.Target = 目标速度(编码器脉冲/10ms)）
 static void motor_update(void)
 {
-    // ----PD算出差速----
-    float e=err;                                     // 偏差
-    if (e > -servo_dead && e < servo_dead) e = 0;    // 死区（与舵机一致）
-    if (servo_dir) e = -e;                           // 方向翻转（与舵机一致）
-    float cha = e - motor_last_err;                  // 偏差变化
+    /* 同步菜单参数到PID结构体 */
+    Motor_L_PID.Kp = motor_speed_kp; Motor_R_PID.Kp = motor_speed_kp;
+    Motor_L_PID.Ki = motor_speed_ki; Motor_R_PID.Ki = motor_speed_ki;
+    Motor_L_PID.Kd = motor_speed_kd; Motor_R_PID.Kd = motor_speed_kd;
 
+    float e = err;
+    if (e > -servo_dead && e < servo_dead) e = 0;
+    if (servo_dir) e = -e;
+    float cha = e - motor_last_err;
     float Cha = motor_kp * e + motor_kd * cha;
     motor_last_err = e;
 
-    // ----直道/弯道基础占空比: |err|<8→直道高速, else→弯道减速----
-    float e_abs = (e > 0) ? e : -e;
-    int base = (e_abs < 8.0f) ? motor_base_duty : motor_curve_duty;
-    if (base < 5) base = 5;                         // 死区12已是最低可用duty，base保底降到5
+    /* 目标速度: 菜单值(dm/s) → cm/s → PID.Target(cm/s)（对齐P7做法）*/
+    #define ENC_TO_CMS 1.117f    /* 1脉冲/5ms → cm/s (PPR=4096=1024线×4x) */
+    #define DMS_TO_CMS 10.0f     /* 1 dm/s = 10 cm/s */
 
-    // 差速量：限幅防漂
-    int diff = (int)Cha;
+    static bool is_curve = false;
+    float e_abs = (e > 0) ? e : -e;
+    if (!is_curve && e_abs > 12.0f)      is_curve = true;
+    else if (is_curve && e_abs < 6.0f)   is_curve = false;
+    float base_cms = (is_curve
+        ? (float)motor_curve_duty : (float)motor_base_duty) * DMS_TO_CMS;
+    if (base_cms < 20.0f) base_cms = 20.0f;
+
+    /* 差速量（cm/s）*/
+    int diff = (int)(Cha * ENC_TO_CMS);
     if (diff >  motor_diff_max) diff =  motor_diff_max;
     if (diff < -motor_diff_max) diff = -motor_diff_max;
 
-    int left  = base + diff;
-    int right = base - diff;
+    /* PID Target 和 Actual 统一用 cm/s（对齐P7）*/
+    Motor_L_PID.Target = base_cms + (float)diff;
+    Motor_R_PID.Target = base_cms - (float)diff;
+}
 
-    // ----死区+限幅----
-    // 电机±1~11%扭矩不足，直接跳到±12；0保持0（停车）
-    if (left  > 0 && left  < 12)  left  = 12;
-    if (left  < 0 && left  > -12) left  = -12;
-    if (right > 0 && right < 12)  right = 12;
-    if (right < 0 && right > -12) right = -12;
-
-    if (left  > motor_max_duty)  left  = motor_max_duty;
-    if (left  < -motor_max_duty)  left  = -motor_max_duty;
-    if (right > motor_max_duty)  right = motor_max_duty;
-    if (right < -motor_max_duty)  right = -motor_max_duty;
-
-    motor_set_both((int8_t)left, (int8_t)right); 
+// VOFA Firewater: 无线串口发送速度数据（每N帧调用一次，供上位机调参）
+void control_vofa_send(void)
+{
+    /* Firewater: Target(cm/s),Actual(cm/s),Out(duty),... */
+    char buf[128];
+    int len = snprintf(buf, sizeof(buf),
+        "%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.2f\r\n",
+        Motor_L_PID.Target, Motor_L_PID.Actual, Motor_L_PID.Out,
+        Motor_R_PID.Target, Motor_R_PID.Actual, Motor_R_PID.Out,
+        (double)err);
+    if (len > 0 && len < (int)sizeof(buf))
+        wireless_uart_send_buffer((uint8 *)buf, (uint32)len);
 }
 
 //控制总调用接口
 void control_update(void)
 {
-    //---- |err|连续过渡: kp自动分离, kd/gyro平滑, motor速度跟随 ----
     servo_update();
     motor_update();
+    Speed_PID_Enable = 1;   /* 速度环使能（car_run=false时由main.c关闭）*/
 }
 
 

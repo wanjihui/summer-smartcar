@@ -62,24 +62,17 @@ void menu_init(void)
         Menu_Set_Limit(v, 0, 10,0.5f);
 
 
-        // 电机
-        v = dynamicCreate_Menu_Number(pid, "base_duty", &motor_base_duty, int32_Box);
-        Menu_Set_Limit(v, 0, 50,1.0f);
-        v = dynamicCreate_Menu_Number(pid, "cur_duty", &motor_curve_duty, int32_Box);
-        Menu_Set_Limit(v, 0, 50,1.0f);
-        v = dynamicCreate_Menu_Number(pid, "motor_kp",  &motor_kp, float_Box);
-        Menu_Set_Limit(v, 0, 10,0.01f);
-        v = dynamicCreate_Menu_Number(pid, "motor_kd",  &motor_kd, float_Box);
-        Menu_Set_Limit(v, 0, 2,0.01f);
-        v = dynamicCreate_Menu_Number(pid, "diff_max",  &motor_diff_max, int32_Box);
-        Menu_Set_Limit(v, 2, 20,1.0f);
-
-        // 姿态角融合
-        v = dynamicCreate_Menu_Number(pid, "fusion_a",  &servo_fusion_alpha, float_Box);
-        Menu_Set_Limit(v, 0.0f, 0.5f, 0.05f);  // 上限 0.5（Angle PID 是偏航速率阻尼器，α=1 会丢失视觉跟踪）
-        v = dynamicCreate_Menu_Number(pid, "ang_kpa",   &angle_kp_a, float_Box);
+        // 电机目标速度 (dm/s: 22=2.2m/s)
+        v = dynamicCreate_Menu_Number(pid, "base_spd", &motor_base_duty, int32_Box);
+        Menu_Set_Limit(v, 1, 80, 1.0f);
+        v = dynamicCreate_Menu_Number(pid, "cur_spd",  &motor_curve_duty, int32_Box);
+        Menu_Set_Limit(v, 1, 80, 1.0f);
+        // 速度环PID
+        v = dynamicCreate_Menu_Number(pid, "spd_kp",   &motor_speed_kp, float_Box);
+        Menu_Set_Limit(v, 0.0f, 10.0f, 0.1f);
+        v = dynamicCreate_Menu_Number(pid, "spd_ki",   &motor_speed_ki, float_Box);
         Menu_Set_Limit(v, 0.0f, 5.0f, 0.01f);
-        v = dynamicCreate_Menu_Number(pid, "ang_kd",    &angle_kd, float_Box);
+        v = dynamicCreate_Menu_Number(pid, "spd_kd",   &motor_speed_kd, float_Box);
         Menu_Set_Limit(v, 0.0f, 2.0f, 0.01f);
 
         dynamicCreate_Menu_Number(pid, "car_run",   &car_run,  bool_Box);
@@ -97,6 +90,10 @@ void menu_init(void)
         v = dynamicCreate_Menu_Number(dbg, "gz",        &gyro_z_dbg, float_Box);
         v = dynamicCreate_Menu_Number(dbg, "steer",     &steer_dbg, float_Box);
         v = dynamicCreate_Menu_Number(dbg, "ang",       &angle_pid_out, float_Box);
+        v = dynamicCreate_Menu_Number(dbg, "encL",      (int16*)&encoder_left_speed, int16_Box);
+        v = dynamicCreate_Menu_Number(dbg, "encR",      (int16*)&encoder_right_speed, int16_Box);
+        v = dynamicCreate_Menu_Number(dbg, "tgtL",      (float*)&Motor_L_PID.Target, float_Box);
+        v = dynamicCreate_Menu_Number(dbg, "pL",        (float*)&Motor_L_PID.Out, float_Box);
     }
 
     key = head.first_son;
@@ -108,8 +105,7 @@ static void show_key(void)
     Menu_Item *h = key->father;
     Menu_Item *s = h->first_son;
     for(int i = 0; i < h->sons; i++)
-    {
-        if(s == key)
+    {        if(s == key)
         {
             if(s->select)
                 ips200_show_string(0, i*16, "*>");
