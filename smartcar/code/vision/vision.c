@@ -163,7 +163,7 @@ static int calc_adaptive_far(void)
  *   左边界: 从 prev_l ± range 搜 B→W→W（黑→白→白）= 真左边界
  *   右边界: 从 prev_r ± range 搜 W→B（白→黑）= 真右边界
  *   单边丢: last_valid_width 外推，exist=0
- *   双边丢: 中心区域白检测 → 十字继续 / 黑区5行停止
+ *   双边丢: 中心区域白检测 → 继续 / 黑区5行停止
  *
  * 直接填充 l_border[] / r_border[] / exist[]，替代种子生长全流程。
  * 返回: 1=双侧丢线（pho_center安全钳触发） 0=正常
@@ -548,8 +548,7 @@ static int camera_is_covered(void)
  *   2. 手遮检测 → 停车
  *   3. 底部连通滤波 → 只留与底部连通的白
  *   4. sweep_boundaries → 逐行扫描边界
- *   5. 斜入十字处理（一侧贴边，P4白宽扩张验证+斜率拐点）
- *   6. pho_center → 中线 + 偏差
+ *   5. pho_center → 中线 + 偏差
  * ================================================================ */
 void vis_deal(void)
 {
@@ -598,153 +597,6 @@ void vis_deal(void)
 
     /* ---- 逐行扫描边界（替代种子生长 + pho_border + 补全）---- */
     sweep_boundaries();
-
-    /* ---- 斜入十字 v2：贴边检测(P4白宽扩张) + 斜率突变拐点 + 贴边侧斜率跟随 ---- */
-    {
-        /* 1. 贴边检测（放宽阈值70%，后续多道验证防误判）*/
-        int l_bad = 0, r_bad = 0, l_n = 0, r_n = 0;
-        for (int y = 50; y <= 110; y++)
-        {
-            if (l_border[y] != BORDER_INVALID)
-            {
-                l_n++;
-                if (l_border[y] <= 10 || !l_border_exist[y]) l_bad++;
-            }
-            if (r_border[y] != BORDER_INVALID)
-            {
-                r_n++;
-                if (r_border[y] >= pho_w_max - 10 || !r_border_exist[y]) r_bad++;
-            }
-        }
-        int lost_side = 0;
-        if (l_n > 5 && l_bad > l_n * 7 / 10) lost_side = -1;  /* 70%，放宽 */
-        if (r_n > 5 && r_bad > r_n * 7 / 10) lost_side =  1;
-
-        if (lost_side != 0)
-        {
-            border_line *bdr_away = (lost_side == -1) ? &r_border : &l_border;
-            border_line *bdr_edge = (lost_side == -1) ? &l_border : &r_border;
-
-            /* 2. 白宽扩张验证：逐行算最长白列宽，行号减小(往上)宽度增大=十字 */
-            int expansion = 0;
-            {
-                int prev_max_w = 0, inc_cnt = 0, total = 0;
-                for (int y = 110; y >= 50; y--)
-                {
-                    // 找该行最长白段宽度
-                    int run_s = -1, max_w = 0;
-                    for (int x = 0; x < pho_w; x++)
-                    {
-                        if (Image_Used[y][x] == 255)
-                        { if (run_s < 0) run_s = x; }
-                        else if (run_s >= 0)
-                        { int w = x - run_s;
-                          if (w > max_w) max_w = w; run_s = -1; }
-                    }
-                    if (run_s >= 0)
-                    { int w = pho_w - run_s; if (w > max_w) max_w = w; }
-                    if (max_w < 10) continue;
-
-                    total++;
-                    if (max_w > prev_max_w) inc_cnt++;
-                    prev_max_w = max_w;
-                }
-                // 60行中>55%的行宽度递增=十字扩张
-                if (total > 20 && inc_cnt > total * 55 / 100)
-                    expansion = 1;
-            }
-
-            /* 3. 背离侧底部参考 + 斜率拐点搜索(110→30行) */
-            int away_bot = 0, away_by = 0, edge_bot = 0, edge_by = 0;
-            for (int y = 105; y <= 115; y++)
-            {
-                if ((*bdr_away)[y] != BORDER_INVALID && away_by == 0)
-                    { away_bot = (*bdr_away)[y]; away_by = y; }
-                if ((*bdr_edge)[y] != BORDER_INVALID && edge_by == 0)
-                    { edge_bot = (*bdr_edge)[y]; edge_by = y; }
-            }
-
-            if (away_by > 0 && expansion)
-            {
-                /* 斜率突变拐点检测：从110行扫到30行，找斜率阶跃 */
-                int corner_y = -1;
-                {
-                    int   py = away_by, px = away_bot;
-                    float prev_k = 0;
-                    int   kink_cnt = 0;
-
-                    for (int y = away_by - 1; y >= 30 && corner_y < 0; y--)
-                    {
-                        if ((*bdr_away)[y] == BORDER_INVALID) continue;
-                        int dy = py - y;
-                        if (dy < 2) continue;
-
-                        float k = (float)((*bdr_away)[y] - px) / (float)dy;
-                        float dk = (k > prev_k) ? (k - prev_k) : (prev_k - k);
-
-                        if (prev_k != 0 && dk > 0.25f)
-                        {
-                            kink_cnt++;
-                            if (kink_cnt >= 2) { corner_y = py; break; }
-                        }
-                        else { kink_cnt = 0; }
-
-                        prev_k = k; py = y; px = (*bdr_away)[y];
-                    }
-                }
-                /* 扫到30行还没找到拐点 → 不触发，放弃 */
-
-                if (corner_y > 0)
-                {
-                    /* 5. 拐点往上清空背离侧 */
-                    for (int y = corner_y; y >= 20; y--)
-                        { (*bdr_away)[y] = BORDER_INVALID;
-                          ((lost_side == -1) ? r_border_exist : l_border_exist)[y] = 0; }
-
-                    /* 6. 外推：贴边侧跟随实际斜率 (P4: 斜率补线) + 实测路宽 */
-                    int ehw = 0, ehw_n = 0;
-                    for (int y = 105; y <= 115; y++)
-                        if (l_border[y] != BORDER_INVALID && r_border[y] != BORDER_INVALID)
-                            { ehw += r_border[y] - l_border[y]; ehw_n++; }
-                    if (ehw_n > 0) ehw /= ehw_n;
-                    if (ehw < 20) ehw = 60;
-                    if (ehw > 160) ehw = 160;
-
-                    /* 追贴边侧拐点附近的真实斜率 */;
-                    int   etop = edge_bot, etop_y = edge_by;
-                    float ek = 0;
-                    for (int y = edge_by - 1; y >= corner_y && y >= 20; y--)
-                        if ((*bdr_edge)[y] != BORDER_INVALID)
-                            { etop = (*bdr_edge)[y]; etop_y = y; break; }
-                    if (etop_y != edge_by)
-                        ek = (float)(etop - edge_bot) / (float)(etop_y - edge_by);
-
-                    if (edge_bot < 5) edge_bot = (lost_side == -1) ? 0 : pho_w_max;
-
-                    for (int y = corner_y; y >= 20; y--)
-                    {
-                        int dy = edge_by - y;
-                        int edge_now = edge_bot + (int)(ek * (float)dy);
-                        if (edge_now < 0) edge_now = 0;
-                        if (edge_now >= pho_w) edge_now = pho_w_max;
-
-                        if (lost_side == -1)  /* 左贴边 → 推右边 */
-                        {
-                            int rv = edge_now + ehw;
-                            if (rv > pho_w_max) rv = pho_w_max;
-                            r_border[y] = (uint8)rv; r_border_exist[y] = 0;
-                        }
-                        else                /* 右贴边 → 推左边 */
-                        {
-                            int lv = edge_now - ehw;
-                            if (lv < 0) lv = 0;
-                            l_border[y] = (uint8)lv; l_border_exist[y] = 0;
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     /* ---- 中线 + 偏差 ---- */
     pho_center();
