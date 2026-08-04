@@ -1,4 +1,5 @@
 #include "config.h"
+#include "vofa_uart.h"
 
 //PID参数定义
 float servo_kp1      = DEFAULT_SERVO_KP1;  // 基础P
@@ -123,13 +124,28 @@ static void motor_update(void)
     #define ENC_TO_CMS 1.117f
     #define DMS_TO_CMS 10.0f
 
-    static bool is_curve = false;
+    /* 连续速度过渡：|e| 8→18，基础速度从直道平滑过渡到弯道 */
     float e_abs = (e > 0) ? e : -e;
-    if (!is_curve && e_abs > 12.0f)      is_curve = true;
-    else if (is_curve && e_abs < 6.0f)   is_curve = false;
-    float base_cms = (is_curve
-        ? (float)motor_curve_duty : (float)motor_base_duty) * DMS_TO_CMS;
+    float ratio = 0.0f;
+    if (e_abs > 8.0f)
+    {
+        ratio = (e_abs - 8.0f) / 10.0f;       /* 8→18, ratio 0→1 */
+        if (ratio > 1.0f) ratio = 1.0f;
+    }
+    float base_spd_dms = (float)motor_base_duty * (1.0f - ratio)
+                       + (float)motor_curve_duty * ratio;
+    float base_cms = base_spd_dms * DMS_TO_CMS;
     if (base_cms < 20.0f) base_cms = 20.0f;
+
+    /* 非对称低通：入弯降速α=0.8(快)，出弯加速α=0.2(慢防振荡)*/
+    static float base_cms_filtered = 0;
+    if (base_cms_filtered < 1.0f) base_cms_filtered = base_cms;
+    else
+    {
+        float alpha = (base_cms < base_cms_filtered) ? 1.0f : 0.5f;
+        base_cms_filtered += alpha * (base_cms - base_cms_filtered);
+    }
+    base_cms = base_cms_filtered;
 
     int diff = (int)(Cha * ENC_TO_CMS);
     if (diff >  motor_diff_max) diff =  motor_diff_max;
@@ -143,7 +159,7 @@ static void motor_update(void)
     float new_tgt_l = base_cms + (float)diff;
     float new_tgt_r = base_cms - (float)diff;
     if (prev_target_l > 10.0f
-        && (new_tgt_l > prev_target_l * 1.3f || new_tgt_l < prev_target_l * 0.7f))
+        && (new_tgt_l > prev_target_l * 1.5f || new_tgt_l < prev_target_l * 0.5f))
     {
         PID_INC_Init(&Motor_L_PID);
         PID_INC_Init(&Motor_R_PID);
@@ -154,20 +170,23 @@ static void motor_update(void)
 
     Motor_L_PID.Target = new_tgt_l;
     Motor_R_PID.Target = new_tgt_r;
+
+    /* 更新陀螺仪调试值（主循环50Hz，不放ISR防I2C阻塞）*/
+    gyro_z_dbg = (float)mpu6050_get_gyro_z();
 }
 
-// VOFA Firewater: 无线串口发送速度数据（每N帧调用一次，供上位机调参）
+// VOFA Firewater: 无线串口发送速度数据（非阻塞，TX空中断发送）
 void control_vofa_send(void)
 {
-    /* Firewater: Target(cm/s),Actual(cm/s),Out(duty),... */
+    /* Firewater: Target(cm/s),Actual(cm/s),Out(duty),err,steer */
     char buf[128];
     int len = snprintf(buf, sizeof(buf),
-        "%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.2f\r\n",
+        "%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.2f,%.2f,%.1f\r\n",
         Motor_L_PID.Target, Motor_L_PID.Actual, Motor_L_PID.Out,
         Motor_R_PID.Target, Motor_R_PID.Actual, Motor_R_PID.Out,
-        (double)err);
+        (double)err, (double)steer_dbg, (double)gyro_z_dbg);
     if (len > 0 && len < (int)sizeof(buf))
-        wireless_uart_send_buffer((uint8 *)buf, (uint32)len);
+        vofa_uart_send((uint8 *)buf, (uint32)len);
 }
 
 //控制总调用接口

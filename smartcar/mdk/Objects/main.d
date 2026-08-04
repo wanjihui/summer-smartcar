@@ -80,4 +80,5 @@
   ..\code\encoder\encoder.h ..\code\MPU6050\mpu6050.h \
   ..\code\servo\servo.h ..\code\menu\menu.h ..\code\menu\Mymenu.h \
   ..\code\vision\vision.h ..\code\control\control.h \
-  ..\code\control\attitude.h ..\code\pid\pid.h ..\code\KF\KF.h
+  ..\code\control\attitude.h ..\code\pid\pid.h ..\code\KF\KF.h \
+  ..\code\vofa\vofa_uart.h

@@ -26,7 +26,7 @@
 #define MOTOR_PWM_R             (TIM5_PWM_CH4_A3)   // 右电机 PWM 引脚
 
 #define MOTOR_PWM_FREQ          17000               // PWM 频率 17KHz
-#define MOTOR_MAX_DUTY          50                  // 最大占空比 50% 防止过流
+#define MOTOR_MAX_DUTY          70                  // 最大占空比 70%
 
 // 电机初始化
 void motor_init(void);

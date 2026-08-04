@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\user\inc;..\code;..\..\libraries\zf_common;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\..\libraries\sdk;..\..\libraries\sdk\CMSIS\Include;..\..\libraries\sdk\drivers;..\..\libraries\components\fatfs\source;..\code\menu;..\code\motor;..\code\encoder;..\code\MPU6050;..\code\servo;..\code\vision;..\code\control;..\code\pid;..\code\KF</IncludePath>
+              <IncludePath>..\user\inc;..\code;..\..\libraries\zf_common;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\..\libraries\sdk;..\..\libraries\sdk\CMSIS\Include;..\..\libraries\sdk\drivers;..\..\libraries\components\fatfs\source;..\code\menu;..\code\motor;..\code\encoder;..\code\MPU6050;..\code\servo;..\code\vision;..\code\control;..\code\pid;..\code\KF;..\code\vofa</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1368,6 +1368,21 @@
               <FileName>KF.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\code\KF\KF.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>code/vofa</GroupName>
+          <Files>
+            <File>
+              <FileName>vofa_uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\code\vofa\vofa_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>vofa_uart.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\code\vofa\vofa_uart.h</FilePath>
             </File>
           </Files>
         </Group>

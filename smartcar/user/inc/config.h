@@ -45,21 +45,21 @@
 #define DEFAULT_SERVO_MAX_ADD  5.5f  // 步进限制（度/帧）
 #define DEFAULT_SERVO_DIR      1     // 0=正常 1=翻转
 
-// --- 电机目标速度（dm/s，如22=2.2m/s=220cm/s）---
-#define DEFAULT_MOTOR_BASE       10    // 直道目标速度(dm/s) = 1.0m/s
-#define DEFAULT_MOTOR_CURVE_DUTY 7     // 弯道目标速度(dm/s) = 0.7m/s
+// --- 电机目标速度---
+#define DEFAULT_MOTOR_BASE       16    // 直道目标速度(dm/s) = 1.0m/s
+#define DEFAULT_MOTOR_CURVE_DUTY 11     // 弯道目标速度(dm/s) = 0.7m/s
 #define DEFAULT_MOTOR_MAX        50    // 最大占空比（PID Out限制）
 #define DEFAULT_MOTOR_KP         0.05f // 差速 P 系数
 #define DEFAULT_MOTOR_KD         0.0f  // 差速 D 系数
 #define DEFAULT_MOTOR_DIFF_MAX   13    // 差速上限（cm/s）
 
 // --- 速度环PID（增量式，ISR 5ms，200Hz，左右独立）---
-#define DEFAULT_SPEED_KP_L       0.8f  // 左轮 Kp
-#define DEFAULT_SPEED_KI_L       0.15f // 左轮 Ki
-#define DEFAULT_SPEED_KD_L       0.05f // 左轮 Kd
-#define DEFAULT_SPEED_KP_R       1.5f  // 右轮 Kp
-#define DEFAULT_SPEED_KI_R       0.25f // 右轮 Ki
-#define DEFAULT_SPEED_KD_R       0.10f // 右轮 Kd（加大抑制抖动）
+#define DEFAULT_SPEED_KP_L       0.5f  // 左轮 Kp（高速降增益防抖）
+#define DEFAULT_SPEED_KI_L       0.12f // 左轮 Ki
+#define DEFAULT_SPEED_KD_L       0.10f // 左轮 Kd
+#define DEFAULT_SPEED_KP_R       1.0f  // 右轮 Kp
+#define DEFAULT_SPEED_KI_R       0.20f // 右轮 Ki
+#define DEFAULT_SPEED_KD_R       0.15f // 右轮 Kd
 #define DEFAULT_SPEED_DELTA_MAX  6.0f  // 单次增量限幅（duty/5ms）
 
 // --- 姿态角融合 ---

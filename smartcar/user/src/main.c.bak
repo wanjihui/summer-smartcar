@@ -93,20 +93,20 @@ int main (void)
 					if(car_run)
 					{
 						control_update();     //舵机 电机控制
-						/* VOFA Firewater 非阻塞发送（TX空中断+环形缓冲区）*/
-						static uint8 vofa_cnt = 0;
-						if (++vofa_cnt >= 2)  /* 隔帧 ≈25Hz */
-						{
-						    vofa_cnt = 0;
-						    control_vofa_send();
-						}
 					}
 					vis_frame_ready = 1;  //通知显示层：新帧已处理，可以刷新
+						/* VOFA Firewater 速度数据发送（每帧≈50Hz）*/
+						static uint8 vofa_cnt = 0;
+							if (++vofa_cnt >= 2)  /* 隔帧发送 ≈25Hz */
+							{
+							    vofa_cnt = 0;
+							    control_vofa_send();
+							}
+						/* VOFA已关闭 */
 				}
 		    if(!car_run) {motor_stop(); Speed_PID_Enable = 0;}     //car_run=F立即停车+关速度�?
 
-			vofa_uart_poll();               // RTS恢复后重新使能TX中断
-		menu();					      // 菜单主循环：按键模式切换 �?菜单/摄像头分�?
+			menu();					      // 菜单主循环：按键模式切换 �?菜单/摄像头分�?
     }
 }
 // **************************** 代码区域 ****************************

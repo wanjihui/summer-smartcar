@@ -41,6 +41,7 @@
 #include "pid.h"
 #include "KF.h"
 #include "control.h"
+#include "vofa_uart.h"
 
 //-------------------------------------------------------------------------------------------------------------------
 // 函数简介     TIM1 的定时器更新中断服务函数 启动 .s 文件定义 不允许修改函数名称
@@ -107,12 +108,10 @@ void TIM6_IRQHandler (void)
 {
     encoder_pit_callback();
 
-    /* 速度环：编码器脉冲/5ms → cm/s (PPR=4096=1024线×4x正交) */
+    /* 速度环：编码器脉冲/5ms → cm/s (PPR=4096) */
     #define ENC_TO_CMS 1.117f
-    Motor_L_PID.Actual = kalman_update(&Kf_L,
-                            (float)encoder_get_left_speed() * ENC_TO_CMS);
-    Motor_R_PID.Actual = kalman_update(&Kf_R,
-                            -(float)encoder_get_right_speed() * ENC_TO_CMS);
+    Motor_L_PID.Actual =  (float)encoder_get_left_speed() * ENC_TO_CMS;
+    Motor_R_PID.Actual = -(float)encoder_get_right_speed() * ENC_TO_CMS;
     if (car_run)
     {
         Speed_PID_Crtl();
@@ -293,10 +292,7 @@ void UART6_IRQHandler (void)
 {
     if(UART6->ISR & 0x00000001)                                                 // 串口发送缓冲空中断
     {
-        // 此处编写用户代码
-        // 务必填写数据或者关闭中断 否则会一直触发串口发送中断
-
-        // 此处编写用户代码
+        vofa_uart_tx_isr();                                                     // VOFA 非阻塞发送：写 1 字节或关中断
         UART6->ICR |= 0x00000001;                                               // 清除中断标志位
     }
     if(UART6->ISR & 0x00000002)                                                 // 串口接收缓冲中断

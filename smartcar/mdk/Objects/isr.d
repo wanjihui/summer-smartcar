@@ -80,4 +80,4 @@
   ..\code\motor\motor.h ..\code\MPU6050\mpu6050.h \
   ..\code\control\attitude.h ..\code\pid\pid.h ..\code\KF\KF.h \
   ..\code\control\control.h ..\code\servo\servo.h \
-  ..\code\vision\vision.h
+  ..\code\vision\vision.h ..\code\vofa\vofa_uart.h
