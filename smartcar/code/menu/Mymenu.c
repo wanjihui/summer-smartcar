@@ -67,11 +67,9 @@ void menu_init(void)
         Menu_Set_Limit(v, 1, 80, 1.0f);
         v = dynamicCreate_Menu_Number(pid, "cur_spd",  &motor_curve_duty, int32_Box);
         Menu_Set_Limit(v, 1, 80, 1.0f);
-        // 差速PD
-        v = dynamicCreate_Menu_Number(pid, "diff_kp",  &motor_kp, float_Box);
-        Menu_Set_Limit(v, 0.0f, 1.0f, 0.01f);
-        v = dynamicCreate_Menu_Number(pid, "diff_kd",  &motor_kd, float_Box);
-        Menu_Set_Limit(v, 0.0f, 1.0f, 0.01f);
+        // Ackermann差速增益
+        v = dynamicCreate_Menu_Number(pid, "ack_gain", &ackermann_gain, float_Box);
+        Menu_Set_Limit(v, 0.1f, 5.0f, 0.1f);
 
         dynamicCreate_Menu_Number(pid, "car_run",   (bool*)&car_run,  bool_Box);
     }

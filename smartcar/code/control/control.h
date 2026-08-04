@@ -29,6 +29,7 @@ extern int   motor_max_duty;  // 最大正转占空比
 extern float motor_kp;
 extern float motor_kd;
 extern int   motor_diff_max;  // 差速上限（脉冲/10ms），防漂
+extern float ackermann_gain;  // Ackermann差速增益
 extern float motor_speed_kp_l;  // 左轮 Kp
 extern float motor_speed_ki_l;  // 左轮 Ki
 extern float motor_speed_kd_l;  // 左轮 Kd

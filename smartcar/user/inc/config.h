@@ -51,7 +51,8 @@
 #define DEFAULT_MOTOR_MAX        50    // 最大占空比（PID Out限制）
 #define DEFAULT_MOTOR_KP         0.05f // 差速 P 系数
 #define DEFAULT_MOTOR_KD         0.0f  // 差速 D 系数
-#define DEFAULT_MOTOR_DIFF_MAX   13    // 差速上限（cm/s）
+#define DEFAULT_MOTOR_DIFF_MAX   13    // 差速上限（cm/s）（旧方案保留）
+#define DEFAULT_ACKERMANN_GAIN  1.0f  // Ackermann差速增益
 
 // --- 速度环PID（增量式，ISR 5ms，200Hz，左右独立）---
 #define DEFAULT_SPEED_KP_L       0.5f  // 左轮 Kp（高速降增益防抖）

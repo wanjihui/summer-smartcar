@@ -19,6 +19,7 @@ float gyro_kd_curve   = DEFAULT_GYRO_KD_CURVE;
 float motor_kp       = DEFAULT_MOTOR_KP;
 float motor_kd       = DEFAULT_MOTOR_KD;
 int   motor_diff_max = DEFAULT_MOTOR_DIFF_MAX;
+float ackermann_gain = DEFAULT_ACKERMANN_GAIN;  // Ackermann差速增益
 float motor_speed_kp_l = DEFAULT_SPEED_KP_L;
 float motor_speed_ki_l = DEFAULT_SPEED_KI_L;
 float motor_speed_kd_l = DEFAULT_SPEED_KD_L;
@@ -31,7 +32,6 @@ float steer_dbg      = 0.0f;
 
 static float servo_last_err   = 0;       // 上一帧偏差，舵机D项用
 static float servo_last_angle = 0;      // 上一帧舵机角度，步进限制用
-static float motor_last_err   = 0;      // 上一帧偏差，电机D项用
 
 
 void control_init(void)
@@ -117,11 +117,7 @@ static void motor_update(void)
     float e = err;
     if (e > -servo_dead && e < servo_dead) e = 0;
     if (servo_dir) e = -e;
-    float cha = e - motor_last_err;
-    float Cha = motor_kp * e + motor_kd * cha;
-    motor_last_err = e;
 
-    #define ENC_TO_CMS 1.117f
     #define DMS_TO_CMS 10.0f
 
     /* 连续速度过渡：|e| 8→18，基础速度从直道平滑过渡到弯道 */
@@ -147,17 +143,27 @@ static void motor_update(void)
     }
     base_cms = base_cms_filtered;
 
-    int diff = (int)(Cha * ENC_TO_CMS);
-    if (diff >  motor_diff_max) diff =  motor_diff_max;
-    if (diff < -motor_diff_max) diff = -motor_diff_max;
+    /* === Ackermann差速：舵角→差速比（乘法，速度自适应）=== */
+    #define ACKERMANN_WHEELBASE  0.20f       // 轴距 L (m)
+    #define ACKERMANN_TRACK      0.05475f    // 后轮轮距 W (m)
+    #define ACKERMANN_DEADZONE   4.0f        // 死区 (°)
+    #define DEG2RAD              0.017453293f // PI/180
+
+    float steer_abs = (steer_dbg > 0.0f) ? steer_dbg : -steer_dbg;
+    float diff_ratio = 0.0f;
+    if (steer_abs > ACKERMANN_DEADZONE)
+    {
+        float ang_rad = steer_dbg * DEG2RAD;  // tan(θ)≈θ, 16°误差~3%
+        diff_ratio = ang_rad * ACKERMANN_TRACK / ACKERMANN_WHEELBASE * ackermann_gain;
+    }
 
     /* 前馈: 25duty≈200cm/s → 0.125 duty/(cm/s) */
     #define FF_GAIN 0.125f
 
-    /* 目标速度突变>30%时复位PID+预载前馈 */
+    /* 目标速度：乘法差速（差速量随速度自动缩放）*/
     static float prev_target_l = 0, prev_target_r = 0;
-    float new_tgt_l = base_cms + (float)diff;
-    float new_tgt_r = base_cms - (float)diff;
+    float new_tgt_l = base_cms * (1.0f + diff_ratio);
+    float new_tgt_r = base_cms * (1.0f - diff_ratio);
     if (prev_target_l > 10.0f
         && (new_tgt_l > prev_target_l * 1.5f || new_tgt_l < prev_target_l * 0.5f))
     {
