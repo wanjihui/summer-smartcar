@@ -18,9 +18,12 @@ float gyro_kd_curve   = DEFAULT_GYRO_KD_CURVE;
 float motor_kp       = DEFAULT_MOTOR_KP;
 float motor_kd       = DEFAULT_MOTOR_KD;
 int   motor_diff_max = DEFAULT_MOTOR_DIFF_MAX;
-float motor_speed_kp = DEFAULT_SPEED_KP;
-float motor_speed_ki = DEFAULT_SPEED_KI;
-float motor_speed_kd = DEFAULT_SPEED_KD;
+float motor_speed_kp_l = DEFAULT_SPEED_KP_L;
+float motor_speed_ki_l = DEFAULT_SPEED_KI_L;
+float motor_speed_kd_l = DEFAULT_SPEED_KD_L;
+float motor_speed_kp_r = DEFAULT_SPEED_KP_R;
+float motor_speed_ki_r = DEFAULT_SPEED_KI_R;
+float motor_speed_kd_r = DEFAULT_SPEED_KD_R;
 volatile bool  car_run        = false;
 float gyro_z_dbg     = 0.0f;
 float steer_dbg      = 0.0f;
@@ -102,13 +105,13 @@ static void servo_update(void)
 }
 
 
-//电机控制 — 速度闭环（PID.Target = 目标速度(编码器脉冲/10ms)）
+//电机控制 — 速度闭环
 static void motor_update(void)
 {
-    /* 同步菜单参数到PID结构体 */
-    Motor_L_PID.Kp = motor_speed_kp; Motor_R_PID.Kp = motor_speed_kp;
-    Motor_L_PID.Ki = motor_speed_ki; Motor_R_PID.Ki = motor_speed_ki;
-    Motor_L_PID.Kd = motor_speed_kd; Motor_R_PID.Kd = motor_speed_kd;
+    /* 同步菜单参数到PID结构体（左右独立）*/
+    Motor_L_PID.Kp = motor_speed_kp_l; Motor_R_PID.Kp = motor_speed_kp_r;
+    Motor_L_PID.Ki = motor_speed_ki_l; Motor_R_PID.Ki = motor_speed_ki_r;
+    Motor_L_PID.Kd = motor_speed_kd_l; Motor_R_PID.Kd = motor_speed_kd_r;
 
     float e = err;
     if (e > -servo_dead && e < servo_dead) e = 0;
@@ -117,9 +120,8 @@ static void motor_update(void)
     float Cha = motor_kp * e + motor_kd * cha;
     motor_last_err = e;
 
-    /* 目标速度: 菜单值(dm/s) → cm/s → PID.Target(cm/s)（对齐P7做法）*/
-    #define ENC_TO_CMS 1.117f    /* 1脉冲/5ms → cm/s (PPR=4096=1024线×4x) */
-    #define DMS_TO_CMS 10.0f     /* 1 dm/s = 10 cm/s */
+    #define ENC_TO_CMS 1.117f
+    #define DMS_TO_CMS 10.0f
 
     static bool is_curve = false;
     float e_abs = (e > 0) ? e : -e;
@@ -129,14 +131,29 @@ static void motor_update(void)
         ? (float)motor_curve_duty : (float)motor_base_duty) * DMS_TO_CMS;
     if (base_cms < 20.0f) base_cms = 20.0f;
 
-    /* 差速量（cm/s）*/
     int diff = (int)(Cha * ENC_TO_CMS);
     if (diff >  motor_diff_max) diff =  motor_diff_max;
     if (diff < -motor_diff_max) diff = -motor_diff_max;
 
-    /* PID Target 和 Actual 统一用 cm/s（对齐P7）*/
-    Motor_L_PID.Target = base_cms + (float)diff;
-    Motor_R_PID.Target = base_cms - (float)diff;
+    /* 前馈: 25duty≈200cm/s → 0.125 duty/(cm/s) */
+    #define FF_GAIN 0.125f
+
+    /* 目标速度突变>30%时复位PID+预载前馈 */
+    static float prev_target_l = 0, prev_target_r = 0;
+    float new_tgt_l = base_cms + (float)diff;
+    float new_tgt_r = base_cms - (float)diff;
+    if (prev_target_l > 10.0f
+        && (new_tgt_l > prev_target_l * 1.3f || new_tgt_l < prev_target_l * 0.7f))
+    {
+        PID_INC_Init(&Motor_L_PID);
+        PID_INC_Init(&Motor_R_PID);
+        Motor_L_PID.Out = new_tgt_l * FF_GAIN;  /* 预载估算duty */
+        Motor_R_PID.Out = new_tgt_r * FF_GAIN;
+    }
+    prev_target_l = new_tgt_l; prev_target_r = new_tgt_r;
+
+    Motor_L_PID.Target = new_tgt_l;
+    Motor_R_PID.Target = new_tgt_r;
 }
 
 // VOFA Firewater: 无线串口发送速度数据（每N帧调用一次，供上位机调参）

@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\MM32F327X_G8P.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\MM32F327X_G8P.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6240002: Last Updated: Tue Aug  4 05:56:58 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6240002: Last Updated: Tue Aug  4 18:06:55 2026
 <BR><P>
 <H3>Maximum Stack Usage =       1412 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -474,7 +474,8 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[88]"></a>__aeabi_fcmpgt</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, fcmpgt.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_straight
+<BR><BR>[Called By]<UL><LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_update
+<LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_straight
 <LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calc_adaptive_far
 </UL>
 
@@ -726,6 +727,7 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 4<LI>Call Chain = PID_INC_Init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Speed_PID_Init
+<LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_update
 </UL>
 
 <P><STRONG><a name="[74]"></a>PID_INC_Update</STRONG> (Thumb, 266 bytes, Stack size 64 bytes, pid.o(.text.PID_INC_Update))
@@ -1533,7 +1535,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[ed]"></a>menu_init</STRONG> (Thumb, 1060 bytes, Stack size 96 bytes, mymenu.o(.text.menu_init))
+<P><STRONG><a name="[ed]"></a>menu_init</STRONG> (Thumb, 1176 bytes, Stack size 96 bytes, mymenu.o(.text.menu_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = menu_init &rArr; dynamicCreate_Menu_Number &rArr; Create_Menu_Item
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Menu_Set_Limit
@@ -2508,8 +2510,8 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update
 </UL>
 
-<P><STRONG><a name="[9b]"></a>motor_update</STRONG> (Thumb, 598 bytes, Stack size 64 bytes, control.o(.text.motor_update))
-<BR><BR>[Stack]<UL><LI>Max Depth = 84<LI>Call Chain = motor_update &rArr; __aeabi_fsub &rArr; __aeabi_fadd &rArr; _float_epilogue
+<P><STRONG><a name="[9b]"></a>motor_update</STRONG> (Thumb, 814 bytes, Stack size 96 bytes, control.o(.text.motor_update))
+<BR><BR>[Stack]<UL><LI>Max Depth = 116<LI>Call Chain = motor_update &rArr; __aeabi_fsub &rArr; __aeabi_fadd &rArr; _float_epilogue
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
 <LI><a href="#[77]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpge
@@ -2517,6 +2519,8 @@ Local Symbols
 <LI><a href="#[5a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fadd
 <LI><a href="#[75]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
 <LI><a href="#[69]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2f
+<LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PID_INC_Init
+<LI><a href="#[88]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmpgt
 <LI><a href="#[76]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmple
 </UL>
 <BR>[Called By]<UL><LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;control_update

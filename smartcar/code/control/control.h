@@ -29,9 +29,12 @@ extern int   motor_max_duty;  // 最大正转占空比
 extern float motor_kp;
 extern float motor_kd;
 extern int   motor_diff_max;  // 差速上限（脉冲/10ms），防漂
-extern float motor_speed_kp;   // 速度环 Kp
-extern float motor_speed_ki;   // 速度环 Ki
-extern float motor_speed_kd;   // 速度环 Kd
+extern float motor_speed_kp_l;  // 左轮 Kp
+extern float motor_speed_ki_l;  // 左轮 Ki
+extern float motor_speed_kd_l;  // 左轮 Kd
+extern float motor_speed_kp_r;  // 右轮 Kp
+extern float motor_speed_ki_r;  // 右轮 Ki
+extern float motor_speed_kd_r;  // 右轮 Kd
 extern volatile bool  car_run;          // 是否运行小车
 extern float gyro_z_dbg;       // 诊断：量化后 gyro_z
 extern float steer_dbg;        // 诊断：舵机偏离中心角度

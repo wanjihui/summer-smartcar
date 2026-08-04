@@ -67,12 +67,19 @@ void menu_init(void)
         Menu_Set_Limit(v, 1, 80, 1.0f);
         v = dynamicCreate_Menu_Number(pid, "cur_spd",  &motor_curve_duty, int32_Box);
         Menu_Set_Limit(v, 1, 80, 1.0f);
-        // 速度环PID
-        v = dynamicCreate_Menu_Number(pid, "spd_kp",   &motor_speed_kp, float_Box);
+        // 速度环PID（左轮）
+        v = dynamicCreate_Menu_Number(pid, "L_kp",     &motor_speed_kp_l, float_Box);
         Menu_Set_Limit(v, 0.0f, 10.0f, 0.1f);
-        v = dynamicCreate_Menu_Number(pid, "spd_ki",   &motor_speed_ki, float_Box);
+        v = dynamicCreate_Menu_Number(pid, "L_ki",     &motor_speed_ki_l, float_Box);
         Menu_Set_Limit(v, 0.0f, 5.0f, 0.01f);
-        v = dynamicCreate_Menu_Number(pid, "spd_kd",   &motor_speed_kd, float_Box);
+        v = dynamicCreate_Menu_Number(pid, "L_kd",     &motor_speed_kd_l, float_Box);
+        Menu_Set_Limit(v, 0.0f, 2.0f, 0.01f);
+        // 速度环PID（右轮）
+        v = dynamicCreate_Menu_Number(pid, "R_kp",     &motor_speed_kp_r, float_Box);
+        Menu_Set_Limit(v, 0.0f, 10.0f, 0.1f);
+        v = dynamicCreate_Menu_Number(pid, "R_ki",     &motor_speed_ki_r, float_Box);
+        Menu_Set_Limit(v, 0.0f, 5.0f, 0.01f);
+        v = dynamicCreate_Menu_Number(pid, "R_kd",     &motor_speed_kd_r, float_Box);
         Menu_Set_Limit(v, 0.0f, 2.0f, 0.01f);
 
         dynamicCreate_Menu_Number(pid, "car_run",   &car_run,  bool_Box);
