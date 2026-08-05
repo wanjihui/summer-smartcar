@@ -82,8 +82,9 @@ static void servo_update(void)
     else                    e_clamp = (e_abs - 5.0f) / 10.0f;
     float kd = servo_kd_str + (servo_kd - servo_kd_str) * e_clamp;
 
-    // ----位置式 PD ----
-    float pd = kp * e + kd * delta;
+    // ----位置式 PD + 陀螺仪阻尼 ----
+    float gyro_damp = gyro_kd + (gyro_kd_curve - gyro_kd) * e_clamp;  // 直道D→弯道D过渡
+    float pd = kp * e + kd * delta - gyro_damp * gyro_z_dbg;
 
     servo_last_err = e;
 
@@ -177,8 +178,9 @@ static void motor_update(void)
     Motor_L_PID.Target = new_tgt_l;
     Motor_R_PID.Target = new_tgt_r;
 
-    /* 更新陀螺仪调试值（主循环50Hz，不放ISR防I2C阻塞）*/
-    gyro_z_dbg = (float)mpu6050_get_gyro_z();
+    /* 更新陀螺仪（主循环50Hz读I2C，不放ISR防阻塞）*/
+    mpu6050_get_gyro();
+    gyro_z_dbg = mpu6050_gyro_transition(mpu6050_get_gyro_z());  // °/s
 }
 
 // VOFA Firewater: 无线串口发送速度数据（非阻塞，TX空中断发送）

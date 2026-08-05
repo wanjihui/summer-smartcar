@@ -9,11 +9,9 @@
 
  volatile float err;                        // 中线偏离图像中心的像素均值，>0偏右
  volatile uint8_t vis_frame_ready;          // 新帧处理完成，显示层可刷新
- volatile uint8  straight_dbg  = 0;          // 诊断：当前帧直线判定结果
  volatile int16  asc_range_dbg = 0;          // 诊断：ASC窗口行数（100-y_far）
 
  uint8 asc_far = DEFAULT_ASC_FAR;             // ASC采样远行（顶部行），菜单可调，默认10
-uint8 straight_far = DEFAULT_STRAIGHT_FAR;    // 直线判定采样远行（顶部行），菜单可调，默认30
 static int16 last_valid_width = 60;            // 最近双边真实路宽（逐行扫描外推基准）
 
 /* ================================================================
@@ -23,18 +21,18 @@ static int16 last_valid_width = 60;            // 最近双边真实路宽（逐
 uint8 Image_Used[pho_h][pho_w];
 
 /* ================================================================
- * 大津法 (Otsu) — 下采样 4x，安全钳 20~235
+ * 大津法 (Otsu) — 全屏 下采样4x4，安全钳 20~235
  * 移植自 loongson_learn，double → float
  * ================================================================ */
 static int compute_otsu(void)
 {
     unsigned long hist[256] = {0};
-    /* 只统计下半屏（行60~119），避免上半屏背景白色干扰阈值 */
-    for (int y = pho_h / 2; y < pho_h; y += 2)
-        for (int x = 0; x < pho_w; x += 2)
+    /* 全屏统计（行0~119），下采样4x4抗干扰 */
+    for (int y = 0; y < pho_h; y += 4)
+        for (int x = 0; x < pho_w; x += 4)
             hist[mt9v03x_image[y][x]]++;
 
-    unsigned long total = (unsigned long)((pho_h - pho_h / 2 + 1) / 2) * ((pho_w + 1) / 2);
+    unsigned long total = (unsigned long)((pho_h + 3) / 4) * ((pho_w + 3) / 4);
     if (total == 0) return -1;
 
     unsigned long sum_all = 0;
@@ -99,40 +97,6 @@ static void border_smooth(border_line border)
  *
  * 调参: far(ASC远行基准,默认10)+自适应分段偏移; 单边→最新真实路宽外推; 双侧丢线→锁存
  * ================================================================ */
-
-/* ================================================================
- * 直道判定：检查中线是否接近竖直直线
- *
- * 用 center_line[] 替代左右边界分别判断：
- *   - 中线已含双边/单边/兜底逻辑，不依赖两侧边界同时有效
- *   - 中线已经 border_smooth 平滑，抗噪更好
- *   - 只需一条线的斜率+偏离检查，比旧版左右各6点更简洁
- *
- * y_start=100, y_end=straight_far（默认30）：中段区域，终点菜单可调
- * 返回: 1=直道  0=弯道
- * ================================================================ */
-int is_straight(void)
-{
-    straight_dbg = 0;  // 默认非直道，确保每帧更新
-
-    int y_start = 100, step = 5;
-    int y_end = (int)straight_far;
-    if (y_end < 5)  y_end = 5;
-    if (y_end > 95) y_end = 95;
-
-    /* 两端必须有效 */
-    if (center_line[y_start] == BORDER_INVALID
-        || center_line[y_end] == BORDER_INVALID)
-        return 0;
-
-    /* 中线斜率：|k| < 0.45 → (100-y_end)行内偏移 <0.45×行数 px */
-    float kc = (float)(center_line[y_end] - center_line[y_start])
-             / (float)(y_end - y_start);
-    if (kc > 0.25f || kc < -0.25f) return 0;
-
-    straight_dbg = 1;
-    return 1;
-}
 
 /* ================================================================
  * calc_adaptive_far — 自适应预瞄远行
@@ -526,17 +490,14 @@ static void filter_bottom_connected(void)
 }
 
 /* ================================================================
- * 手遮摄像头检测：底部+顶部全黑 → 摄像头被遮住
- * 基于二值图 Image_Used（0=黑 255=白）
+ * 出界检测：最底行全黑 → 赛道出画
  * ================================================================ */
-static int camera_is_covered(void)
+static int out_of_bounds_check(void)
 {
-    for (int y = 118; y >= 110; y--)
-        for (int x = 0; x < pho_w; x++)
-            if (Image_Used[y][x] == 255) return 0;
-    for (int y = 10; y >= 0; y--)
-        for (int x = 0; x < pho_w; x++)
-            if (Image_Used[y][x] == 255) return 0;
+    int y_bot = pho_h - 1;
+    for (int x = 0; x < pho_w; x++)
+        if (Image_Used[y_bot][x] == 255)
+            return 0;
     return 1;
 }
 
@@ -545,7 +506,7 @@ static int camera_is_covered(void)
  *
  * 流程：
  *   1. Otsu 自适应阈值 + 一次性二值化 → Image_Used[][]
- *   2. 手遮检测 → 停车
+ *   2. 出界检测 → 停车
  *   3. 底部连通滤波 → 只留与底部连通的白
  *   4. sweep_boundaries → 逐行扫描边界
  *   5. pho_center → 中线 + 偏差
@@ -575,10 +536,9 @@ void vis_deal(void)
         for (int x = 0; x < pho_w; x++)
             Image_Used[y][x] = (mt9v03x_image[y][x] > th) ? 255 : 0;
 
-    /* ---- 手遮摄像头 → 停车 ---- */
-    if (camera_is_covered())
+    /* ---- 出界检测：底行全黑 → 停车 ---- */
+    if (out_of_bounds_check())
     {
-        motor_stop();
         car_run = false;
         return;
     }
@@ -600,9 +560,6 @@ void vis_deal(void)
 
     /* ---- 中线 + 偏差 ---- */
     pho_center();
-
-    /* 调试：每帧更新直线判定（不受car_run限制） */
-    is_straight();
 
     vis_frame_ready = 1;
 }

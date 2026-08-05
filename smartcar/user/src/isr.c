@@ -118,8 +118,10 @@ void TIM6_IRQHandler (void)
     }
     else
     {
-        motor_set_left(0);
-        motor_set_right(0);
+        /* 速度环平滑减速到0，替代硬切 */
+        Motor_L_PID.Target = 0;
+        Motor_R_PID.Target = 0;
+        Speed_PID_Crtl();
     }
 
     // MPU6050 + AHRS 已禁用
