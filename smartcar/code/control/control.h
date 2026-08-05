@@ -18,7 +18,6 @@ extern float gyro_kd;         // 陀螺仪阻尼
 extern float servo_center;   // 中位角度
 extern float servo_max_cha;  // 最大偏角
 extern float servo_dead;     // 死区
-extern float servo_max_add;  // 步进限制
 extern int   servo_dir;      // 方向翻转
 //=====电机=====
 extern int   motor_base_duty; // 基础占空比

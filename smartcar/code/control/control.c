@@ -8,7 +8,6 @@ float servo_kd       = DEFAULT_SERVO_KD;  // 统一D（已精简，不再区分�
 float servo_center   = DEFAULT_SERVO_CENTER;
 float servo_max_cha  = DEFAULT_SERVO_MAX_CHA;
 float servo_dead     = DEFAULT_SERVO_DEAD;
-float servo_max_add  = DEFAULT_SERVO_MAX_ADD;
 int   servo_dir      = DEFAULT_SERVO_DIR;
 int   motor_base_duty= DEFAULT_MOTOR_BASE;
 int   motor_curve_duty = DEFAULT_MOTOR_CURVE_DUTY;  // 弯道占空比（|err|≥8时使用）
@@ -31,13 +30,11 @@ float gyro_z_dbg     = 0.0f;
 float steer_dbg      = 0.0f;
 
 static float servo_last_err   = 0;       // 上一帧偏差，舵机D项用（50Hz servo_calc专用）
-static float servo_last_angle = 0;      // 上一帧舵机角度，步进限制用
 float motor_base_cms    = 20.0f;         // 速度目标缓存（50Hz motor_speed_calc写，200Hz motor_inject_ackermann读）
 
 
 void control_init(void)
 {
-    servo_last_angle = servo_center;
     servo_set_angle(servo_center);
     Speed_PID_Init();                    // 初始化速度环PID中间量
     KF_init(&Kf_L, KF_SPEED_Q, KF_SPEED_R);  // 初始化卡尔曼滤波器
@@ -99,14 +96,8 @@ void servo_calc(void)
     if (angle_cha < -servo_max_cha) angle_cha = -servo_max_cha;
 
     float target = servo_center + angle_cha;
-
-    float add = target - servo_last_angle;
-    if (add >  servo_max_add) target = servo_last_angle + servo_max_add;
-    if (add < -servo_max_add) target = servo_last_angle - servo_max_add;
-
-    steer_dbg = target - servo_center;
+    steer_dbg = angle_cha;
     servo_set_angle(target);
-    servo_last_angle = target;
 }
 
 

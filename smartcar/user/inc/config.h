@@ -31,19 +31,18 @@
 #define ADAPT_OFF_BIG     20    // 大弯far偏移（减10前瞻）
 
 // --- 舵机 ---
-#define DEFAULT_SERVO_KP1      0.5f  // 基础P（主力，kP2清零后用线性P替代）
+#define DEFAULT_SERVO_KP1      0.65f  // 基础P（主力，kP2清零后用线性P替代）
 #define DEFAULT_SERVO_KP2      0.0f  // 二次P: err×|err|
-#define DEFAULT_SERVO_KD       0.0f  // 统一D系数（原直道0.35/弯道0.0→合并取中）
-#define DEFAULT_GYRO_KD        0.03f  // 陀螺仪阻尼。gyro_kd=0.03, gyro_z=100°/s → pd-=3.0 → angle-=1.11°(×13/35)
+#define DEFAULT_SERVO_KD       0.07f  // 统一D系数（原直道0.35/弯道0.0→合并取中）
+#define DEFAULT_GYRO_KD        0.005f  // 陀螺仪阻尼。gyro_kd=0.03, gyro_z=100°/s → pd-=3.0 → angle-=1.11°(×13/35)
 #define DEFAULT_SERVO_CENTER   95.2f // 中位角度
 #define DEFAULT_SERVO_MAX_CHA  13.0f // 最大偏角
 #define DEFAULT_SERVO_DEAD     2.0f  // 死区（像素）
-#define DEFAULT_SERVO_MAX_ADD  5.5f  // 步进限制（度/帧）
 #define DEFAULT_SERVO_DIR      1     // 0=正常 1=翻转
 
 // --- 电机目标速度---
-#define DEFAULT_MOTOR_BASE       11    // 直道目标速度(dm/s) = 1.0m/s
-#define DEFAULT_MOTOR_CURVE_DUTY 11     // 弯道目标速度(dm/s) = 0.7m/s
+#define DEFAULT_MOTOR_BASE       13    // 直道目标速度
+#define DEFAULT_MOTOR_CURVE_DUTY 11     // 弯道目标速度
 #define DEFAULT_MOTOR_MAX        40    // 最大占空比（PID Out限制）
 #define DEFAULT_MOTOR_KP         0.05f // 差速 P 系数
 #define DEFAULT_MOTOR_KD         0.0f  // 差速 D 系数

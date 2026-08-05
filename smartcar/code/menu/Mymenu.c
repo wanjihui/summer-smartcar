@@ -50,8 +50,6 @@ void menu_init(void)
         Menu_Set_Limit(v, 0.0f, 0.1f, 0.005f);   /* 有效范围0.01~0.05，留余量到0.1 */
         v = dynamicCreate_Menu_Number(pid, "far", &asc_far, uint8_Box);
         Menu_Set_Limit(v, 5, 60, 5.0f);
-        v = dynamicCreate_Menu_Number(pid, "max_add", &servo_max_add, float_Box);
-        Menu_Set_Limit(v, 0.5f, 20,0.5f);
         v = dynamicCreate_Menu_Number(pid, "deadband",  &servo_dead, float_Box);
         Menu_Set_Limit(v, 0, 10,0.5f);
 
