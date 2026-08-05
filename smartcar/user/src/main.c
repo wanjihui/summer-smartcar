@@ -86,31 +86,52 @@ int main (void)
     menu_show();					  		//显示一次菜单项
     while(1)
     {
-			if (mt9v03x_finish_flag)  //运行开�?等待图像采集完成
-				{
-					mt9v03x_finish_flag = 0;//立即清零，防止新帧标志在后续处理中被覆盖
-					vis_deal();           //搜线 误差算法
-					if(car_run)
-					{
-						control_update();     //舵机 电机控制
-						/* VOFA Firewater 非阻塞发送（TX空中断+环形缓冲区）*/
-						static uint8 vofa_cnt = 0;
-						if (++vofa_cnt >= 2)  /* 隔帧 ≈25Hz */
-						{
-						    vofa_cnt = 0;
-						    control_vofa_send();
-						}
-					}
-					vis_frame_ready = 1;  //通知显示层：新帧已处理，可以刷新
-				}
-		    if(!car_run) {motor_stop(); Speed_PID_Enable = 0;}     //car_run=F立即停车+关速度�?
+        if (mt9v03x_finish_flag)
+        {
+            mt9v03x_finish_flag = 0;
+            vis_deal();
 
-			vofa_uart_poll();               // RTS恢复后重新使能TX中断
-		menu();					      // 菜单主循环：按键模式切换 �?菜单/摄像头分�?
+            /* 发车指令：菜单 car_cmd=1 + 当前空闲 → 启动 */
+            if (car_cmd && car_state == CAR_IDLE) {
+                control_state_launch();
+            }
+            /* 停车指令：菜单 car_cmd=0 + 正在运行 → 停车 */
+            if (!car_cmd && car_state >= CAR_LAUNCHING) {
+                control_state_stop();
+            }
+
+            if (car_state >= CAR_LAUNCHING)
+            {
+                control_update();
+                /* VOFA Firewater 非阻塞发送（TX空中断+环形缓冲区）*/
+                static uint8 vofa_cnt = 0;
+                if (++vofa_cnt >= 2)
+                {
+                    vofa_cnt = 0;
+                    control_vofa_send();
+                }
+            }
+            vis_frame_ready = 1;
+        }
+
+        /* 停车清理：STOP 状态执行一次清理后自动切 IDLE */
+        if (car_state == CAR_STOP) {
+            motor_stop();
+            Speed_PID_Enable = 0;
+            Speed_PID_Init();
+            motor_base_cms = 20.0f;
+            car_state = CAR_IDLE;
+        }
+        if (car_state == CAR_IDLE) {
+            motor_stop();
+            Speed_PID_Enable = 0;
+        }
+
+        vofa_uart_poll();
+        menu();
     }
 }
 // **************************** 代码区域 ****************************
 
 
 // *************************** 常见问题说明 ***************************
-

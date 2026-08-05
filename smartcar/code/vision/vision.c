@@ -1033,7 +1033,7 @@ void vis_deal(void)
     /* ---- 出界检测：底行全黑 → 停车 ---- */
     if (out_of_bounds_check())
     {
-        car_run = false;
+        control_state_stop();
         return;
     }
 

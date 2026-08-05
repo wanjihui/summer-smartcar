@@ -24,13 +24,15 @@ float motor_speed_kd_l = DEFAULT_SPEED_KD_L;
 float motor_speed_kp_r = DEFAULT_SPEED_KP_R;
 float motor_speed_ki_r = DEFAULT_SPEED_KI_R;
 float motor_speed_kd_r = DEFAULT_SPEED_KD_R;
-volatile bool  car_run        = false;
+volatile CarState car_state   = CAR_IDLE;
+volatile bool     car_cmd     = false;   /* 菜单代理: false=停车 true=发车 */
+static uint8_t    launch_ramp_cnt = 0;   /* 起步斜坡计数器 */
 float gyro_z_dbg     = 0.0f;
 float steer_dbg      = 0.0f;
 
 static float servo_last_err   = 0;       // 上一帧偏差，舵机D项用（50Hz servo_calc专用）
 static float servo_last_angle = 0;      // 上一帧舵机角度，步进限制用（servo_calc + servo_inject_gyro共享）
-static float motor_base_cms    = 20.0f; // 速度目标缓存（50Hz motor_speed_calc写，200Hz motor_inject_ackermann读）
+float motor_base_cms    = 20.0f;         // 速度目标缓存（50Hz motor_speed_calc写，200Hz motor_inject_ackermann读）
 
 
 void control_init(void)
@@ -45,10 +47,33 @@ void control_init(void)
     Motor_L_PID.OutMin = -(float)motor_max_duty;
     Motor_R_PID.OutMax =  (float)motor_max_duty;
     Motor_R_PID.OutMin = -(float)motor_max_duty;
+    car_state = CAR_IDLE;
+    car_cmd   = false;
+    launch_ramp_cnt = 0;
 }
 
-/* servo_calc: 50Hz 主循环调用，依赖 err 计算 P+P²+D，产出 steer_dbg
- * gyro 阻尼项不在此处——由 ISR 的 servo_inject_gyro 每 5ms 独立注入 */
+/* 发车：从菜单触发，重置斜坡 + PID，IDLE → LAUNCHING */
+void control_state_launch(void)
+{
+    if (car_state == CAR_IDLE) {
+        launch_ramp_cnt = 0;
+        Speed_PID_Init();
+        car_state = CAR_LAUNCHING;
+    }
+}
+
+/* 停车：从 vision 出界或菜单触发，→ STOP。
+ * STOP 的清理（motor_stop + PID_Init + →IDLE）由 main.c 主循环执行 */
+void control_state_stop(void)
+{
+    if (car_state >= CAR_LAUNCHING) {
+        car_state = CAR_STOP;
+        car_cmd   = false;   /* 同步菜单显示 */
+    }
+}
+
+/* servo_calc: 50Hz 主循环调用，PPDD+Gyro 一次性算出 steer_dbg
+ * gyro_z_dbg 由 ISR 200Hz 更新，此处始终取最新值 */
 void servo_calc(void)
 {
     float e = err;
@@ -58,10 +83,11 @@ void servo_calc(void)
     float e_abs = (e > 0) ? e : -e;
     float delta = e - servo_last_err;
 
-    /* P + P² + D（gyro 项由 ISR servo_inject_gyro 注入）*/
+    /* 统一 PPDD + Gyro：四项一起算，不拆链 */
     float pd = servo_kp1 * e
              + servo_kp2 * e * e_abs
-             + servo_kd  * delta;
+             + servo_kd  * delta
+             - gyro_kd   * gyro_z_dbg;
 
     servo_last_err = e;
 
@@ -74,25 +100,6 @@ void servo_calc(void)
     float add = target - servo_last_angle;
     if (add >  servo_max_add) target = servo_last_angle + servo_max_add;
     if (add < -servo_max_add) target = servo_last_angle - servo_max_add;
-
-    steer_dbg = target - servo_center;
-    servo_set_angle(target);
-    servo_last_angle = target;
-}
-
-/* servo_inject_gyro: 200Hz TIM6 ISR 调用，仅注入陀螺仪阻尼到 steer_dbg
- * gyro_correction = -gyro_kd × gyro_z_dbg，gyro_kd 物理单位: 秒(s)
- * gyro_kd=0.03, gyro_z=100°/s → 回打 3°。有效范围 0.01~0.05 */
-void servo_inject_gyro(void)
-{
-    float gyro_correction = -gyro_kd * gyro_z_dbg;
-    float target = servo_center + steer_dbg + gyro_correction;
-
-    /* 缩比步进限制：ISR 5ms = 帧周期 20ms 的 1/4 */
-    float add = target - servo_last_angle;
-    float max_step = servo_max_add * 0.25f;
-    if (add >  max_step) target = servo_last_angle + max_step;
-    if (add < -max_step) target = servo_last_angle - max_step;
 
     steer_dbg = target - servo_center;
     servo_set_angle(target);
@@ -117,6 +124,18 @@ void motor_speed_calc(void)
     float base_cms = ((float)motor_base_duty * (1.0f - ratio)
                     + (float)motor_curve_duty * ratio) * 10.0f;
     if (base_cms < 20.0f) base_cms = 20.0f;
+
+    /* 起步斜坡：LAUNCHING 状态下 base_cms 从0线性爬升到目标值。
+     * 50步 × 10ms(帧周期) = 500ms，完成后自动切 RUNNING */
+    if (car_state == CAR_LAUNCHING) {
+        if (launch_ramp_cnt < LAUNCH_RAMP_STEPS) {
+            launch_ramp_cnt++;
+            float factor = (float)launch_ramp_cnt / (float)LAUNCH_RAMP_STEPS;
+            base_cms *= factor;
+        } else {
+            car_state = CAR_RUNNING;
+        }
+    }
 
     /* 非对称低通：入弯降速α=1.0(快)，出弯加速α=0.5(慢防振荡) */
     static float filtered = 0;

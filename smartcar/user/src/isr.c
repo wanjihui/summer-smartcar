@@ -116,12 +116,10 @@ void TIM6_IRQHandler (void)
     #define ENC_TO_CMS 1.117f
     Motor_L_PID.Actual =  (float)encoder_get_left_speed() * ENC_TO_CMS;
     Motor_R_PID.Actual = -(float)encoder_get_right_speed() * ENC_TO_CMS;
-    if (car_run)
+    if (car_state >= CAR_LAUNCHING)   /* LAUNCHING / RUNNING / STOP 均执行控制 */
     {
-        /* 拆链方案：ISR仅做传感器驱动的轻量注入（gyro阻尼 + Ackermann差速）
-         * err驱动的 P+P²+D 和速度过渡+LPF 在50Hz主循环 control_update 中计算 */
-        servo_inject_gyro();       /* gyro阻尼注入（~5μs）*/
-        motor_inject_ackermann();  /* Ackermann差速（~5μs）*/
+        /* gyro 阻尼已合并到 servo_calc 的 PPDD+Gyro 公式中，ISR 仅保留 Ackermann 差速 */
+        motor_inject_ackermann();  /* Ackermann差速 */
         Speed_PID_Crtl();
     }
     else

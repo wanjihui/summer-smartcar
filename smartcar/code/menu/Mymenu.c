@@ -65,7 +65,7 @@ void menu_init(void)
         v = dynamicCreate_Menu_Number(pid, "ack_gain", &ackermann_gain, float_Box);
         Menu_Set_Limit(v, 0.5f, 4.0f, 0.1f);
 
-        dynamicCreate_Menu_Number(pid, "car_run",   (bool*)&car_run,  bool_Box);
+        dynamicCreate_Menu_Number(pid, "car_run", (bool*)&car_cmd, bool_Box);
     }
 
     // =====Debug文件夹=====
@@ -287,8 +287,10 @@ static void k4_handle(void)
         ips200_clear();
         menu_show();
     }
-    else
-        motor_stop();//根目录下k4停车
+    else {
+        motor_stop();
+        control_state_stop();  /* 同步状态机 → STOP → IDLE */
+    }
 
 }
 
