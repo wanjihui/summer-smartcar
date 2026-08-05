@@ -47,7 +47,7 @@ void menu_init(void)
         v = dynamicCreate_Menu_Number(pid, "servokd",  &servo_kd,  float_Box);
         Menu_Set_Limit(v, 0, 1,0.01f);
         v = dynamicCreate_Menu_Number(pid, "gyro_kd",   &gyro_kd, float_Box);
-        Menu_Set_Limit(v, 0.0f, 0.2f, 0.005f);
+        Menu_Set_Limit(v, 0.0f, 0.1f, 0.005f);   /* 有效范围0.01~0.05，留余量到0.1 */
         v = dynamicCreate_Menu_Number(pid, "far", &asc_far, uint8_Box);
         Menu_Set_Limit(v, 5, 60, 5.0f);
         v = dynamicCreate_Menu_Number(pid, "max_add", &servo_max_add, float_Box);

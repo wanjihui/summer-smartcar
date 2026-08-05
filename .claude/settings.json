@@ -13,6 +13,9 @@
       "Read(//c/Users/Lenovo/Desktop/summer-smartcar/MCZSCS-V2-MM32已完成的项目3/project/code/**)",
       "Read(//c/Users/Lenovo/Desktop/summer-smartcar/Seekfree_LS2K0300Library大佬完成的项目/project/code/**)",
       "Read(//c//**)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\Lenovo\\Desktop\\summer-smartcar\\docs"
     ]
   }
 }

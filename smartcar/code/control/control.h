@@ -41,5 +41,10 @@ extern float steer_dbg;        // 诊断：舵机偏离中心角度
 void control_init(void);
 void control_update(void);
 void control_vofa_send(void);
+void servo_calc(void);              /* 50Hz 主循环：P+P²+D → steer_dbg */
+void servo_inject_gyro(void);       /* 200Hz ISR：gyro阻尼注入 → steer_dbg */
+void motor_speed_calc(void);        /* 50Hz 主循环：速度过渡+LPF → motor_base_cms */
+void motor_inject_ackermann(void);  /* 200Hz ISR：Ackermann差速 → Motor_*.Target */
+void control_sync_params(void);     /* PID参数同步（菜单修改后调用） */
 
 #endif

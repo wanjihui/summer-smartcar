@@ -108,7 +108,7 @@ void TIM6_IRQHandler (void)
 {
     encoder_pit_callback();
 
-    /* 陀螺仪：200Hz读取（阶段一：从motor_update的50Hz提升到ISR 200Hz，实时性4×提升）*/
+    /* 陀螺仪：200Hz读取（阶段二：全链路200Hz，servo+速度目标均在此ISR中更新）*/
     mpu6050_get_gyro();
     gyro_z_dbg = mpu6050_gyro_transition(mpu6050_get_gyro_z());
 
@@ -118,6 +118,10 @@ void TIM6_IRQHandler (void)
     Motor_R_PID.Actual = -(float)encoder_get_right_speed() * ENC_TO_CMS;
     if (car_run)
     {
+        /* 拆链方案：ISR仅做传感器驱动的轻量注入（gyro阻尼 + Ackermann差速）
+         * err驱动的 P+P²+D 和速度过渡+LPF 在50Hz主循环 control_update 中计算 */
+        servo_inject_gyro();       /* gyro阻尼注入（~5μs）*/
+        motor_inject_ackermann();  /* Ackermann差速（~5μs）*/
         Speed_PID_Crtl();
     }
     else

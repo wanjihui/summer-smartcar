@@ -23,12 +23,18 @@
 
 // --- 预瞄位置 ---
 #define DEFAULT_ASC_FAR        20   // ASC采样远行（顶部行），10≈90行范围
+// --- 自适应预瞄常量（编译期，基于调好的far，按|err|分段偏移）---
+#define ADAPT_ERR_TH1     10    // 小弯err阈值（像素），|err|≤th1=直道
+#define ADAPT_ERR_TH2     20    // 大弯err阈值（像素），th1<|err|≤th2=小弯
+#define ADAPT_OFF_STR    (-10)  // 直道far偏移（负=看更远）
+#define ADAPT_OFF_SML      5    // 小弯far偏移
+#define ADAPT_OFF_BIG     20    // 大弯far偏移（减10前瞻）
 
 // --- 舵机 ---
 #define DEFAULT_SERVO_KP1      0.5f  // 基础P（主力，kP2清零后用线性P替代）
 #define DEFAULT_SERVO_KP2      0.0f  // 二次P: err×|err|
 #define DEFAULT_SERVO_KD       0.0f  // 统一D系数（原直道0.35/弯道0.0→合并取中）
-#define DEFAULT_GYRO_KD        0.0f  // 陀螺仪阻尼（提升到0.05，后续可继续加大）
+#define DEFAULT_GYRO_KD        0.03f  // 陀螺仪阻尼，单位秒(s)。gyro_kd=0.03, gyro_z=100°/s → 回打3°。有效范围0.01~0.05
 #define DEFAULT_SERVO_CENTER   95.2f // 中位角度
 #define DEFAULT_SERVO_MAX_CHA  13.0f // 最大偏角
 #define DEFAULT_SERVO_DEAD     2.0f  // 死区（像素）
