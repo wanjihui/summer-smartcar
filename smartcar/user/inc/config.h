@@ -34,7 +34,7 @@
 #define DEFAULT_SERVO_KP1      0.5f  // 基础P（主力，kP2清零后用线性P替代）
 #define DEFAULT_SERVO_KP2      0.0f  // 二次P: err×|err|
 #define DEFAULT_SERVO_KD       0.0f  // 统一D系数（原直道0.35/弯道0.0→合并取中）
-#define DEFAULT_GYRO_KD        0.03f  // 陀螺仪阻尼，单位秒(s)。gyro_kd=0.03, gyro_z=100°/s → 回打3°。有效范围0.01~0.05
+#define DEFAULT_GYRO_KD        0.03f  // 陀螺仪阻尼。gyro_kd=0.03, gyro_z=100°/s → pd-=3.0 → angle-=1.11°(×13/35)
 #define DEFAULT_SERVO_CENTER   95.2f // 中位角度
 #define DEFAULT_SERVO_MAX_CHA  13.0f // 最大偏角
 #define DEFAULT_SERVO_DEAD     2.0f  // 死区（像素）

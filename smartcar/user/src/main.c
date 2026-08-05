@@ -95,10 +95,6 @@ int main (void)
             if (car_cmd && car_state == CAR_IDLE) {
                 control_state_launch();
             }
-            /* 停车指令：菜单 car_cmd=0 + 正在运行 → 停车 */
-            if (!car_cmd && car_state >= CAR_LAUNCHING) {
-                control_state_stop();
-            }
 
             if (car_state >= CAR_LAUNCHING)
             {
@@ -114,11 +110,20 @@ int main (void)
             vis_frame_ready = 1;
         }
 
+        /* 停车触发：不依赖摄像头帧，car_cmd=0 或 vision 触发的 STOP 都立即生效 */
+        if (!car_cmd && car_state >= CAR_LAUNCHING) {
+            control_state_stop();
+        }
+
         /* 停车清理：STOP 状态执行一次清理后自动切 IDLE */
         if (car_state == CAR_STOP) {
             motor_stop();
             Speed_PID_Enable = 0;
-            Speed_PID_Init();
+            {
+                uint32 primask = interrupt_global_disable();
+                Speed_PID_Init();
+                interrupt_global_enable(primask);
+            }
             motor_base_cms = 20.0f;
             car_state = CAR_IDLE;
         }

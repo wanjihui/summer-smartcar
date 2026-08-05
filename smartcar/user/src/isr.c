@@ -108,27 +108,22 @@ void TIM6_IRQHandler (void)
 {
     encoder_pit_callback();
 
-    /* 陀螺仪：200Hz读取（阶段二：全链路200Hz，servo+速度目标均在此ISR中更新）*/
+    /* 陀螺仪：200Hz读取 + ±500°/s 健康钳位（MPU6050故障时防随机抖舵）*/
     mpu6050_get_gyro();
     gyro_z_dbg = mpu6050_gyro_transition(mpu6050_get_gyro_z());
+    if (gyro_z_dbg >  500.0f) gyro_z_dbg =  500.0f;
+    if (gyro_z_dbg < -500.0f) gyro_z_dbg = -500.0f;
 
     /* 速度环：编码器脉冲/5ms → cm/s (PPR=4096) */
     #define ENC_TO_CMS 1.117f
     Motor_L_PID.Actual =  (float)encoder_get_left_speed() * ENC_TO_CMS;
     Motor_R_PID.Actual = -(float)encoder_get_right_speed() * ENC_TO_CMS;
-    if (car_state >= CAR_LAUNCHING)   /* LAUNCHING / RUNNING / STOP 均执行控制 */
+    if (car_state >= CAR_LAUNCHING)
     {
-        /* gyro 阻尼已合并到 servo_calc 的 PPDD+Gyro 公式中，ISR 仅保留 Ackermann 差速 */
-        motor_inject_ackermann();  /* Ackermann差速 */
+        motor_inject_ackermann();
         Speed_PID_Crtl();
     }
-    else
-    {
-        /* 速度环平滑减速到0，替代硬切 */
-        Motor_L_PID.Target = 0;
-        Motor_R_PID.Target = 0;
-        Speed_PID_Crtl();
-    }
+    /* IDLE 状态：main.c 已通过 motor_stop() + Speed_PID_Enable=0 处理停车，ISR 无需操作 */
 
     TIM6->SR &= ~TIM6->SR;
 }

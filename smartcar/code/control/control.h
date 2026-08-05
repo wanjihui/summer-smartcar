@@ -42,7 +42,7 @@ typedef enum {
     CAR_STOP      = 3,  // 停车过渡（清理后自动切 IDLE）
 } CarState;
 
-#define LAUNCH_RAMP_STEPS  50   // 起步斜坡步数: 50 × 10ms(摄像头帧) = 500ms
+#define LAUNCH_RAMP_STEPS  25   // 起步斜坡: 25步 × 20ms(帧周期) = 500ms
 
 extern volatile CarState car_state;    // 当前状态（ISR + 主循环）
 extern volatile bool     car_cmd;      // 菜单代理: false=停车 true=发车

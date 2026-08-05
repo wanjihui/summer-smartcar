@@ -31,7 +31,7 @@ float gyro_z_dbg     = 0.0f;
 float steer_dbg      = 0.0f;
 
 static float servo_last_err   = 0;       // 上一帧偏差，舵机D项用（50Hz servo_calc专用）
-static float servo_last_angle = 0;      // 上一帧舵机角度，步进限制用（servo_calc + servo_inject_gyro共享）
+static float servo_last_angle = 0;      // 上一帧舵机角度，步进限制用
 float motor_base_cms    = 20.0f;         // 速度目标缓存（50Hz motor_speed_calc写，200Hz motor_inject_ackermann读）
 
 
@@ -57,7 +57,10 @@ void control_state_launch(void)
 {
     if (car_state == CAR_IDLE) {
         launch_ramp_cnt = 0;
+        servo_last_err  = 0;   /* 防第一帧D爆冲 */
+        uint32 primask = interrupt_global_disable();
         Speed_PID_Init();
+        interrupt_global_enable(primask);
         car_state = CAR_LAUNCHING;
     }
 }
@@ -126,7 +129,7 @@ void motor_speed_calc(void)
     if (base_cms < 20.0f) base_cms = 20.0f;
 
     /* 起步斜坡：LAUNCHING 状态下 base_cms 从0线性爬升到目标值。
-     * 50步 × 10ms(帧周期) = 500ms，完成后自动切 RUNNING */
+     * 25步 × 20ms(帧周期) = 500ms，完成后自动切 RUNNING */
     if (car_state == CAR_LAUNCHING) {
         if (launch_ramp_cnt < LAUNCH_RAMP_STEPS) {
             launch_ramp_cnt++;
