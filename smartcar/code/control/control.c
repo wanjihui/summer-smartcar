@@ -4,8 +4,7 @@
 //PID参数定义
 float servo_kp1      = DEFAULT_SERVO_KP1;  // 基础P
 float servo_kp2      = DEFAULT_SERVO_KP2;  // 二次P: err×|err|
-float servo_kd       = DEFAULT_SERVO_KD;
-float servo_kd_str    = DEFAULT_SERVO_KD_STR;  // 直道/小err D
+float servo_kd       = DEFAULT_SERVO_KD;  // 统一D（已精简，不再区分直道/弯道）
 float servo_center   = DEFAULT_SERVO_CENTER;
 float servo_max_cha  = DEFAULT_SERVO_MAX_CHA;
 float servo_dead     = DEFAULT_SERVO_DEAD;
@@ -14,8 +13,7 @@ int   servo_dir      = DEFAULT_SERVO_DIR;
 int   motor_base_duty= DEFAULT_MOTOR_BASE;
 int   motor_curve_duty = DEFAULT_MOTOR_CURVE_DUTY;  // 弯道占空比（|err|≥8时使用）
 int   motor_max_duty = DEFAULT_MOTOR_MAX;
-float gyro_kd        = DEFAULT_GYRO_KD;
-float gyro_kd_curve   = DEFAULT_GYRO_KD_CURVE;
+float gyro_kd        = DEFAULT_GYRO_KD;  // 陀螺仪阻尼（已精简，不再区分直道/弯道）
 float motor_kp       = DEFAULT_MOTOR_KP;
 float motor_kd       = DEFAULT_MOTOR_KD;
 int   motor_diff_max = DEFAULT_MOTOR_DIFF_MAX;
@@ -48,7 +46,7 @@ void control_init(void)
     Motor_R_PID.OutMin = -(float)motor_max_duty;
 }
 
-//舵机控制
+//舵机控制 — 统一 PPDD + Gyro 公式（阶段一精简，与参考项目 STEER_CTRL 同构）
 static void servo_update(void)
 {
     // ----死区处理----
@@ -58,33 +56,16 @@ static void servo_update(void)
 
     float e_abs = (e > 0) ? e : -e;
     float delta = e - servo_last_err;
-    float d_abs = (delta > 0) ? delta : -delta;
 
-    // ---- kp: 正常=kp1+kp2×|err|, 回正(err缩小)时软化防过冲 ----
-    float kp = servo_kp1 + servo_kp2 * e_abs;
-
-    // 回正软化: e×Δerr<0 → 车在靠近中线, |err|大+回正快 → 软P防冲过头
-    if (e * delta < 0.0f && e_abs > 5.0f)
-    {
-        float r_err = (e_abs - 5.0f) / 10.0f;   // |err| 5→15, 软化0→1
-        if (r_err > 1.0f) r_err = 1.0f;
-        float r_spd = d_abs / 10.0f;             // |Δerr| 0→10, 因子0→1
-        if (r_spd > 1.0f) r_spd = 1.0f;
-        float soft = r_err * r_spd;               // 双因子: 大err+快速回正=强力软化
-        float kp_soft = servo_kp1 * 0.6f;
-        kp = kp + (kp_soft - kp) * soft;
-    }
-
-    // ---- kd: |err| 5→15 从直道D平滑过渡到弯道D ----
-    float e_clamp;
-    if (e_abs < 5.0f)      e_clamp = 0.0f;
-    else if (e_abs > 15.0f) e_clamp = 1.0f;
-    else                    e_clamp = (e_abs - 5.0f) / 10.0f;
-    float kd = servo_kd_str + (servo_kd - servo_kd_str) * e_clamp;
-
-    // ----位置式 PD + 陀螺仪阻尼 ----
-    float gyro_damp = gyro_kd + (gyro_kd_curve - gyro_kd) * e_clamp;  // 直道D→弯道D过渡
-    float pd = kp * e + kd * delta - gyro_damp * gyro_z_dbg;
+    /* 统一 PPDD + Gyro：Out = P + P² + D - Gyro
+     *   servo_kp1 × e          → 线性比例
+     *   servo_kp2 × e × |e|    → 非线性P²（大弯更强，自动替代回正软化）
+     *   servo_kd  × Δe         → D抑制振荡
+     *   gyro_kd   × gyro_z     → 陀螺仪前馈阻尼                    */
+    float pd = servo_kp1 * e
+             + servo_kp2 * e * e_abs
+             + servo_kd  * delta
+             - gyro_kd   * gyro_z_dbg;
 
     servo_last_err = e;
 
@@ -177,10 +158,6 @@ static void motor_update(void)
 
     Motor_L_PID.Target = new_tgt_l;
     Motor_R_PID.Target = new_tgt_r;
-
-    /* 更新陀螺仪（主循环50Hz读I2C，不放ISR防阻塞）*/
-    mpu6050_get_gyro();
-    gyro_z_dbg = mpu6050_gyro_transition(mpu6050_get_gyro_z());  // °/s
 }
 
 // VOFA Firewater: 无线串口发送速度数据（非阻塞，TX空中断发送）

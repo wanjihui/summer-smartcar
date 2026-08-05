@@ -44,14 +44,10 @@ void menu_init(void)
         Menu_Set_Limit(v, 0, 2,0.05f);
         v = dynamicCreate_Menu_Number(pid, "servokp2",  &servo_kp2, float_Box);
         Menu_Set_Limit(v, 0, 0.05f,0.001f);
-        v = dynamicCreate_Menu_Number(pid, "kd_cur",  &servo_kd,  float_Box);
-        Menu_Set_Limit(v, 0, 1,0.01f);
-        v = dynamicCreate_Menu_Number(pid, "kd_stra",  &servo_kd_str,  float_Box);
+        v = dynamicCreate_Menu_Number(pid, "servokd",  &servo_kd,  float_Box);
         Menu_Set_Limit(v, 0, 1,0.01f);
         v = dynamicCreate_Menu_Number(pid, "gyro_kd",   &gyro_kd, float_Box);
-        Menu_Set_Limit(v, 0.0f, 0.1f, 0.005f);
-        v = dynamicCreate_Menu_Number(pid, "gyro_kdc",  &gyro_kd_curve, float_Box);
-        Menu_Set_Limit(v, 0.0f, 0.1f, 0.005f);
+        Menu_Set_Limit(v, 0.0f, 0.2f, 0.005f);
         v = dynamicCreate_Menu_Number(pid, "far", &asc_far, uint8_Box);
         Menu_Set_Limit(v, 5, 60, 5.0f);
         v = dynamicCreate_Menu_Number(pid, "max_add", &servo_max_add, float_Box);

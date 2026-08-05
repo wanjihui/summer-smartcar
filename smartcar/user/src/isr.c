@@ -108,6 +108,10 @@ void TIM6_IRQHandler (void)
 {
     encoder_pit_callback();
 
+    /* 陀螺仪：200Hz读取（阶段一：从motor_update的50Hz提升到ISR 200Hz，实时性4×提升）*/
+    mpu6050_get_gyro();
+    gyro_z_dbg = mpu6050_gyro_transition(mpu6050_get_gyro_z());
+
     /* 速度环：编码器脉冲/5ms → cm/s (PPR=4096) */
     #define ENC_TO_CMS 1.117f
     Motor_L_PID.Actual =  (float)encoder_get_left_speed() * ENC_TO_CMS;
@@ -123,11 +127,6 @@ void TIM6_IRQHandler (void)
         Motor_R_PID.Target = 0;
         Speed_PID_Crtl();
     }
-
-    // MPU6050 + AHRS 已禁用
-    //mpu6050_get_acc();
-    //mpu6050_get_gyro();
-    //atti_update();
 
     TIM6->SR &= ~TIM6->SR;
 }

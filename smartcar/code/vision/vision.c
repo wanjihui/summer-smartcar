@@ -15,6 +15,76 @@
 static int16 last_valid_width = 60;            // 最近双边真实路宽（逐行扫描外推基准）
 
 /* ================================================================
+ * 十字识别与补线 — 编译期常量
+ * ================================================================ */
+#define CROSS_ROI_TOP                 12    /* 独立扫描ROI顶行 */
+#define CROSS_ROI_BOTTOM              75    /* 独立扫描ROI底行 */
+#define CROSS_CORNER_SEARCH_TOP       30    /* 拐点搜索顶行 */
+#define CROSS_CORNER_SEARCH_BOTTOM    65    /* 拐点搜索底行 */
+#define CROSS_CONTEXT_ROWS             7    /* 过渡带上下文半径 */
+#define CROSS_ABOVE_INVALID_MIN        2    /* 上方最少无效行数 */
+#define CROSS_BELOW_VALID_MIN          4    /* 下方最少有效行数 */
+#define CROSS_CORNER_SIDE_MARGIN       5    /* 拐点距种子列最小边距 */
+#define CROSS_CORNER_MIN_GAP          18    /* 两拐点最小间距 */
+#define CROSS_CORNER_MAX_GAP         130    /* 两拐点最大间距 */
+#define CROSS_LANE_ROW_MAX_GAP       150    /* 车道行双边最大间距 */
+#define CROSS_CORNER_MAX_ROW_DIFF     18    /* 两拐点最大行差 */
+#define CROSS_MID_MAX_OFFSET          36    /* 拐点中点距种子列最大偏移 */
+#define CROSS_TANGENT_SEARCH_TOP      30    /* 切线搜索顶行 */
+#define CROSS_TANGENT_SEARCH_BOTTOM   72    /* 切线搜索底行 */
+#define CROSS_TANGENT_HALF_WINDOW      3    /* 切线窗口半宽 */
+#define CROSS_TANGENT_MAX_STEP        10    /* 切线窗口内最大阶跃 */
+#define CROSS_TANGENT_EDGE_MARGIN      2    /* 切线边沿距图像边界最小距离 */
+#define CROSS_SLOPE_SCALE            256    /* 斜率定点化比例 */
+#define CROSS_FULL_WIDTH_TOP          42    /* 全宽白带检测顶行 */
+#define CROSS_FULL_WIDTH_BOTTOM       95    /* 全宽白带检测底行 */
+#define CROSS_FULL_WIDTH_WHITE_MIN    (MT9V03X_W - 12)  /* 全宽白带最少白像素 */
+#define CROSS_EDGE_SAMPLE_COLS         8    /* 图像边缘采样列数 */
+#define CROSS_EDGE_WHITE_MIN           7    /* 边缘采样区最少白像素 */
+#define CROSS_FULL_WIDTH_ROWS          3    /* 连续满足白带条件的行数 */
+#define CROSS_CONFIRM_FRAMES           2    /* 连续确认帧数 */
+#define CROSS_HOLD_MISSED_FRAMES       2    /* 漏检保持帧数 */
+
+/* ================================================================
+ * 斑马线检测 — 编译期常量
+ * ================================================================ */
+#define ZEBRA_SAMPLE_ROWS              3    /* 底部采样行数 */
+#define ZEBRA_SAMPLE_ROW_STEP          5    /* 采样行间隔 */
+#define ZEBRA_VALID_ROWS_MIN           2    /* 最少有效采样行数 */
+#define ZEBRA_WHITE_RATIO_MIN         25    /* 白像素占比下限(%) */
+#define ZEBRA_WHITE_RATIO_MAX         75    /* 白像素占比上限(%) */
+#define ZEBRA_TRANSITIONS_MIN         10    /* 最少黑白跳变次数 */
+#define ZEBRA_RUN_WIDTH_MIN            4    /* 连续同色段最小宽度 */
+#define ZEBRA_BLACK_RUNS_MIN           5    /* 最少黑色段数 */
+#define ZEBRA_WHITE_RUNS_MIN           5    /* 最少白色段数 */
+#define ZEBRA_FILTER_RADIUS            2    /* 中值滤波半径(±2=5像素窗口) */
+#define ZEBRA_HOLD_MISSED_FRAMES       2    /* 漏检保持帧数 */
+
+/* 十字状态机 */
+typedef enum {
+    CROSS_STATE_NONE = 0,
+    CROSS_STATE_CANDIDATE,
+    CROSS_STATE_DETECTED,
+} cross_state_enum;
+
+/* 十字静态变量 */
+static cross_state_enum cross_state = CROSS_STATE_NONE;
+static uint8  cross_left_col,  cross_left_row;
+static uint8  cross_right_col, cross_right_row;
+static bool   cross_corners_valid;
+static uint8  cross_confirm_count;
+static uint8  cross_missed_count;
+static uint16 cross_scan_left[MT9V03X_H];
+static uint16 cross_scan_right[MT9V03X_H];
+static bool   cross_scan_left_valid[MT9V03X_H];
+static bool   cross_scan_right_valid[MT9V03X_H];
+static uint8  cross_scan_seed_col;
+
+/* 斑马线静态变量 */
+static bool   zebra_detected;
+static uint8  zebra_missed_count;
+
+/* ================================================================
  * Otsu 二值化图像缓存
  *   0=黑（背景）, 255=白（赛道）
  * ================================================================ */
@@ -61,6 +131,28 @@ static int compute_otsu(void)
 }
 
 
+/* ================================================================
+ * calc_adaptive_far — 自适应预瞄远行
+ *
+ * 用上一帧 err 的 |err| 分段选择 ASC 采样远行：
+ *   直道看远（far 减小，预瞄更远），弯道看近（far 增大，跟住弯心）
+ * 偏移相对菜单调好的 asc_far，阈值/偏移为编译期常量(ADAPT_*)，
+ * 最终钳位 5~95
+ * ================================================================ */
+static int calc_adaptive_far(void)
+{
+    float e = (err > 0) ? err : -err;
+    int y_far = (int)asc_far;
+
+    if      (e <= (float)ADAPT_ERR_TH1) y_far += ADAPT_OFF_STR;
+    else if (e <= (float)ADAPT_ERR_TH2) y_far += ADAPT_OFF_SML;
+    else                                y_far += ADAPT_OFF_BIG;
+
+    if (y_far < 10)  y_far = 10;
+    if (y_far > 100) y_far = 100;
+    return y_far;
+}
+
 
 /* ================================================================
  * 边界3点滑动平均：消除单行噪声，保持趋势
@@ -93,32 +185,10 @@ static void border_smooth(border_line border)
  * 1. border_smooth(l_border/r_border) — 平滑左右边界
  * 2. center_line[]: 双边→中点(记录宽度), 单边→真实路宽外推, 都缺→白像素重心
  * 3. border_smooth(center_line) — 平滑中线
- * 4. ASC多行加权平均: 100→自适应far, 权重2.5→2.0递减(近重远轻), 均值=err
+ * 4. ASC多行加权平均: 100→asc_far, 权重2.0→2.5递增(远重近轻), 均值=err
  *
- * 调参: far(ASC远行基准,默认10)+自适应分段偏移; 单边→最新真实路宽外推; 双侧丢线→锁存
+ * 调参: far(ASC远行基准,默认20); 单边→最新真实路宽外推; 双侧丢线→锁存
  * ================================================================ */
-
-/* ================================================================
- * calc_adaptive_far — 自适应预瞄远行
- *
- * 用上一帧 err 的 |err| 分段选择 ASC 采样远行：
- *   直道看远（far 减小，预瞄更远），弯道看近（far 增大，跟住弯心）
- * 偏移相对菜单调好的 asc_far，阈值/偏移为编译期常量(ADAPT_*)，
- * 最终钳位 5~95
- * ================================================================ */
-static int calc_adaptive_far(void)
-{
-    float e = (err > 0) ? err : -err;
-    int y_far = (int)asc_far;
-
-    if      (e <= (float)ADAPT_ERR_TH1) y_far += ADAPT_OFF_STR;
-    else if (e <= (float)ADAPT_ERR_TH2) y_far += ADAPT_OFF_SML;
-    else                                y_far += ADAPT_OFF_BIG;
-
-    if (y_far < 10)  y_far = 10;
-    if (y_far > 100) y_far = 100;
-    return y_far;
-}
 
 /* ================================================================
  * sweep_boundaries — 逐行扫描替代种子生长
@@ -393,8 +463,8 @@ static void pho_center(void)
     // ---- 平滑中线（消除半宽偏移可能引入的不连续）----
     border_smooth(center_line);
 
-    // ---- ASC 多行加权平均（远行由自适应预瞄决定）----
-    // 范围 100→自适应far（直道看远/弯道看近），权重 2.0→2.5 线性递增，远行权重大=预瞄靠前
+    // ---- ASC 多行加权平均（自适应预瞄，直道看远/弯道看近）----
+    // 范围 100→calc_adaptive_far()，权重 2.0→2.5 线性递增，远行权重大=预瞄靠前
     int y_near = 100;
     int y_far  = calc_adaptive_far();
     asc_range_dbg = y_near - y_far;
@@ -432,6 +502,419 @@ static void pho_center(void)
 }
 
 /* ---- 旧 fallback_scan 已删除，sweep_boundaries() 内置兜底处理 ---- */
+
+/* ================================================================
+ * 十字识别 — 辅助函数
+ * ================================================================ */
+static uint8 cross_limit_u8(int32 value, uint8 lower, uint8 upper)
+{
+    if (value < lower) return lower;
+    if (value > upper) return upper;
+    return (uint8)value;
+}
+
+static uint8 cross_abs_diff(uint8 a, uint8 b)
+{
+    return (a >= b) ? (a - b) : (b - a);
+}
+
+/* ================================================================
+ * 十字用二值边缘搜索（基于 Image_Used[][], 0=黑 255=白）
+ *
+ *  左边界：从 start 向 end（递减）搜 B→W 或直接黑像素
+ *  右边界：从 start 向 end（递增）搜 W→B 或直接黑像素
+ * ================================================================ */
+static uint16 cross_find_left_edge_bin(uint8 row, int16 start, int16 end, bool *found)
+{
+    *found = false;
+    start = (int16)cross_limit_u8(start, 0, MT9V03X_W - 1);
+    end   = (int16)cross_limit_u8(end,   0, MT9V03X_W - 1);
+    if (start < end) { int16 t = start; start = end; end = t; }
+
+    for (int16 col = start; col >= end; col--)
+    {
+        if (Image_Used[row][col] == 0)
+        { *found = true; return (uint16)col; }
+        if (col > 0 && Image_Used[row][col] == 255 && Image_Used[row][col - 1] == 0)
+        { *found = true; return (uint16)col; }
+    }
+    return 0;
+}
+
+static uint16 cross_find_right_edge_bin(uint8 row, int16 start, int16 end, bool *found)
+{
+    *found = false;
+    start = (int16)cross_limit_u8(start, 0, MT9V03X_W - 1);
+    end   = (int16)cross_limit_u8(end,   0, MT9V03X_W - 1);
+    if (start > end) { int16 t = start; start = end; end = t; }
+
+    for (int16 col = start; col <= end; col++)
+    {
+        if (Image_Used[row][col] == 0)
+        { *found = true; return (uint16)col; }
+        if (col < MT9V03X_W - 1 && Image_Used[row][col] == 255 && Image_Used[row][col + 1] == 0)
+        { *found = true; return (uint16)col; }
+    }
+    return MT9V03X_W - 1;
+}
+
+/* ================================================================
+ * 车道行有效性：独立扫描后双边都有效、分别在种子列两侧、间距合理
+ * ================================================================ */
+static bool cross_lane_row_valid(uint8 row)
+{
+    uint16 lc = cross_scan_left[row];
+    uint16 rc = cross_scan_right[row];
+    if (!cross_scan_left_valid[row] || !cross_scan_right_valid[row])
+        return false;
+    if (lc + CROSS_CORNER_SIDE_MARGIN >= cross_scan_seed_col)  return false;
+    if (rc <= cross_scan_seed_col + CROSS_CORNER_SIDE_MARGIN)  return false;
+    if (lc >= rc) return false;
+    uint16 gap = rc - lc;
+    return gap >= CROSS_CORNER_MIN_GAP && gap <= CROSS_LANE_ROW_MAX_GAP;
+}
+
+/* ================================================================
+ * 全宽白带检测 — 存在连续3行近全屏白，说明遇到十字横道
+ * ================================================================ */
+static bool cross_has_white_band(void)
+{
+    uint8 consec = 0;
+    for (uint16 row = CROSS_FULL_WIDTH_TOP; row <= CROSS_FULL_WIDTH_BOTTOM; row++)
+    {
+        uint16 white_cnt = 0;
+        uint8  left_w = 0, right_w = 0;
+        for (uint16 col = 0; col < MT9V03X_W; col++)
+        {
+            if (Image_Used[row][col] == 255)
+            {
+                white_cnt++;
+                if (col < CROSS_EDGE_SAMPLE_COLS) left_w++;
+                if (col >= MT9V03X_W - CROSS_EDGE_SAMPLE_COLS) right_w++;
+            }
+        }
+        if (white_cnt >= CROSS_FULL_WIDTH_WHITE_MIN
+            && left_w  >= CROSS_EDGE_WHITE_MIN
+            && right_w >= CROSS_EDGE_WHITE_MIN)
+        {
+            consec++;
+            if (consec >= CROSS_FULL_WIDTH_ROWS) return true;
+        }
+        else
+        {
+            consec = 0;
+        }
+    }
+    return false;
+}
+
+/* ================================================================
+ * 单侧拐点搜索 — 过渡带检测 + 切线匹配
+ *
+ *   1. 过渡带：上方无效行≥2 且 下方有效行≥4 → 纵道重新出现
+ *   2. 切线：在切线搜索区内找边缘斜率最接近"拐点→底角连线"
+ *      的点作为拐点
+ * ================================================================ */
+static bool cross_find_corner(bool left_side, uint8 *corner_col, uint8 *corner_row)
+{
+    const uint16 *edge  = left_side ? cross_scan_left  : cross_scan_right;
+    const bool   *valid = left_side ? cross_scan_left_valid : cross_scan_right_valid;
+    int32 bottom_col = left_side ? 0 : (MT9V03X_W - 1);
+    bool transition_found = false;
+    bool tangent_found = false;
+    uint16 best_score = 0xFFFF;
+    uint8  best_col = 0, best_row = 0;
+
+    /* 阶段一：过渡带检测 */
+    for (uint16 row = CROSS_CORNER_SEARCH_TOP; row <= CROSS_CORNER_SEARCH_BOTTOM; row++)
+    {
+        if (!cross_lane_row_valid((uint8)row)) continue;
+
+        uint8 above_invalid = 0, below_valid = 0;
+        for (uint16 s = row - CROSS_CONTEXT_ROWS; s < row; s++)
+            if (!cross_lane_row_valid((uint8)s)) above_invalid++;
+        for (uint16 s = row; s <= row + CROSS_CONTEXT_ROWS && s <= CROSS_ROI_BOTTOM; s++)
+            if (cross_lane_row_valid((uint8)s)) below_valid++;
+
+        if (above_invalid >= CROSS_ABOVE_INVALID_MIN
+            && below_valid >= CROSS_BELOW_VALID_MIN)
+        {
+            transition_found = true;
+            break;
+        }
+    }
+    if (!transition_found) return false;
+
+    /* 阶段二：切线匹配 */
+    for (uint16 row = CROSS_TANGENT_SEARCH_TOP; row <= CROSS_TANGENT_SEARCH_BOTTOM; row++)
+    {
+        bool continuous = true;
+        /* 窗口内边沿连续有效 */
+        for (uint16 s = row - CROSS_TANGENT_HALF_WINDOW;
+             s <= row + CROSS_TANGENT_HALF_WINDOW; s++)
+        {
+            if (!valid[s]
+                || edge[s] <= CROSS_TANGENT_EDGE_MARGIN
+                || edge[s] + CROSS_TANGENT_EDGE_MARGIN >= MT9V03X_W)
+            { continuous = false; break; }
+        }
+        if (!continuous) continue;
+
+        /* 窗口内无大阶跃 */
+        for (uint16 s = row - CROSS_TANGENT_HALF_WINDOW;
+             s < row + CROSS_TANGENT_HALF_WINDOW; s++)
+        {
+            int32 step = (int32)edge[s + 1] - edge[s];
+            if (step < 0) step = -step;
+            if (step > CROSS_TANGENT_MAX_STEP) { continuous = false; break; }
+        }
+        if (!continuous) continue;
+
+        /* 局部斜率 vs. 到图像底角的连线斜率 */
+        int32 local_slope  = ((int32)edge[row + CROSS_TANGENT_HALF_WINDOW]
+                           -  edge[row - CROSS_TANGENT_HALF_WINDOW])
+                           * CROSS_SLOPE_SCALE
+                           / (int32)(2 * CROSS_TANGENT_HALF_WINDOW);
+        int32 repair_slope = (bottom_col - edge[row]) * CROSS_SLOPE_SCALE
+                           / (int32)((MT9V03X_H - 1) - row);
+        int32 diff = local_slope - repair_slope;
+        if (diff < 0) diff = -diff;
+
+        uint16 score = (uint16)diff;
+        if (!tangent_found || score < best_score)
+        {
+            tangent_found = true;
+            best_score = score;
+            best_col = (uint8)edge[row];
+            best_row = (uint8)row;
+        }
+    }
+    if (!tangent_found) return false;
+
+    *corner_col = best_col;
+    *corner_row = best_row;
+    return true;
+}
+
+/* ================================================================
+ * 拐点对提取 — 独立逐行扫描 + 双边拐点匹配
+ * ================================================================ */
+static bool cross_find_pair(uint8 seed_col,
+                            uint8 *l_col, uint8 *l_row,
+                            uint8 *r_col, uint8 *r_row)
+{
+    cross_scan_seed_col = seed_col;
+    /* 每行都从同一种子列独立搜索，避免边线跟踪在横道上漂移 */
+    for (uint16 row = CROSS_ROI_TOP; row <= CROSS_ROI_BOTTOM; row++)
+    {
+        cross_scan_left[row] = cross_find_left_edge_bin(
+            (uint8)row, seed_col, 0, &cross_scan_left_valid[row]);
+        cross_scan_right[row] = cross_find_right_edge_bin(
+            (uint8)row, seed_col, MT9V03X_W - 1, &cross_scan_right_valid[row]);
+    }
+
+    bool lf = cross_find_corner(true,  l_col, l_row);
+    bool rf = cross_find_corner(false, r_col, r_row);
+    if (!lf || !rf || *l_col >= *r_col) return false;
+
+    uint8 row_diff = cross_abs_diff(*l_row, *r_row);
+    uint16 gap     = (uint16)*r_col - *l_col;
+    uint8  mid     = (uint8)(((uint16)*l_col + *r_col) / 2);
+
+    return gap >= CROSS_CORNER_MIN_GAP
+        && gap <= CROSS_CORNER_MAX_GAP
+        && row_diff <= CROSS_CORNER_MAX_ROW_DIFF
+        && cross_abs_diff(mid, seed_col) <= CROSS_MID_MAX_OFFSET;
+}
+
+/* ================================================================
+ * 十字补线 — 两个上拐点分别连接图像左下角和右下角
+ * ================================================================ */
+static void cross_repair(void)
+{
+    if (cross_state != CROSS_STATE_DETECTED || !cross_corners_valid)
+        return;
+
+    /* 两拐点从同一行开始补线 */
+    uint8 start_row = (cross_left_row > cross_right_row)
+                    ? cross_left_row : cross_right_row;
+
+    for (uint16 row = start_row; row < MT9V03X_H; row++)
+    {
+        /* 左拐点 → (0, 底行) */
+        {
+            int32 rs = (int32)(MT9V03X_H - 1) - cross_left_row;
+            int32 ro = (int32)row - cross_left_row;
+            int32 cs = (int32)0 - cross_left_col;
+            int32 c  = cross_left_col;
+            if (rs > 0) c += (cs * ro) / rs;
+            l_border[row] = (uint8)cross_limit_u8(c, 0, MT9V03X_W - 1);
+            l_border_exist[row] = 1;
+        }
+        /* 右拐点 → (pho_w_max, 底行) */
+        {
+            int32 rs = (int32)(MT9V03X_H - 1) - cross_right_row;
+            int32 ro = (int32)row - cross_right_row;
+            int32 cs = (int32)(MT9V03X_W - 1) - cross_right_col;
+            int32 c  = cross_right_col;
+            if (rs > 0) c += (cs * ro) / rs;
+            r_border[row] = (uint8)cross_limit_u8(c, 0, MT9V03X_W - 1);
+            r_border_exist[row] = 1;
+        }
+    }
+}
+
+/* ================================================================
+ * 十字检测主函数 — 状态机 + 确认/保持
+ * ================================================================ */
+static void cross_detect(void)
+{
+    uint8  lc = 0, lr = 0, rc = 0, rr = 0;
+    bool   pair_ok = false;
+
+    if (cross_has_white_band())
+    {
+        uint8 seed = (uint8)((l_border[MT9V03X_H - 1] + r_border[MT9V03X_H - 1]) / 2);
+        if (seed < 5 || seed > MT9V03X_W - 5)
+            seed = MT9V03X_W / 2;
+
+        pair_ok = cross_find_pair(seed, &lc, &lr, &rc, &rr);
+
+        /* 斜入兜底：参考列可能落入侧向支路，用画面中心重试 */
+        if (!pair_ok && seed != MT9V03X_W / 2)
+            pair_ok = cross_find_pair(MT9V03X_W / 2, &lc, &lr, &rc, &rr);
+    }
+
+    if (pair_ok)
+    {
+        cross_left_col  = lc; cross_left_row  = lr;
+        cross_right_col = rc; cross_right_row = rr;
+        cross_corners_valid = true;
+        cross_missed_count  = 0;
+        if (cross_confirm_count < CROSS_CONFIRM_FRAMES)
+            cross_confirm_count++;
+        cross_state = (cross_confirm_count >= CROSS_CONFIRM_FRAMES)
+                    ? CROSS_STATE_DETECTED : CROSS_STATE_CANDIDATE;
+    }
+    else if (cross_state == CROSS_STATE_DETECTED
+             && cross_missed_count < CROSS_HOLD_MISSED_FRAMES)
+    {
+        cross_missed_count++;
+    }
+    else
+    {
+        cross_state = CROSS_STATE_NONE;
+        cross_corners_valid = false;
+        cross_confirm_count = 0;
+        cross_missed_count  = 0;
+    }
+}
+
+
+/* ================================================================
+ * 斑马线检测 — 5像素多数表决滤波
+ *
+ *   对横向 ±ZEBRA_FILTER_RADIUS 窗口做多数表决，
+ *   消除单/双像素噪点后再判断该列是否为白。
+ * ================================================================ */
+static bool zebra_pixel_is_white(uint8 row, uint16 col)
+{
+    uint16 start = (col > ZEBRA_FILTER_RADIUS)
+                 ? col - ZEBRA_FILTER_RADIUS : 0;
+    uint16 end   = col + ZEBRA_FILTER_RADIUS;
+    uint8  white = 0, total = 0;
+
+    if (end >= MT9V03X_W) end = MT9V03X_W - 1;
+
+    for (uint16 c = start; c <= end; c++)
+    {
+        if (Image_Used[row][c] == 255) white++;
+        total++;
+    }
+    return (white * 2 >= total + 1);  /* 多数：≥ceil(n/2) */
+}
+
+/* ================================================================
+ * 斑马线行有效性 — 检查单行是否含规则黑白条纹
+ *
+ *   条件：白像素占比 25%~75%、跳变 ≥10、
+ *         黑白连续段各 ≥5（段宽 ≥4）
+ * ================================================================ */
+static bool zebra_row_is_valid(uint8 row)
+{
+    bool   last_white  = zebra_pixel_is_white(row, 0);
+    uint16 white_count = last_white ? 1 : 0;
+    uint16 run_width   = 1;
+    uint8  transitions = 0;
+    uint8  black_runs  = 0;
+    uint8  white_runs  = 0;
+
+    for (uint16 col = 1; col < MT9V03X_W; col++)
+    {
+        bool cur = zebra_pixel_is_white(row, col);
+        if (cur) white_count++;
+
+        if (cur == last_white)
+        {
+            run_width++;
+            continue;
+        }
+
+        /* 颜色跳变 */
+        transitions++;
+        if (run_width >= ZEBRA_RUN_WIDTH_MIN)
+        {
+            if (last_white) white_runs++; else black_runs++;
+        }
+        last_white = cur;
+        run_width = 1;
+    }
+
+    /* 收尾最后一段 */
+    if (run_width >= ZEBRA_RUN_WIDTH_MIN)
+    {
+        if (last_white) white_runs++; else black_runs++;
+    }
+
+    return ((uint32)white_count * 100 >= (uint32)MT9V03X_W * ZEBRA_WHITE_RATIO_MIN)
+        && ((uint32)white_count * 100 <= (uint32)MT9V03X_W * ZEBRA_WHITE_RATIO_MAX)
+        && (transitions   >= ZEBRA_TRANSITIONS_MIN)
+        && (black_runs    >= ZEBRA_BLACK_RUNS_MIN)
+        && (white_runs    >= ZEBRA_WHITE_RUNS_MIN);
+}
+
+/* ================================================================
+ * 斑马线检测 — 底部3条采样线，≥2条有效则确认
+ *
+ *   采样行：119, 114, 109（最底行向上每5行一条）
+ *   保持机制：漏检≤2帧时维持上一帧状态
+ * ================================================================ */
+static void zebra_detect(void)
+{
+    uint8 valid_rows = 0;
+
+    for (uint8 s = 0; s < ZEBRA_SAMPLE_ROWS; s++)
+    {
+        uint8 row = MT9V03X_H - 1 - s * ZEBRA_SAMPLE_ROW_STEP;
+        if (zebra_row_is_valid(row))
+            valid_rows++;
+    }
+
+    if (valid_rows >= ZEBRA_VALID_ROWS_MIN)
+    {
+        zebra_detected      = true;
+        zebra_missed_count  = 0;
+    }
+    else if (zebra_detected && zebra_missed_count < ZEBRA_HOLD_MISSED_FRAMES)
+    {
+        zebra_missed_count++;
+    }
+    else
+    {
+        zebra_detected      = false;
+        zebra_missed_count  = 0;
+    }
+}
 
 
 /* ================================================================
@@ -491,9 +974,12 @@ static void filter_bottom_connected(void)
 
 /* ================================================================
  * 出界检测：最底行全黑 → 赛道出画
+ *   斑马线优先：检测到斑马线时强制不出界
  * ================================================================ */
 static int out_of_bounds_check(void)
 {
+    if (zebra_detected) return 0;  /* 斑马线优先 */
+
     int y_bot = pho_h - 1;
     for (int x = 0; x < pho_w; x++)
         if (Image_Used[y_bot][x] == 255)
@@ -506,10 +992,12 @@ static int out_of_bounds_check(void)
  *
  * 流程：
  *   1. Otsu 自适应阈值 + 一次性二值化 → Image_Used[][]
- *   2. 出界检测 → 停车
- *   3. 底部连通滤波 → 只留与底部连通的白
- *   4. sweep_boundaries → 逐行扫描边界
- *   5. pho_center → 中线 + 偏差
+ *   2. 底部连通滤波 → 只留与底部连通的白
+ *   3. 斑马线检测 → zebra_detected（优先于出界判定）
+ *   4. 出界检测 → 停车（斑马线时强制不出界）
+ *   5. sweep_boundaries → 逐行扫描边界
+ *   6. cross_detect + cross_repair → 十字补线（覆盖被横道干扰的边界）
+ *   7. pho_center → 中线 + 偏差
  * ================================================================ */
 void vis_deal(void)
 {
@@ -536,15 +1024,18 @@ void vis_deal(void)
         for (int x = 0; x < pho_w; x++)
             Image_Used[y][x] = (mt9v03x_image[y][x] > th) ? 255 : 0;
 
+    /* ---- 底部连通滤波 ---- */
+    filter_bottom_connected();
+
+    /* ---- 斑马线检测（先于出界判定，斑马线不出界）---- */
+    zebra_detect();
+
     /* ---- 出界检测：底行全黑 → 停车 ---- */
     if (out_of_bounds_check())
     {
         car_run = false;
         return;
     }
-
-    /* ---- 底部连通滤波 ---- */
-    filter_bottom_connected();
 
     /* ---- 清空边界数组 ---- */
     for (int y = 0; y < pho_h; y++)
@@ -557,6 +1048,10 @@ void vis_deal(void)
 
     /* ---- 逐行扫描边界（替代种子生长 + pho_border + 补全）---- */
     sweep_boundaries();
+
+    /* ---- 十字检测 + 补线（覆盖被横道干扰的边界行）---- */
+    cross_detect();
+    cross_repair();
 
     /* ---- 中线 + 偏差 ---- */
     pho_center();
@@ -608,6 +1103,35 @@ void vis_draw(void)
             if (c < pho_w_max) ips200_draw_point((uint16)(c + 1), (uint16)dy, RGB565_GREEN);
         }
     }
+
+    /* ---- 十字拐点标记（调试用）---- */
+    if (cross_corners_valid)
+    {
+        int16 lx = (int16)cross_left_col;
+        int16 ly = (int16)cross_left_row + BIN_PARAM_H;
+        int16 rx = (int16)cross_right_col;
+        int16 ry = (int16)cross_right_row + BIN_PARAM_H;
+
+        /* 左上拐点：品红色十字 */
+        ips200_draw_line((uint16)(lx - 3), (uint16)ly, (uint16)(lx + 3), (uint16)ly, RGB565_MAGENTA);
+        ips200_draw_line((uint16)lx, (uint16)(ly - 3), (uint16)lx, (uint16)(ly + 3), RGB565_MAGENTA);
+        /* 右上拐点：青色十字 */
+        ips200_draw_line((uint16)(rx - 3), (uint16)ry, (uint16)(rx + 3), (uint16)ry, RGB565_CYAN);
+        ips200_draw_line((uint16)rx, (uint16)(ry - 3), (uint16)rx, (uint16)(ry + 3), RGB565_CYAN);
+    }
+
+    /* ---- 斑马线 / 十字 状态文字 ---- */
+    ips200_set_color(RGB565_YELLOW, RGB565_BLACK);
+    ips200_show_string(0, 160, "ZEBRA:");
+    ips200_show_string(56, 160, zebra_detected ? "YES" : "NO ");
+    ips200_show_string(88, 160, "CROSS:");
+    if (cross_state == CROSS_STATE_DETECTED)
+        ips200_show_string(144, 160, "YES");
+    else if (cross_state == CROSS_STATE_CANDIDATE)
+        ips200_show_string(144, 160, "CAND");
+    else
+        ips200_show_string(144, 160, "NONE");
+    ips200_set_color(RGB565_WHITE, RGB565_BLACK);
 }
 
 

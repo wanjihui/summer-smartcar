@@ -13,10 +13,8 @@
 //=====舵机=====
 extern float servo_kp1;       // 基础P
 extern float servo_kp2;       // 二次P: err×|err|
-extern float servo_kd;
-extern float servo_kd_str;    // 直道/小err D
-extern float gyro_kd;         // 陀螺仪直道阻尼
-extern float gyro_kd_curve;   // 陀螺仪弯道阻尼
+extern float servo_kd;       // 统一D系数
+extern float gyro_kd;         // 陀螺仪阻尼
 extern float servo_center;   // 中位角度
 extern float servo_max_cha;  // 最大偏角
 extern float servo_dead;     // 死区
