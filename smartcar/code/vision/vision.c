@@ -44,6 +44,7 @@ static int16 last_valid_width = 60;            // 最近双边真实路宽（逐
 #define CROSS_FULL_WIDTH_ROWS          3    /* 连续满足白带条件的行数 */
 #define CROSS_CONFIRM_FRAMES           2    /* 连续确认帧数 */
 #define CROSS_HOLD_MISSED_FRAMES       2    /* 漏检保持帧数 */
+#define CROSS_COOLDOWN_FRAMES         8    /* 离开十字后冷却帧数，防止重复触发 */
 
 /* ================================================================
  * 斑马线检测 — 编译期常量
@@ -79,10 +80,15 @@ static uint16 cross_scan_right[MT9V03X_H];
 static bool   cross_scan_left_valid[MT9V03X_H];
 static bool   cross_scan_right_valid[MT9V03X_H];
 static uint8  cross_scan_seed_col;
+static uint8  cross_cooldown_count;      /* 离开十字后冷却倒计时 */
+
+volatile bool cross_active;              /* control.c读取，十字检测中降速 */
 
 /* 斑马线静态变量 */
 static bool   zebra_detected;
 static uint8  zebra_missed_count;
+static uint8  zebra_count;              /* 上升沿计数（发车重置）*/
+static bool   zebra_prev;               /* 上一帧检测状态 */
 
 /* ================================================================
  * Otsu 二值化图像缓存
@@ -769,6 +775,12 @@ static void cross_repair(void)
  * ================================================================ */
 static void cross_detect(void)
 {
+    /* 冷却期：跳过检测，逐帧递减 */
+    if (cross_cooldown_count > 0) {
+        cross_cooldown_count--;
+        return;
+    }
+
     uint8  lc = 0, lr = 0, rc = 0, rr = 0;
     bool   pair_ok = false;
 
@@ -795,6 +807,7 @@ static void cross_detect(void)
             cross_confirm_count++;
         cross_state = (cross_confirm_count >= CROSS_CONFIRM_FRAMES)
                     ? CROSS_STATE_DETECTED : CROSS_STATE_CANDIDATE;
+        cross_active = (cross_state == CROSS_STATE_DETECTED);
     }
     else if (cross_state == CROSS_STATE_DETECTED
              && cross_missed_count < CROSS_HOLD_MISSED_FRAMES)
@@ -803,11 +816,30 @@ static void cross_detect(void)
     }
     else
     {
+        /* 离开十字 → 启动冷却防重触发 */
+        if (cross_state == CROSS_STATE_DETECTED)
+            cross_cooldown_count = CROSS_COOLDOWN_FRAMES;
         cross_state = CROSS_STATE_NONE;
+        cross_active = false;
         cross_corners_valid = false;
         cross_confirm_count = 0;
         cross_missed_count  = 0;
     }
+}
+
+/* ================================================================
+ * 十字复位 — 发车时清零冷却和状态
+ * ================================================================ */
+void cross_reset(void)
+{
+    cross_state          = CROSS_STATE_NONE;
+    cross_active         = false;
+    cross_corners_valid  = false;
+    cross_confirm_count  = 0;
+    cross_missed_count   = 0;
+    cross_cooldown_count = 0;
+    zebra_count          = 0;
+    zebra_prev           = false;
 }
 
 
@@ -1030,11 +1062,30 @@ void vis_deal(void)
     /* ---- 斑马线检测（先于出界判定，斑马线不出界）---- */
     zebra_detect();
 
-    /* ---- 出界检测：底行全黑 → 停车 ---- */
-    if (out_of_bounds_check())
+    /* 斑马线计数停车：检测到2次上升沿→终点→停车 */
     {
-        control_state_stop();
-        return;
+        if (zebra_detected && !zebra_prev) zebra_count++;
+        zebra_prev = zebra_detected;
+        if (zebra_count >= 2) {
+            control_state_stop();
+            zebra_count = 0; zebra_prev = false;
+            return;
+        }
+    }
+
+    /* ---- 出界检测：连续10帧底行全黑才停车 ---- */
+    {
+        static uint8 oob_cnt = 0;
+        if (out_of_bounds_check()) {
+            oob_cnt++;
+            if (oob_cnt >= 5) {
+                control_state_stop();
+                oob_cnt = 0;
+                return;
+            }
+        } else {
+            oob_cnt = 0;
+        }
     }
 
     /* ---- 清空边界数组 ---- */

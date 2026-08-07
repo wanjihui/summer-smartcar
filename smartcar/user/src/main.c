@@ -84,6 +84,9 @@ int main (void)
     vofa_uart_init();           // VOFA 非阻塞发送初始化
     ips200_clear();		 					//主循环前清屏
     menu_show();					  		//显示一次菜单项
+
+    ips200_clear();		 					//主循环前清屏
+    menu_show();					  		//显示一次菜单项
     while(1)
     {
         if (mt9v03x_finish_flag)

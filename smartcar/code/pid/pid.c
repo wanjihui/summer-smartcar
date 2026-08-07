@@ -57,13 +57,13 @@ void PID_INC_Update(PID_INC_t *p)
 PID_INC_t Motor_L_PID = {
     .OutMax =  MOTOR_MAX_DUTY,
     .OutMin = -MOTOR_MAX_DUTY,
-    .OutDeltaMax = 6.0f,   /* 单次增量上限(duty/5ms)，200Hz */
+    .OutDeltaMax = 0.0f,   /* no delta limit */
 };
 
 PID_INC_t Motor_R_PID = {
     .OutMax =  MOTOR_MAX_DUTY,
     .OutMin = -MOTOR_MAX_DUTY,
-    .OutDeltaMax = 6.0f,
+    .OutDeltaMax = 0.0f,
 };
 
 volatile uint8_t Speed_PID_Enable = 0;

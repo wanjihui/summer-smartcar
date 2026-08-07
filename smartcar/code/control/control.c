@@ -13,9 +13,6 @@ int   motor_base_duty= DEFAULT_MOTOR_BASE;
 int   motor_curve_duty = DEFAULT_MOTOR_CURVE_DUTY;  // 弯道占空比（|err|≥8时使用）
 int   motor_max_duty = DEFAULT_MOTOR_MAX;
 float gyro_kd        = DEFAULT_GYRO_KD;  // 陀螺仪阻尼（已精简，不再区分直道/弯道）
-float motor_kp       = DEFAULT_MOTOR_KP;
-float motor_kd       = DEFAULT_MOTOR_KD;
-int   motor_diff_max = DEFAULT_MOTOR_DIFF_MAX;
 float ackermann_gain = DEFAULT_ACKERMANN_GAIN;  // Ackermann差速增益
 float motor_speed_kp_l = DEFAULT_SPEED_KP_L;
 float motor_speed_ki_l = DEFAULT_SPEED_KI_L;
@@ -55,6 +52,7 @@ void control_state_launch(void)
     if (car_state == CAR_IDLE) {
         launch_ramp_cnt = 0;
         servo_last_err  = 0;   /* 防第一帧D爆冲 */
+        cross_reset();          /* 清十字冷却 */
         uint32 primask = interrupt_global_disable();
         Speed_PID_Init();
         interrupt_global_enable(primask);
@@ -100,6 +98,30 @@ void servo_calc(void)
     servo_set_angle(target);
 }
 
+/* 判断直道：斜率<0.8 + 总偏差<15px + steer<3deg + |err|<8 */
+static bool is_straight(void)
+{
+    float sa = (steer_dbg > 0) ? steer_dbg : -steer_dbg;
+    float ea = (err > 0) ? err : -err;
+    if (sa >= 3.0f || ea >= 8.0f) return false;
+    int valid = 0;
+    float sum = 0.0f;
+    int first_c = -1, last_c = -1;
+    for (int r = 90; r >= 50; r -= 10) {
+        uint8 c1 = center_line[r];
+        uint8 c2 = center_line[r - 10];
+        if (c1 == BORDER_INVALID || c2 == BORDER_INVALID) continue;
+        float s = (float)((int)c1 - (int)c2) / 10.0f;
+        sum += (s > 0) ? s : -s;
+        if (first_c < 0) first_c = (int)c1;
+        last_c = (int)c2;
+        valid++;
+    }
+    if (valid < 2) return false;
+    float avg_slope = sum / (float)valid;
+    int total_dev = (first_c > last_c) ? (first_c - last_c) : (last_c - first_c);
+    return (avg_slope < 0.8f && total_dev < 15);
+}
 
 /* motor_speed_calc: 50Hz 主循环调用，依赖 err 计算基础速度 + 非对称LPF
  * 结果写入 motor_base_cms，供 ISR 的 motor_inject_ackermann 消费 */
@@ -111,12 +133,13 @@ void motor_speed_calc(void)
 
     float e_abs = (e > 0) ? e : -e;
     float ratio = 0.0f;
-    if (e_abs > 8.0f) {
-        ratio = (e_abs - 8.0f) / 10.0f;
+    if (e_abs > 4.0f) {
+        ratio = (e_abs - 4.0f) / 12.0f;       /* 4→16（R79原版）*/
         if (ratio > 1.0f) ratio = 1.0f;
     }
     float base_cms = ((float)motor_base_duty * (1.0f - ratio)
                     + (float)motor_curve_duty * ratio) * 10.0f;
+    // R53: 取消十字减速，靠ack差速+刹车自然过十字
     if (base_cms < 20.0f) base_cms = 20.0f;
 
     /* 起步斜坡：LAUNCHING 状态下 base_cms 从0线性爬升到目标值。
@@ -131,18 +154,26 @@ void motor_speed_calc(void)
         }
     }
 
-    /* 非对称低通：入弯降速α=1.0(快)，出弯加速α=0.5(慢防振荡) */
+    /* brief dip on corner entry, then bounce back to base speed */
     static float filtered = 0;
     if (filtered < 1.0f) filtered = base_cms;
     else {
-        float alpha = (base_cms < filtered) ? 1.0f : 0.5f;
+        float alpha;
+        if (base_cms < filtered) {
+            alpha = 1.0f;           /* decel: instant dip */
+        } else {
+            /* bounce back fast after dip, regardless of straight/curve */
+            alpha = (filtered < (float)motor_base_duty * 9.0f) ? 0.5f :
+                    (is_straight() ? 0.3f : 0.0f);
+        }
         filtered += alpha * (base_cms - filtered);
     }
     motor_base_cms = filtered;
 }
 
 /* motor_inject_ackermann: 200Hz TIM6 ISR 调用，用最新的 steer_dbg 和 motor_base_cms
- * 计算 Ackermann 乘法差速目标。前馈预载逻辑保留于此。 */
+ * 计算 Ackermann 乘法差速目标。前馈预载逻辑保留于此。
+ * R70: 新增甩尾触发——steer>12°时渐进砍内轮目标，17°时内轮再×0.3 */
 void motor_inject_ackermann(void)
 {
     float steer_abs = (steer_dbg > 0.0f) ? steer_dbg : -steer_dbg;
@@ -150,9 +181,22 @@ void motor_inject_ackermann(void)
     if (steer_abs > 4.0f) {
         diff_ratio = steer_dbg * 0.017453293f * 0.05475f / 0.20f * ackermann_gain;
     }
-
-    float new_tgt_l = motor_base_cms * (1.0f + diff_ratio);
-    float new_tgt_r = motor_base_cms * (1.0f - diff_ratio);
+    /* LPF diff_ratio to smooth S-turn steer flips */
+    static float diff_smooth = 0;
+    diff_smooth += 0.3f * (diff_ratio - diff_smooth);
+    diff_ratio = diff_smooth;
+    /* asymmetric: outer×0.2 push, inner×0.8 brake */
+    float dr = (diff_ratio > 0) ? diff_ratio : -diff_ratio;
+    float outer_r = dr * 0.3f;
+    float inner_r = dr * 0.7f;
+    float new_tgt_l, new_tgt_r;
+    if (diff_ratio >= 0) {
+        new_tgt_l = motor_base_cms * (1.0f + outer_r);
+        new_tgt_r = motor_base_cms * (1.0f - inner_r);
+    } else {
+        new_tgt_l = motor_base_cms * (1.0f - inner_r);
+        new_tgt_r = motor_base_cms * (1.0f + outer_r);
+    }
 
     /* 前馈预载：目标跳变 >50% 时复位 PID + 预载估算 duty */
     static float prev_l = 0, prev_r = 0;

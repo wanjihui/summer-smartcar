@@ -24,6 +24,7 @@ extern border_line center_line;    // 中线 = (左+右)/2，车应该沿它走
 extern uint8 l_border_exist[pho_h];  // 左边界该行是否真实存在（1=真边界 0=出画伪边界/无）
 extern uint8 r_border_exist[pho_h];  // 右边界该行是否真实存在
 
+extern volatile bool  cross_active;    // 十字检测中（control.c读取降速）
 extern volatile float err;     // 赛道中线-图像中心=偏差,>0偏右,右转;<0偏左,左转
 extern volatile uint8_t vis_frame_ready; // 新帧已搜线完成，显示层可刷新
 extern volatile int16  asc_range_dbg;    // 诊断：ASC窗口行数(100-y_far)
@@ -36,5 +37,6 @@ extern uint8 Image_Used[pho_h][pho_w];   // Otsu二值化后的图像，0=黑 25
 void vis_deal(void);   //搜线，无返回值
 void vis_draw(void);   //图像显示
 void vis_bin_draw(void);  //二值化显示（调参）
+void cross_reset(void);   //发车时重置十字状态与冷却
 
 #endif 
