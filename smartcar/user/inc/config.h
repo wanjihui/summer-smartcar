@@ -22,18 +22,18 @@
 #define ADAPT_OFF_BIG     20
 
 // --- Servo ---
-#define DEFAULT_SERVO_KP1      1.20f  // faster turn-in
+#define DEFAULT_SERVO_KP1      1.00f
 #define DEFAULT_SERVO_KP2      0.004f
-#define DEFAULT_SERVO_KD       0.25f
-#define DEFAULT_GYRO_KD        0.12f
+#define DEFAULT_SERVO_KD       0.30f
+#define DEFAULT_GYRO_KD        0.10f
 #define DEFAULT_SERVO_CENTER   95.2f
 #define DEFAULT_SERVO_MAX_CHA  17.0f
 #define DEFAULT_SERVO_DEAD     2.0f
 #define DEFAULT_SERVO_DIR      1
 
 // --- Motor ---
-#define DEFAULT_MOTOR_BASE       16    // 160 straight
-#define DEFAULT_MOTOR_CURVE_DUTY 16    // 160 corner = base
+#define DEFAULT_MOTOR_BASE       15    // 150 straight
+#define DEFAULT_MOTOR_CURVE_DUTY 15    // 150 corner = base
 #define DEFAULT_MOTOR_MAX        80
 #define DEFAULT_ACKERMANN_GAIN  0.0f
 
