@@ -24,8 +24,8 @@
 // --- Servo ---
 #define DEFAULT_SERVO_KP1      1.00f
 #define DEFAULT_SERVO_KP2      0.004f
-#define DEFAULT_SERVO_KD       0.30f
-#define DEFAULT_GYRO_KD        0.10f
+#define DEFAULT_SERVO_KD       0.24f
+#define DEFAULT_GYRO_KD        0.09f
 #define DEFAULT_SERVO_CENTER   95.2f
 #define DEFAULT_SERVO_MAX_CHA  17.0f
 #define DEFAULT_SERVO_DEAD     2.0f

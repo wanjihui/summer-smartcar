@@ -15,7 +15,8 @@
       "Read(//c//**)"
     ],
     "additionalDirectories": [
-      "C:\\Users\\Lenovo\\Desktop\\summer-smartcar\\docs"
+      "C:\\Users\\Lenovo\\Desktop\\summer-smartcar\\docs",
+      "c:\\Users\\Lenovo\\.claude\\plans"
     ]
   }
 }

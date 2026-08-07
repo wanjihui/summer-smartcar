@@ -111,6 +111,7 @@ void TIM6_IRQHandler (void)
     /* 陀螺仪：200Hz读取 + ±500°/s 健康钳位（MPU6050故障时防随机抖舵）*/
     mpu6050_get_gyro();
     gyro_z_dbg = mpu6050_gyro_transition(mpu6050_get_gyro_z());
+    if (gyro_z_dbg > -3.0f && gyro_z_dbg < 3.0f) gyro_z_dbg = 0.0f;  /* deadband: kill I2C noise */
     if (gyro_z_dbg >  500.0f) gyro_z_dbg =  500.0f;
     if (gyro_z_dbg < -500.0f) gyro_z_dbg = -500.0f;
 
